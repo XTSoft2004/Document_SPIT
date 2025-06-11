@@ -1,0 +1,6 @@
+@Document_SPIT_HostAddress = http://localhost:5090
+
+GET {{Document_SPIT_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
