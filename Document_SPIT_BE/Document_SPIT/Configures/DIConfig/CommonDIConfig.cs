@@ -1,9 +1,9 @@
 ﻿//using Domain.Helper;
 using Domain.Interfaces.Helper;
 using Domain.Interfaces.Repositories;
-using Domain.Interfaces.Services;
+//using Domain.Interfaces.Services;
 //using Domain.Models.Mails;
-using Domain.Services;
+//using Domain.Services;
 using NetCore.AutoRegisterDi;
 using Domain.Interfaces.Logging;
 using Domain.Logging;

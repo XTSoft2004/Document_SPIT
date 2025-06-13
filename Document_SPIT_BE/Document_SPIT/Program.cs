@@ -1,9 +1,13 @@
-﻿using System.Text;
+﻿using System.Security.Claims;
+using System.Text;
 using Domain.Common.GoogleDriver.Interfaces;
 using Domain.Common.GoogleDriver.Services;
 using Domain.Common.Http;
 using Domain.Interfaces.Repositories;
 using Infrastructure.ContextDB.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using WebApp.Configures.DIConfig;
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
@@ -15,6 +19,83 @@ var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 Console.OutputEncoding = Encoding.UTF8;
 DBDIConfig.Configure(builder.Services, builder.Configuration);
 IdentityDIConfig.Configure(builder.Services, builder.Configuration);
+
+#region Setup JWT vào Swagger
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "SPIT-EduCheck API",
+        Version = "v1",
+        Description = "API documentation for SPIT-EduCheck system"
+    });
+    // ✅ Cấu hình Bearer Token cho Swagger
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Nhập token vào đây: Bearer {your_token}"
+    });
+
+    // ✅ Bắt buộc sử dụng JWT khi gọi API
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+
+    options.OperationFilter<AuthorizeCheckOperationFilter>();
+});
+#endregion
+
+#region Cấu hình JWT Authentication
+// Đọc cấu hình JWT từ appsettings.json
+var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+var secretKey = jwtSettings["Secret"];
+var issuer = jwtSettings["Issuer"];
+var audience = jwtSettings["Audience"];
+var expireMinutes = Convert.ToInt32(jwtSettings["ExpireMinutes"]);
+
+// Cấu hình Authentication & JWT Bearer
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            //ValidateIssuer = true,
+            //ValidateAudience = true,
+            //ValidateLifetime = true,
+            //ValidateIssuerSigningKey = true,
+            //ValidIssuer = issuer,
+            //ValidAudience = audience,
+            //IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+            //ClockSkew = TimeSpan.Zero, // Tránh thời gian trễ khi kiểm tra token hết hạn
+            RequireSignedTokens = true,
+            RoleClaimType = ClaimTypes.Role,
+            ValidateIssuerSigningKey = true, // Bắt buộc kiểm tra chữ ký
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)), // Khóa bí mật
+            ValidateIssuer = true, // Kiểm tra Issuer
+            ValidIssuer = issuer,
+            ValidateAudience = true, // Kiểm tra Audience
+            ValidAudience = audience,
+            ValidateLifetime = true, // Kiểm tra thời gian hết hạn
+            ClockSkew = TimeSpan.Zero // Không cho phép trễ thời gian
+        };
+    });
+#endregion
+
 
 builder.Services.AddAuthorization(); // Bật Authorization
 builder.Services.AddControllers(); // Thêm Controller
@@ -38,8 +119,61 @@ app.UseStaticFiles();
 var httpContextAccessor = app.Services.GetRequiredService<IHttpContextAccessor>();
 HttpAppContext.Configure(httpContextAccessor);
 
+//app.Use(async (context, next) =>
+//{
+//    using (var scope = context.RequestServices.CreateScope())
+//    {
+//        var middleware = new JwtMiddleware(next, context.RequestServices.GetRequiredService<IConfiguration>(), scope.ServiceProvider.GetRequiredService<ITokenServices>(), scope.ServiceProvider.GetRequiredService<IUserServices>());
+//        await middleware.Invoke(context);
+//    }
+//});
+
+#region Kiểm tra chữ ký JWT
+app.Use(async (context, next) =>
+{
+    var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
+    if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer "))
+    {
+        var token = authHeader.Substring("Bearer ".Length).Trim();
+        var parts = token.Split('.');
+
+        if (parts.Length == 3)
+        {
+            try
+            {
+                string input = parts[0];
+                string base64 = input.Replace('-', '+').Replace('_', '/'); // Chuyển đổi ký tự URL-safe
+                switch (base64.Length % 4) // Thêm padding nếu thiếu
+                {
+                    case 2: base64 += "=="; break;
+                    case 3: base64 += "="; break;
+                }
+                var header = Encoding.UTF8.GetString(Convert.FromBase64String(base64));
+                header = header.Trim();
+                if (header.Contains("\"alg\":\"none\"") || header.Contains("\"typ\":\"none\""))
+                {
+                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    await context.Response.WriteAsJsonAsync(new { Message = "Invalid JWT Algorithm" });
+                    return;
+                }
+            }
+            catch
+            {
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                await context.Response.WriteAsJsonAsync(new { Message = "Invalid JWT Algorithm" });
+                return;
+            }
+        }
+    }
+
+    await next();
+});
+#endregion
+
 app.UseHttpsRedirection();
 
+app.UseRouting();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

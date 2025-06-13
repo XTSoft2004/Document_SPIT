@@ -19,7 +19,7 @@ namespace Domain.Common
         [Display(Name = "Tối")]
         Toi,
     }
-    public enum StatusTimesheet_Enum
+    public enum StatusDocument_Enum
     {
         [Display(Name = "Đã duyệt")]
         Approved,
