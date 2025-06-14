@@ -14,14 +14,20 @@ namespace Domain.Common.HttpRequest
         static HttpRequest()
         {
             _request = new RequestHttpClient();
-            DotNetEnv.Env.Load(".env");
-            string keyAPI = Environment.GetEnvironmentVariable("KEY_API");
+            var envPath = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, ".env");
+            DotNetEnv.Env.Load(envPath);
+
+            string? keyAPI = Environment.GetEnvironmentVariable("KEY_API");
             _request.SetAuthentication(keyAPI);
 
-            string apiServer = Environment.GetEnvironmentVariable("API_SERVER");
+            string? apiServer = Environment.GetEnvironmentVariable("API_SERVER");
             if (!string.IsNullOrEmpty(apiServer))
                 _request.SetAddress($"http://{apiServer}/");
         }
-        public static RequestHttpClient Client => _request;
+        public static string GetResponse(HttpResponseMessage httpResponseMessage)
+        {
+            return RequestHttpClient.GetTextContent(httpResponseMessage).Result;
+        }
+        public static RequestHttpClient _client => _request;
     }
 }
