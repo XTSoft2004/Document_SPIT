@@ -14,17 +14,11 @@ namespace Domain.Common.HttpRequest
         static HttpRequest()
         {
             _request = new RequestHttpClient();
-            _request.SetAuthentication("Document_SPIT_19082023");
+            DotNetEnv.Env.Load(".env");
+            string keyAPI = Environment.GetEnvironmentVariable("KEY_API");
+            _request.SetAuthentication(keyAPI);
 
-            DotNetEnv.Env.Load();
-
-            // Lấy tất cả biến môi trường
-            var envVars = Environment.GetEnvironmentVariables();
-            foreach (System.Collections.DictionaryEntry entry in envVars)
-            {
-                Console.WriteLine($"{entry.Key} = {entry.Value}");
-            }
-            string apiServer = Environment.GetEnvironmentVariable("DB_PASSWORD");
+            string apiServer = Environment.GetEnvironmentVariable("API_SERVER");
             if (!string.IsNullOrEmpty(apiServer))
                 _request.SetAddress($"http://{apiServer}/");
         }
