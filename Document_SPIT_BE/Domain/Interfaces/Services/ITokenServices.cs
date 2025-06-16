@@ -1,22 +1,29 @@
-﻿using System;
+﻿using Domain.Common.Http;
+using Domain.Model.Request.TokenUser;
+using Domain.Model.Response.Token;
+using Domain.Model.Response.User;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Domain.Common.Http;
-using Domain.Model.Request.TokenUser;
-using Domain.Model.Response.User;
 
 namespace Domain.Interfaces.Services
 {
     public interface ITokenServices
     {
         /// <summary>
+        /// Tạo JWT token và Refresh Token cho người dùng
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        TokenResponse GenerateToken(UserResponse user);
+        /// <summary>
         /// Tạo JWT token cho người dùng
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        string GenerateToken(UserResponse user);
+        string GenerateTokenUser(UserResponse user);
         /// <summary>
         /// Tạo Refresh Token cho người dùng
         /// </summary>

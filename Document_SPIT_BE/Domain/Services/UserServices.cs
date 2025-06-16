@@ -13,15 +13,9 @@ namespace Domain.Services
     public class UserServices : BaseService
     {
         private readonly IRepositoryBase<User>? _user;
-        private readonly RequestHttpClient _request;
-        private string API_SERVER = string.Empty;
         public UserServices(IRepositoryBase<User>? user)
         {
             _user = user;
-            _request = new RequestHttpClient();
-            _request.SetAuthentication("Document_SPIT_19082023");
-            DotNetEnv.Env.Load();
-            API_SERVER = Environment.GetEnvironmentVariable("API_SERVER");
         }
 
         //public async Task<User> GetUserByIdAsync(long userId)

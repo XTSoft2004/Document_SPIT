@@ -14,7 +14,7 @@ namespace Domain.Common.HttpRequest
         static HttpRequest()
         {
             _request = new RequestHttpClient();
-            var envPath = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, ".env");
+            var envPath = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.Parent.FullName, ".env");
             DotNetEnv.Env.Load(envPath);
 
             string? keyAPI = Environment.GetEnvironmentVariable("KEY_API");
@@ -26,7 +26,7 @@ namespace Domain.Common.HttpRequest
         }
         public static string GetResponse(HttpResponseMessage httpResponseMessage)
         {
-            return RequestHttpClient.GetTextContent(httpResponseMessage).Result;
+            return RequestHttpClient.GetTextContent(httpResponseMessage).GetAwaiter().GetResult();
         }
         public static RequestHttpClient _client => _request;
     }

@@ -12,6 +12,7 @@ using Domain.Entities;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
 using Domain.Model.Request.TokenUser;
+using Domain.Model.Response.Token;
 using Domain.Model.Response.User;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -30,8 +31,17 @@ namespace Domain.Services
             _user = user;
             _token = token;
         }
-
-        public string GenerateToken(UserResponse user)
+        public TokenResponse GenerateToken(UserResponse user)
+        {
+            return new TokenResponse()
+            {
+                AccessToken = GenerateTokenUser(user),
+                ExpiresAt = DateTime.Now.AddDays(Convert.ToInt32(_config["JwtSettings:ExpireToken"])),
+                RefreshToken = GenerateRefreshToken(user),
+                RefreshExpiresAt = DateTime.Now.AddDays(Convert.ToInt32(_config["JwtSettings:ExpireRefreshToken"]))
+            };
+        }
+        public string GenerateTokenUser(UserResponse user)
         {
             var key = Encoding.UTF8.GetBytes(_config["JwtSettings:Secret"]);
             var claims = new[]
