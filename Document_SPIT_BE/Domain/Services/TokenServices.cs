@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-using Domain.Base.Services;
+﻿using Domain.Base.Services;
 using Domain.Common.Http;
 using Domain.Entities;
+using Domain.Interfaces.Common;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
 using Domain.Model.Request.TokenUser;
@@ -16,6 +9,14 @@ using Domain.Model.Response.Token;
 using Domain.Model.Response.User;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Domain.Services
 {
@@ -24,30 +25,33 @@ namespace Domain.Services
         private readonly IConfiguration _config;
         private readonly IRepositoryBase<User>? _user;
         private readonly IRepositoryBase<TokenUser>? _token;
+        private readonly IHttpContextHelper? _HttpContextHelper;
 
-        public TokenServices(IConfiguration config, IRepositoryBase<User>? user, IRepositoryBase<TokenUser>? token)
+        public TokenServices(IConfiguration config, IRepositoryBase<User>? user, IRepositoryBase<TokenUser>? token, IHttpContextHelper? httpContextHelper)
         {
             _config = config;
             _user = user;
             _token = token;
+            _HttpContextHelper = httpContextHelper;
         }
-        public TokenResponse GenerateToken(UserResponse user)
+        public TokenResponse GenerateToken(UserResponse user, string deviceId)
         {
             return new TokenResponse()
             {
-                AccessToken = GenerateTokenUser(user),
+                AccessToken = GenerateTokenUser(user, deviceId),
                 ExpiresAt = DateTime.Now.AddDays(Convert.ToInt32(_config["JwtSettings:ExpireToken"])),
-                RefreshToken = GenerateRefreshToken(user),
+                RefreshToken = GenerateRefreshToken(user, deviceId),
                 RefreshExpiresAt = DateTime.Now.AddDays(Convert.ToInt32(_config["JwtSettings:ExpireRefreshToken"]))
             };
         }
-        public string GenerateTokenUser(UserResponse user)
+        public string GenerateTokenUser(UserResponse user, string deviceId)
         {
             var key = Encoding.UTF8.GetBytes(_config["JwtSettings:Secret"]);
             var claims = new[]
             {
-                new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+                new Claim("userName", user.Username),
+                new Claim("userId", user.UserId.ToString()),
+                new Claim("deviceId", deviceId ?? string.Empty),
             };
 
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -65,13 +69,14 @@ namespace Domain.Services
             return tokenHandler.WriteToken(token);
         }
 
-        public string GenerateRefreshToken(UserResponse user)
+        public string GenerateRefreshToken(UserResponse user, string deviceId)
         {
             var key = Encoding.UTF8.GetBytes(_config["JwtSettings:Secret"]);
             var claims = new[]
             {
-                new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+                new Claim("userName", user.Username),
+                new Claim("userId", user.UserId.ToString()),
+                new Claim("deviceId", deviceId ?? string.Empty),
             };
 
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -102,8 +107,9 @@ namespace Domain.Services
             catch { return null; }
 
             var claims = jwtToken.Claims;
-            var IdValue = claims.FirstOrDefault(c => c.Type == "nameid")?.Value;
-            var username = claims.FirstOrDefault(c => c.Type == "unique_name")?.Value;
+            var IdValue = claims.FirstOrDefault(c => c.Type == "userId")?.Value;
+            var username = claims.FirstOrDefault(c => c.Type == "userName")?.Value;
+            var deviceId = claims.FirstOrDefault(c => c.Type == "deviceId")?.Value;
             var expiryDateUnix = claims.FirstOrDefault(c => c.Type == "exp")?.Value;
             var expiryDate = expiryDateUnix != null
                 ? DateTimeOffset.FromUnixTimeSeconds(long.Parse(expiryDateUnix))
@@ -116,9 +122,15 @@ namespace Domain.Services
                 UserId = !string.IsNullOrEmpty(IdValue) ? long.Parse(IdValue) : -100,
                 Username = username,
                 ExpiryDate = expiryDate,
+                DeviceId = deviceId,
             };
         }
-
+        public UserTokenResponse? GetTokenBrowser()
+        {
+            var authHeader = _HttpContextHelper!.GetHeader("Authorization");
+            var userMeToken = !string.IsNullOrEmpty(authHeader) ? GetInfoFromToken(authHeader) : null;
+            return userMeToken;
+        }
         public DateTime GetDateTimeFormToken(string token)
         {
             var handler = new JwtSecurityTokenHandler();
@@ -148,6 +160,7 @@ namespace Domain.Services
             {
                 refreshToken.Token = info.Token;
                 refreshToken.ExpiryDate = info.ExpiryDate;
+                refreshToken.ModifiedDate = DateTime.Now;
                 _token.Update(refreshToken);
                 await UnitOfWork.CommitAsync();
                 return HttpResponse.OK("Cập nhật token thành công.");
@@ -159,7 +172,9 @@ namespace Domain.Services
                     UserId = user.UserId,
                     User = user,
                     Token = info.Token,
-                    ExpiryDate = info.ExpiryDate
+                    ExpiryDate = info.ExpiryDate,
+                    DeviceId = info.DeviceId,
+                    CreatedDate = DateTime.Now
                 });
                 await UnitOfWork.CommitAsync();
                 return HttpResponse.OK("Thêm token thành công.");

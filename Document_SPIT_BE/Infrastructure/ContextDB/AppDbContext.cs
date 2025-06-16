@@ -29,10 +29,15 @@ namespace Infrastructure.ContextDB
             modelBuilder.Entity<DocumentCategory>()
                 .HasKey(dc => new { dc.DocumentId, dc.CategoryId });
 
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.UserId)
+                .IsUnique();
+
             modelBuilder.Entity<TokenUser>()
                 .HasOne(u => u.User)
                 .WithMany(t => t.Tokens)
-                .HasForeignKey(t => t.UserId)
+                .HasPrincipalKey(u => u.UserId)       // liên kết tới User.UserId
+                .HasForeignKey(t => t.UserId)         // khóa ngoại ở TokenUser
                 .OnDelete(DeleteBehavior.SetNull);
         }
     }

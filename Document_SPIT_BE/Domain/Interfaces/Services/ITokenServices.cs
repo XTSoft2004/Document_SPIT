@@ -17,19 +17,19 @@ namespace Domain.Interfaces.Services
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        TokenResponse GenerateToken(UserResponse user);
+        TokenResponse GenerateToken(UserResponse user, string deviceId);
         /// <summary>
         /// Tạo JWT token cho người dùng
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        string GenerateTokenUser(UserResponse user);
+        string GenerateTokenUser(UserResponse user, string deviceId);
         /// <summary>
         /// Tạo Refresh Token cho người dùng
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        string GenerateRefreshToken(UserResponse user);
+        string GenerateRefreshToken(UserResponse user, string deviceId);
         /// <summary>
         /// Lấy thông tin người dùng qua token
         /// </summary>
@@ -54,5 +54,10 @@ namespace Domain.Interfaces.Services
         /// <param name="info"></param>
         /// <returns></returns>
         Task<HttpResponse> UpdateRefreshToken(TokenRequest info);
+        /// <summary>
+        /// Lấy thông tin người dùng từ token trong Header Authorization
+        /// </summary>
+        /// <returns></returns>
+        UserTokenResponse? GetTokenBrowser();
     }
 }

@@ -24,5 +24,11 @@ namespace Document_SPIT_BE.Controllers
             var response = await _sevices!.LoginUser(loginRequest);
             return response.ToActionResult();
         }
-    }
+        [HttpGet("logout")]
+        public async Task<IActionResult> LogoutUser()
+        {
+            var response = await _sevices!.LogoutUser();
+            return response.ToActionResult();
+        }
+    } 
 }

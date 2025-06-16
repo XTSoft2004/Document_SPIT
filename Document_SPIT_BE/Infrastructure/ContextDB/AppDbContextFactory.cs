@@ -10,7 +10,8 @@ namespace Infrastructure.ContextDB
         public AppDbContext CreateDbContext(string[] args)
         {
             // Tải các biến môi trường từ file .env
-            DotNetEnv.Env.Load("../../.env");
+            var envPath = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.Parent.FullName, ".env");
+            DotNetEnv.Env.Load(envPath);
             Console.WriteLine("API_SERVER = " + Environment.GetEnvironmentVariable("API_SERVER"));
 
             // Lấy các thông tin kết nối từ biến môi trường

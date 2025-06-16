@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Model.Response.User
+namespace Domain.Model.Request.User
 {
-    public class UserTokenResponse
+    public class UserRequest
     {
         public long? UserId { get; set; }
         public string? Username { get; set; }
-        public DateTime ExpiryDate { get; set; }
-        public string? DeviceId { get; set; }
+        public string? FullName { get; set; }
+        public bool IsLocked { get; set; } = false;
     }
 }

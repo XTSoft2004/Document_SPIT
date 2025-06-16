@@ -11,5 +11,6 @@ namespace Domain.Model.Request.TokenUser
         public long? UserId { get; set; }
         public string? Token { get; set; }
         public DateTime? ExpiryDate { get; set; }
+        public string? DeviceId { get; set; }
     }
 }

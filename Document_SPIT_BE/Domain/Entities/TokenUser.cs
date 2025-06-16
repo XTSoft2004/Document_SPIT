@@ -13,8 +13,9 @@ namespace Domain.Entities
     {
         public string? Token { get; set; }
         public DateTime? ExpiryDate { get; set; }
-
+        // TODO: Kiểm tra lại UserId đưa -1 nhưng nó thành -1 [KIỂM TRA LẠI]
         public long? UserId { get; set; }
+        public string? DeviceId { get; set; }
 
         [ForeignKey(nameof(UserId))]
         public virtual User? User { get; set; }
