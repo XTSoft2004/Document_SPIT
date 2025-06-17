@@ -24,7 +24,17 @@ namespace Domain.Common.GoogleDriver.Interfaces
         /// </summary>
         /// <returns></returns>
         Task<string> GetAccessToken();
-        Task<string> PreviewFile(string fileId);
+        /// <summary>
+        /// Preview file từ Google Drive
+        /// </summary>
+        /// <param name="fileId"></param>
+        /// <returns></returns>
         Task<(byte[] Data, string ContentType, string FileName)?> GetGoogleDrivePreviewAsync(string fileId);
+        /// <summary>
+        /// Lấy dữ liệu trong folder, lấy các thông tin file và folder
+        /// </summary>
+        /// <param name="folderId"></param>
+        /// <returns></returns>
+        Task<List<DriverItemResponse?>?> GetInfoFolder(string folderId);
     }
 }

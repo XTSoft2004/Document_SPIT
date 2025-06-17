@@ -79,33 +79,6 @@ namespace Server_Manager.Middleware
                     return;
                 }
 
-                if (AuthInfo?.UserId != null)
-                {
-                    //UserResponse userResponse = _userServices.GetUserById(AuthInfo.UserId);
-                    //{
-                    //    context.Response.StatusCode = StatusCodes.Status423Locked;
-                    //    await context.Response.WriteAsJsonAsync(new { Message = "Tài khoản đã bị khóa" });
-                    //    return;
-                    //}
-
-                    //context.Items["UserId"] = _user?.Id;
-                    //context.Items["RoleName"] = _user?.RoleName;
-                    //context.Items["SemesterId"] = _user?.SemesterId;
-
-                    //var claims = new List<Claim>
-                    //{
-                    //    new Claim(ClaimTypes.NameIdentifier, _user.Id.ToString()),
-                    //    new Claim(ClaimTypes.Name, _user?.Username),
-                    //    new Claim(ClaimTypes.Role, _user?.RoleName), // Gán role vào Claims
-                    //    new Claim(ClaimTypes.GroupSid, _user?.SemesterId.ToString()) // Gán role vào Claims
-                    //};
-
-                    //var identity = new ClaimsIdentity(claims, "jwt");
-                    //var claimsPrincipal = new ClaimsPrincipal(identity);
-
-                    //context.User = claimsPrincipal; // Thiết lập User cho HttpContext
-                }
-
                 await _next(context);
 
                 if (context.Response.StatusCode == (int)HttpStatusCode.Unauthorized)

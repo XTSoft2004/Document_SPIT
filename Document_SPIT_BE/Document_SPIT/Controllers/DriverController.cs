@@ -45,5 +45,14 @@ namespace Document_SPIT_BE.Controllers
 
             return Ok(response);
         }
+        [HttpGet("find/{folderId}")]
+        public async Task<IActionResult> GetInfoFolder(string folderId)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+
+            var response = await _services.GetInfoFolder(folderId);
+            return Ok(response);
+        }
     }
 }

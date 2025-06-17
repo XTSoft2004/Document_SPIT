@@ -13,6 +13,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Drawing;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -42,6 +43,24 @@ namespace Domain.Common.GoogleDriver.Services
         //        string urlFile = $"https://drive.google.com/thumbnail?id={uploadResponse.id}&sz=w1000";
         //        return urlFile;
         //    }
+        //    return string.Empty;
+        //}
+        //public async Task<string> PreviewFile(string fileId)
+        //{
+        //    string accessToken = await GetAccessToken();
+        //    var response = await _request.GetAsync($"https://www.googleapis.com/drive/v2/files/{fileId}");
+        //    if (response.IsSuccessStatusCode)
+        //    {
+        //        string fileContent = _request.Content;
+        //        var jsonData = JObject.Parse(fileContent);
+        //        if (jsonData["thumbnailLink"] != null)
+        //        {
+        //            string thumbnailLink = jsonData["thumbnailLink"].ToString();
+        //            return thumbnailLink;
+        //        }
+        //    }
+        //    Console.WriteLine("❌ Lỗi khi lấy nội dung tệp tin:");
+        //    Console.WriteLine(await response.Content.ReadAsStringAsync());
         //    return string.Empty;
         //}
         public async Task<UploadFileResponse> UploadFile(UploadFileBase64Request uploadFileRequest)
@@ -108,6 +127,7 @@ namespace Domain.Common.GoogleDriver.Services
             if (response.IsSuccessStatusCode)
             {
                 Console.WriteLine("✅ Copy file thành công!");
+                //var response_DELETE = await _request.DeleteAsync($"https://www.googleapis.com/drive/v3/files/${uploadFileResponse.id}");
             }
             else
             {
@@ -143,7 +163,7 @@ namespace Domain.Common.GoogleDriver.Services
         {
             if (string.IsNullOrEmpty(access_token))
                 return null;
-            var response = await _request.GetAsync("https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=" + access_token);
+            var response = await _request.GetAsync($"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token={access_token}");
             if (response.IsSuccessStatusCode)
             {
                 var jsonData = JsonConvert.DeserializeObject<TokenInfoGoogleResponse>(_request.Content);
@@ -154,25 +174,7 @@ namespace Domain.Common.GoogleDriver.Services
                 return null;
             }
         }
-        public async Task<string> PreviewFile(string fileId)
-        {
-            string accessToken = await GetAccessToken();
-            var response = await _request.GetAsync($"https://www.googleapis.com/drive/v2/files/{fileId}");
-            if (response.IsSuccessStatusCode)
-            {
-                string fileContent = _request.Content;
-                var jsonData = JObject.Parse(fileContent);
-                if (jsonData["thumbnailLink"] != null)
-                {
-                    string thumbnailLink = jsonData["thumbnailLink"].ToString();
-                    return thumbnailLink;
-                }
-            }
-            Console.WriteLine("❌ Lỗi khi lấy nội dung tệp tin:");
-            Console.WriteLine(await response.Content.ReadAsStringAsync());
-            return string.Empty;
-        }
-        private async Task<FileInfoResponse> GetInfoById(string id)
+        private async Task<FileInfoResponse?> GetInfoById(string id)
         {
             await GetAccessToken();
             var response = await _request.GetAsync($"https://www.googleapis.com/drive/v3/files/{id}?fields=id,name,mimeType,webContentLink,webViewLink,thumbnailLink");
@@ -194,6 +196,8 @@ namespace Domain.Common.GoogleDriver.Services
                 return null;
 
             var client = _httpClientFactory.CreateClient();
+
+            // Tạo link preview nếu là docx thì sẽ gọi preview riêng
             var googleDriveUrl = $"https://www.googleapis.com/drive/v3/files/{fileId}?alt=media";
             if (infoFile.mimeType.Contains("application/vnd.google-apps"))
                 googleDriveUrl = $"https://www.googleapis.com/drive/v3/files/{fileId}/export?mimeType=application/pdf";
@@ -209,21 +213,39 @@ namespace Domain.Common.GoogleDriver.Services
             // Nếu không rõ hoặc là "application/octet-stream", đoán theo đuôi file
             if (string.IsNullOrWhiteSpace(contentType) || contentType == "application/octet-stream")
             {
+                // Tự động lấy contentType
                 var ext = Path.GetExtension(infoFile.name)?.ToLower();
-                contentType = ext switch
-                {
-                    ".pdf" => "application/pdf",
-                    ".jpg" or ".jpeg" => "image/jpeg",
-                    ".png" => "image/png",
-                    ".webp" => "image/webp",
-                    ".gif" => "image/gif",
-                    _ => "application/octet-stream" // fallback
-                };
+                contentType = AppDictionary.GetMimeTypeDriver($"a{ext}");
+                //contentType = ext switch
+                //{
+                //    ".pdf" => "application/pdf",
+                //    ".jpg" or ".jpeg" => "image/jpeg",
+                //    ".png" => "image/png",
+                //    ".webp" => "image/webp",
+                //    ".gif" => "image/gif",
+                //    _ => "application/octet-stream" // fallback
+                //};
             }
 
             var bytes = await response.Content.ReadAsByteArrayAsync();
 
             return (bytes, contentType, infoFile.name);
+        }
+        public async Task<List<DriverItemResponse?>?> GetInfoFolder(string folderId)
+        {
+            await GetAccessToken();
+            var response = await _request.GetAsync($"https://www.googleapis.com/drive/v3/files?q='{folderId}'+in+parents&fields=files(id,name,webViewLink,webContentLink,createdTime,md5Checksum)&orderBy=createdTime");
+            if (response.IsSuccessStatusCode)
+            {
+                var result = _request.Content;
+                var jsonData = JObject.Parse(result)?["files"];
+                if (jsonData != null)
+                {
+                    var fileInfo = JsonConvert.DeserializeObject<List<DriverItemResponse?>?>(jsonData.ToString());
+                    return fileInfo;
+                }        
+            }
+            return new List<DriverItemResponse?>();
         }
     }
 }
