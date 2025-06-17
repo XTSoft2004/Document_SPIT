@@ -1,0 +1,59 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Domain.Common
+{
+    public class AppDictionary
+    {
+        public static readonly Dictionary<string, string> MimeTypes = new()
+        {
+            // 📝 Text
+            { ".txt", "text/plain" },
+            { ".md", "text/markdown" },
+            { ".csv", "text/csv" },
+            { ".tsv", "text/tab-separated-values" },
+            { ".xml", "application/xml" },
+            { ".json", "application/json" },
+            { ".rtf", "application/rtf" },
+
+            // 📄 PDF
+            { ".pdf", "application/pdf" },
+
+            // 📄 Microsoft Word
+            { ".doc", "application/msword" },
+            { ".docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document" },
+
+            // 📊 Microsoft Excel
+            { ".xls", "application/vnd.ms-excel" },
+            { ".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" },
+
+            // 📈 Microsoft PowerPoint
+            { ".ppt", "application/vnd.ms-powerpoint" },
+            { ".pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation" },
+
+            // 🔃 OpenDocument Formats (LibreOffice / OpenOffice)
+            { ".odt", "application/vnd.oasis.opendocument.text" },
+            { ".ods", "application/vnd.oasis.opendocument.spreadsheet" },
+            { ".odp", "application/vnd.oasis.opendocument.presentation" },
+
+            // 📚 EPUB eBook
+            { ".epub", "application/epub+zip" },
+
+            // 🗜️ Compressed archives (có thể chứa tài liệu)
+            { ".zip", "application/zip" },
+            { ".rar", "application/vnd.rar" },
+            { ".7z", "application/x-7z-compressed" },
+
+            // ✅ Fallback
+            { ".bin", "application/octet-stream" }
+        };
+        public static string GetMimeTypeDriver(string fileName)
+        {
+            string extension = Path.GetExtension(fileName).ToLowerInvariant();
+            return MimeTypes.TryGetValue(extension, out var mime) ? mime : "application/octet-stream";
+        }
+    }
+}

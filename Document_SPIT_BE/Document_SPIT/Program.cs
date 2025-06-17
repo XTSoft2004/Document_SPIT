@@ -20,6 +20,7 @@ Console.OutputEncoding = Encoding.UTF8;
 DBDIConfig.Configure(builder.Services, builder.Configuration);
 IdentityDIConfig.Configure(builder.Services, builder.Configuration);
 
+builder.Services.AddHttpClient();
 #region Setup JWT vào Swagger
 builder.Services.AddSwaggerGen(options =>
 {
