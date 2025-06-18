@@ -26,11 +26,12 @@ namespace Domain.Services
         private readonly IRepositoryBase<User>? _user;
         private readonly IGoogleDriverServices? _googleDriverServices;
 
-        public DocumentServices(IRepositoryBase<Document>? document, IRepositoryBase<User>? user, IGoogleDriverServices? googleDriverServices)
+        public DocumentServices(IRepositoryBase<Document>? document, IRepositoryBase<User>? user, IGoogleDriverServices? googleDriverServices, IRepositoryBase<DetailDocument>? detailDocument)
         {
             _document = document;
             _user = user;
             _googleDriverServices = googleDriverServices;
+            _detailDocument = detailDocument;
         }
         // Tạo mơi tài liệu
         public async Task<HttpResponse> CreateAsync(DocumentRequest documentRequest)
@@ -66,7 +67,8 @@ namespace Domain.Services
             if (FileId == null || string.IsNullOrEmpty(FileId.id))
                 return HttpResponse.Error("Tải lên tài liệu thất bại.", System.Net.HttpStatusCode.InternalServerError);
 
-            var documentCreate = new Document()
+            // Tạo mới tài liệu
+            var documentCreate = new Document
             {
                 Name = documentRequest.Name?.Trim(),
                 FileId = FileId.id,
@@ -82,6 +84,22 @@ namespace Domain.Services
                 CreatedDate = DateTime.Now
             };
             _document.Insert(documentCreate);
+            await UnitOfWork.CommitAsync();
+
+            // Tạo mới chi tiết tài liệu
+            var detailDocument = new DetailDocument
+            {
+                DocumentId = documentCreate.Id,
+                Document = documentCreate,
+                CreatedDate = DateTime.Now
+            };
+            _detailDocument?.Insert(detailDocument);
+            await UnitOfWork.CommitAsync();
+
+            // Cập nhật tài liệu với chi tiết tài liệu
+            documentCreate.DetaiDocument = detailDocument;
+            documentCreate.DetaiDocumentId = detailDocument.Id;
+            _detailDocument.Update(detailDocument);
             await UnitOfWork.CommitAsync();
 
             return HttpResponse.OK(message: "Tạo tài liệu thành công.");

@@ -18,14 +18,16 @@ namespace Domain.Services
     {
         private readonly IGoogleDriverServices _googleDriverServices;
         private readonly IDocumentServices _documentServices;
+        private readonly IRepositoryBase<DetailDocument> _detailDocument;
         private readonly IRepositoryBase<User> _user;
         private readonly IRepositoryBase<Document> _document;
-        public ExtensionServices(IGoogleDriverServices googleDriverServices, IDocumentServices documentServices, IRepositoryBase<User> user, IRepositoryBase<Document> document)
+        public ExtensionServices(IGoogleDriverServices googleDriverServices, IDocumentServices documentServices, IRepositoryBase<User> user, IRepositoryBase<Document> document, IRepositoryBase<DetailDocument> detailDocument)
         {
             _googleDriverServices = googleDriverServices;
             _documentServices = documentServices;
             _user = user;
             _document = document;
+            _detailDocument = detailDocument;
         }
 
         public async Task LoadFolderDriver(string folderId)
@@ -40,7 +42,8 @@ namespace Domain.Services
                 if (!item.IsFolder)
                 {
                     Console.WriteLine($"Tạo mới tài liệu: {item.Name} - {item.Id}");
-                    _document.Insert(new Document
+                    // Tạo mới tài liệu từ Google Drive
+                    var documentCreate = new Document
                     {
                         Name = item.Name,
                         FileId = item.Id,
@@ -51,7 +54,24 @@ namespace Domain.Services
                         User = userAdmin,
                         FolderId = folderId,
                         CreatedDate = DateTime.Now
-                    });
+                    };
+                    _document.Insert(documentCreate);
+                    await UnitOfWork.CommitAsync();
+
+                    // Tạo mới chi tiết tài liệu
+                    var detailDocument = new DetailDocument
+                    {
+                        DocumentId = documentCreate.Id,
+                        Document = documentCreate,
+                        CreatedDate = DateTime.Now
+                    };
+                    _detailDocument?.Insert(detailDocument);
+                    await UnitOfWork.CommitAsync();
+
+                    // Cập nhật tài liệu với chi tiết tài liệu
+                    documentCreate.DetaiDocument = detailDocument;
+                    documentCreate.DetaiDocumentId = detailDocument.Id;
+                    _detailDocument.Update(detailDocument);
                     await UnitOfWork.CommitAsync();
                 }
                 else
