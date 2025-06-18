@@ -17,16 +17,11 @@ namespace Domain.Entities
         public string? Name { get; set; }
         public long? TotalDownloads { get; set; } = 0;
         public long? TotalViews { get; set; } = 0;
-        public string? PathFile { get; set; }
+        public string? FileId { get; set; }
         public bool? IsPrivate { get; set; }
-        public StatusDocument_Enum StatusDocument { get; set; } 
-
+        public StatusDocument_Enum? StatusDocument { get; set; } 
+        public string? FolderId { get; set; }
         public ICollection<DocumentCategory>? DocumentCategories { get; set; }
-
-        public long? idTypeDocument { get; set; }
-        [ForeignKey(nameof(idTypeDocument))]
-        public virtual DocumentType? Type_Document { get; set; }
-
         public long? UserId { get; set; }
         [ForeignKey(nameof(UserId))]
         public virtual User? User { get; set; }

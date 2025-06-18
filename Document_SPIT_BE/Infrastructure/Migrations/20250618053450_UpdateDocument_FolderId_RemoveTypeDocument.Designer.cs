@@ -4,6 +4,7 @@ using Infrastructure.ContextDB;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250618053450_UpdateDocument_FolderId_RemoveTypeDocument")]
+    partial class UpdateDocument_FolderId_RemoveTypeDocument
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -72,9 +75,6 @@ namespace Infrastructure.Migrations
                     b.Property<long?>("DocumentTypeId")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("FileId")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("FolderId")
                         .HasColumnType("nvarchar(max)");
 
@@ -92,7 +92,10 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
-                    b.Property<int?>("StatusDocument")
+                    b.Property<string>("PathFile")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("StatusDocument")
                         .HasColumnType("int");
 
                     b.Property<long?>("TotalDownloads")

@@ -245,7 +245,7 @@ namespace Domain.Common.GoogleDriver.Services
                     return fileInfo;
                 }        
             }
-            return new List<DriverItemResponse?>();
+            return null;
         }
     }
 }

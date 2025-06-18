@@ -48,5 +48,22 @@ namespace Domain.Common
         {
             return Enum.GetValues(enumType).Cast<Enum>().Any(e => GetDisplayName(e) == displayName);
         }
+        public static T? GetEnumFromDisplayName<T>(string displayName) where T : struct, Enum
+        {
+            foreach (T enumValue in Enum.GetValues(typeof(T)))
+            {
+                var name = enumValue.GetType()
+                                    .GetField(enumValue.ToString())
+                                    ?.GetCustomAttribute<DisplayAttribute>()
+                                    ?.Name;
+
+                if (name == displayName)
+                {
+                    return enumValue;
+                }
+            }
+
+            return null; // hoặc throw nếu muốn
+        }
     }
 }

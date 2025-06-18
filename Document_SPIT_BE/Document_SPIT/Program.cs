@@ -26,9 +26,9 @@ builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "SPIT-EduCheck API",
+        Title = "SPIT-Document API",
         Version = "v1",
-        Description = "API documentation for SPIT-EduCheck system"
+        Description = "API documentation for SPIT-Document system"
     });
     // ✅ Cấu hình Bearer Token cho Swagger
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme

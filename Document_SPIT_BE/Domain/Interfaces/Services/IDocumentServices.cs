@@ -1,0 +1,33 @@
+﻿using Domain.Common.Http;
+using Domain.Model.Request.Document;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Domain.Interfaces.Services
+{
+    public interface IDocumentServices
+    {
+        /// <summary>
+        /// Tạo mới tài liệu
+        /// </summary>
+        /// <param name="documentRequest"></param>
+        /// <returns></returns>
+        Task<HttpResponse> CreateAsync(DocumentRequest documentRequest);
+        /// <summary>
+        /// Cập nhật tài liệu theo IdDocument
+        /// </summary>
+        /// <param name="IdDocument"></param>
+        /// <param name="documentRequest"></param>
+        /// <returns></returns>
+        Task<HttpResponse> UpdateAsync(long IdDocument, DocumentRequest documentRequest);
+        /// <summary>
+        /// Xoá tài liệu theo IdDocument
+        /// </summary>
+        /// <param name="IdDocument"></param>
+        /// <returns></returns>
+        Task<HttpResponse> DeleteAsync(long IdDocument);
+    }
+}
