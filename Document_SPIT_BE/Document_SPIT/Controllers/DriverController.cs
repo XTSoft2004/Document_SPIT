@@ -1,5 +1,6 @@
 ﻿using Domain.Common.GoogleDriver.Interfaces;
 using Domain.Common.GoogleDriver.Model.Request;
+using Domain.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 using static Domain.Common.AppConstants;
 
@@ -10,10 +11,12 @@ namespace Document_SPIT_BE.Controllers
     public class DriverController : Controller
     {
         private readonly IGoogleDriverServices? _services;
+        private readonly IDocumentServices _documentServices;
 
-        public DriverController(IGoogleDriverServices? services)
+        public DriverController(IGoogleDriverServices? services, IDocumentServices documentServices)
         {
             _services = services;
+            _documentServices = documentServices;
         }
         [HttpGet("preview/{fileId}")]
         public async Task<IActionResult> PreviewFile(string fileId)
@@ -24,9 +27,10 @@ namespace Document_SPIT_BE.Controllers
             var result = await _services.GetGoogleDrivePreviewAsync(fileId);
             if (result == null)
                 return NotFound(new { Message = "Không tồn tại file, vui lòng kiểm tra lại" });
+            _documentServices.ViewFile(fileId);
 
             var (data, contentType, fileName) = result.Value;
-
+            
             Response.Headers["Content-Disposition"] = $"inline; filename=\"{fileName}\"";
             return new FileContentResult(data, contentType);
         }

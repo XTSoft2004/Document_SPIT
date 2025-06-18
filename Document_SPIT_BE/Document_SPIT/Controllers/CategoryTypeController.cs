@@ -1,6 +1,7 @@
 ﻿using Domain.Interfaces.Services;
 using Domain.Model.Request.CategoryType;
 using Microsoft.AspNetCore.Mvc;
+using static Domain.Common.AppConstants;
 
 namespace Document_SPIT_BE.Controllers
 {
@@ -8,35 +9,35 @@ namespace Document_SPIT_BE.Controllers
     [ApiController]
     public class CategoryTypeController : Controller
     {
-        private readonly ICategoryTypeServices? _categoryTypeServices;
+        private readonly ICategoryTypeServices? _services;
 
         public CategoryTypeController(ICategoryTypeServices? categoryTypeServices)
         {
-            _categoryTypeServices = categoryTypeServices;
+            _services = categoryTypeServices;
         }
 
         [HttpPost("create")]
         public async Task<IActionResult> CreateAsync(CategoryTypeRequest categoryTypeRequest)
         {
             if (!ModelState.IsValid)
-                return BadRequest("Invalid model.");
-            var response = await _categoryTypeServices.CreateAsync(categoryTypeRequest);
+                return BadRequest(DefaultString.INVALID_MODEL);
+            var response = await _services.CreateAsync(categoryTypeRequest);
             return response.ToActionResult();
         }
-        [HttpPut("update/{IdCategoryType}")]
+        [HttpPut("{IdCategoryType}")]
         public async Task<IActionResult> UpdateAsync(long IdCategoryType, CategoryTypeRequest categoryTypeRequest)
         {
             if (!ModelState.IsValid)
-                return BadRequest("Invalid model.");
-            var response = await _categoryTypeServices.UpdateAsync(IdCategoryType, categoryTypeRequest);
+                return BadRequest(DefaultString.INVALID_MODEL);
+            var response = await _services.UpdateAsync(IdCategoryType, categoryTypeRequest);
             return response.ToActionResult();
         }
-        [HttpDelete("delete/{IdCategoryType}")]
+        [HttpDelete("{IdCategoryType}")]
         public async Task<IActionResult> DeleteAsync(long IdCategoryType)
         {
             if (!ModelState.IsValid)
-                return BadRequest("Invalid model.");
-            var response = await _categoryTypeServices.DeleteAsync(IdCategoryType);
+                return BadRequest(DefaultString.INVALID_MODEL);
+            var response = await _services.DeleteAsync(IdCategoryType);
             return response.ToActionResult();
         }
     }

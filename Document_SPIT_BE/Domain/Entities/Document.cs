@@ -19,6 +19,7 @@ namespace Domain.Entities
         public long? TotalViews { get; set; } = 0;
         public string? FileId { get; set; }
         public bool? IsPrivate { get; set; }
+        public string Md5Checksum { get; set; } = string.Empty;
         public StatusDocument_Enum? StatusDocument { get; set; } 
         public string? FolderId { get; set; }
         public ICollection<DocumentCategory>? DocumentCategories { get; set; }

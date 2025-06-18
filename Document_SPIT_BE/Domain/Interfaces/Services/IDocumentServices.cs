@@ -29,5 +29,17 @@ namespace Domain.Interfaces.Services
         /// <param name="IdDocument"></param>
         /// <returns></returns>
         Task<HttpResponse> DeleteAsync(long IdDocument);
+        /// <summary>
+        /// Xem tài liệu theo IdDocument
+        /// </summary>
+        /// <param name="IdDocument"></param>
+        /// <returns></returns>
+        Task ViewFile(string FileId);
+        /// <summary>
+        /// Tải xuống tài liệu theo IdDocument
+        /// </summary>
+        /// <param name="IdDocument"></param>
+        /// <returns></returns>
+        Task<(byte[] Data, string ContentType, string FileName)> DownloadFile(string FileId);
     }
 }

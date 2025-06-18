@@ -13,7 +13,6 @@ namespace Infrastructure.ContextDB
 
         // DbSet cho các thực thể
         public DbSet<Document> Documents { get; set; }
-        public DbSet<DocumentType> DocumentTypes { get; set; }
         public DbSet<CategoryType> CategoryTypes { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<TokenUser> Tokens { get; set; }
