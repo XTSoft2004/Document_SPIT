@@ -11,9 +11,7 @@ namespace Domain.Model.Request.Document
     public class DocumentRequest : UploadFileBase64Request
     {
         public string? Name { get; set; }
-        public long? TotalDownloads { get; set; } = 0;
-        public long? TotalViews { get; set; } = 0;
-        public bool? IsPrivate { get; set; }
+        public bool? IsPrivate { get; set; } = false;
         public string? StatusDocument { get; set; }
         public long? UserId { get; set; }
     }

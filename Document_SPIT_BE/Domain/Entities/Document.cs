@@ -18,7 +18,7 @@ namespace Domain.Entities
         public long? TotalDownloads { get; set; } = 0;
         public long? TotalViews { get; set; } = 0;
         public string? FileId { get; set; }
-        public bool? IsPrivate { get; set; }
+        public bool? IsPrivate { get; set; } = false; // Mặc định là công khai
         public string Md5Checksum { get; set; } = string.Empty;
         public StatusDocument_Enum? StatusDocument { get; set; } 
         public string? FolderId { get; set; }

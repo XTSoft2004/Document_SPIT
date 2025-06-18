@@ -68,8 +68,6 @@ namespace Domain.Services
             var documentCreate = new Document()
             {
                 Name = documentRequest.Name?.Trim(),
-                TotalDownloads = documentRequest.TotalDownloads ?? 0,
-                TotalViews = documentRequest.TotalViews ?? 0,
                 FileId = FileId.id,
                 Md5Checksum = md5Hash,
                 IsPrivate = documentRequest.IsPrivate ?? false,
@@ -131,8 +129,6 @@ namespace Domain.Services
             }
 
             document.Name = documentRequest.Name?.Trim() ?? document.Name;
-            document.TotalDownloads = documentRequest.TotalDownloads ?? document.TotalDownloads;
-            document.TotalViews = documentRequest.TotalViews ?? document.TotalViews;
             document.IsPrivate = documentRequest.IsPrivate ?? document.IsPrivate;
             document.StatusDocument = EnumExtensions.GetEnumFromDisplayName<StatusDocument_Enum>(documentRequest.StatusDocument);
 
