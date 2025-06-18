@@ -16,5 +16,11 @@ namespace Domain.Interfaces.Services
         /// <param name="userRequest"></param>
         /// <returns></returns>
         Task<HttpResponse> AddUpdateUser(UserRequest userRequest);
+        /// <summary>
+        /// Set quyền cho người dùng
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        Task<HttpResponse> SetRole(long? userId, string roleName);
     }
 }

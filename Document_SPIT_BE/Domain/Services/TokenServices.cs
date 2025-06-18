@@ -50,7 +50,7 @@ namespace Domain.Services
             var claims = new[]
             {
                 new Claim("userName", user.Username),
-                new Claim("userId", user.UserId.ToString()),
+                new Claim("userId", user.Id.ToString()),
                 new Claim("deviceId", deviceId ?? string.Empty),
             };
 
@@ -75,7 +75,7 @@ namespace Domain.Services
             var claims = new[]
             {
                 new Claim("userName", user.Username),
-                new Claim("userId", user.UserId.ToString()),
+                new Claim("userId", user.Id.ToString()),
                 new Claim("deviceId", deviceId ?? string.Empty),
             };
 
@@ -119,7 +119,7 @@ namespace Domain.Services
 
             return new UserTokenResponse()
             {
-                UserId = !string.IsNullOrEmpty(IdValue) ? long.Parse(IdValue) : -100,
+                Id = !string.IsNullOrEmpty(IdValue) ? long.Parse(IdValue) : -100,
                 Username = username,
                 ExpiryDate = expiryDate,
                 DeviceId = deviceId,
@@ -151,7 +151,7 @@ namespace Domain.Services
         }
         public async Task<HttpResponse> UpdateRefreshToken(TokenRequest info)
         {
-            var user = _user.Find(f => f.UserId == info.UserId);
+            var user = _user.Find(f => f.Id == info.UserId);
             if(user == null)
                 return HttpResponse.Error("Người dùng không tồn tại.", System.Net.HttpStatusCode.NotFound);
 
@@ -169,7 +169,7 @@ namespace Domain.Services
             {
                 _token.Insert(new TokenUser()
                 {
-                    UserId = user.UserId,
+                    UserId = user.Id,
                     User = user,
                     Token = info.Token,
                     ExpiryDate = info.ExpiryDate,

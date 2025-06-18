@@ -47,7 +47,7 @@ namespace Domain.Services
                         Md5Checksum = item.Md5Checksum ?? string.Empty,
                         IsPrivate = false, // Mặc định là công khai
                         StatusDocument = StatusDocument_Enum.Approved,
-                        UserId = userAdmin?.UserId ?? 0, // Gán người dùng admin
+                        UserId = userAdmin?.Id ?? 0, // Gán người dùng admin
                         User = userAdmin,
                         FolderId = folderId,
                         CreatedDate = DateTime.Now

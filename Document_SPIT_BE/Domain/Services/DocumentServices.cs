@@ -22,6 +22,7 @@ namespace Domain.Services
     public class DocumentServices : BaseService, IDocumentServices
     {
         private readonly IRepositoryBase<Document>? _document;
+        private readonly IRepositoryBase<DetailDocument>? _detailDocument;
         private readonly IRepositoryBase<User>? _user;
         private readonly IGoogleDriverServices? _googleDriverServices;
 
@@ -39,7 +40,7 @@ namespace Domain.Services
                 return HttpResponse.Error("Trạng thái điểm danh không hợp lệ.", System.Net.HttpStatusCode.BadRequest);
 
             // Kiểm tra người dùng có tồn tại hay không
-            var user = _user!.Find(f => f.UserId == documentRequest.UserId);
+            var user = _user!.Find(f => f.Id == documentRequest.UserId);
             if (user == null)
                 return HttpResponse.Error("Người dùng không tồn tại.", System.Net.HttpStatusCode.BadRequest);
 
@@ -95,7 +96,7 @@ namespace Domain.Services
             if (!EnumExtensions.IsValidDisplayName(documentRequest.StatusDocument, typeof(StatusDocument_Enum)))
                 return HttpResponse.Error("Trạng thái điểm danh không hợp lệ.", System.Net.HttpStatusCode.BadRequest);
 
-            var user = _user!.Find(f => f.UserId == documentRequest.UserId);
+            var user = _user!.Find(f => f.Id == documentRequest.UserId);
             if (user == null)
                 return HttpResponse.Error("Người dùng không tồn tại.", System.Net.HttpStatusCode.BadRequest);
 
@@ -162,8 +163,12 @@ namespace Domain.Services
             if (document == null)
                 return;
 
-            document.TotalViews += 1;
-            _document.Update(document);
+            var itemReacted = _detailDocument.Find(f => f.Id == document.Id);
+            if(itemReacted == null)
+                return;
+
+            itemReacted.TotalView += 1;
+            _detailDocument.Update(itemReacted);
             await UnitOfWork.CommitAsync();
         }
         public async Task<(byte[] Data, string ContentType, string FileName)> DownloadFile(string FileId)
@@ -172,8 +177,12 @@ namespace Domain.Services
             if (document == null)
                 return (null, null, null);
 
-            document.TotalDownloads += 1;
-            _document.Update(document);
+            var itemReacted = _detailDocument.Find(f => f.Id == document.Id);
+            if (itemReacted == null)
+                return (null, null, null);
+
+            itemReacted.TotalDownload += 1;
+            _detailDocument.Update(itemReacted);
             await UnitOfWork.CommitAsync();
 
             var result = await _googleDriverServices.GetGoogleDrivePreviewAsync(document.FileId);

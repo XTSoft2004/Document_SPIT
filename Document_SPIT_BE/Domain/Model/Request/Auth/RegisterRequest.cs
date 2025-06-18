@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Model.Response.User
+namespace Domain.Model.Request.Auth
 {
-    public class UserResponse
+    public class RegisterRequest
     {
-        public long? Id { get; set; }
         public string? Username { get; set; }
+        public string? Password { get; set; }
         public string? FullName { get; set; }
     }
 }

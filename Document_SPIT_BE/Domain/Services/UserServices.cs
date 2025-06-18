@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Domain.Base.Services;
@@ -17,18 +18,19 @@ namespace Domain.Services
     public class UserServices : BaseService, IUserServices
     {
         private readonly IRepositoryBase<User>? _user;
-        public UserServices(IRepositoryBase<User>? user)
+        private readonly IRepositoryBase<Role>? _role;
+        public UserServices(IRepositoryBase<User>? user, IRepositoryBase<Role>? role)
         {
             _user = user;
+            _role = role;
         }
         public async Task<HttpResponse> AddUpdateUser(UserRequest userRequest)
         {
-            var user = _user!.Find(f => f.UserId == userRequest.UserId && f.Username == userRequest.Username);
+            var user = _user!.Find(f => f.Username == userRequest.Username);
             if(user == null)
             {
                 var userCreate = new User()
                 {
-                    UserId = userRequest.UserId,
                     Username = userRequest.Username.Trim(),
                     FullName = userRequest.FullName.Trim(),
                     isLocked = userRequest.IsLocked,
@@ -37,6 +39,7 @@ namespace Domain.Services
 
                 _user.Insert(userCreate);
                 await UnitOfWork.CommitAsync();
+
                 return HttpResponse.OK(message: "Thêm người dùng thành công.", data: userCreate);
             }
             else
@@ -46,8 +49,26 @@ namespace Domain.Services
                 user.isLocked = userRequest.IsLocked;
                 user.ModifiedDate = DateTime.Now;
                 await UnitOfWork.CommitAsync();
+
                 return HttpResponse.OK(message: "Cập nhật người dùng thành công.", data: user);
             }
+        }
+        public async Task<HttpResponse> SetRole(long? userId, string roleName)
+        {
+            var user = _user!.Find(f => f.Id == userId);
+            if (user == null)
+                return HttpResponse.OK(message: "Người dùng không tồn tại.");
+
+            var role = _role!.Find(f => f.DisplayName == roleName);
+            if (role != null)
+            {
+                user.RoleId = role.Id;
+                user.Role = role;
+                await UnitOfWork.CommitAsync();
+                return HttpResponse.OK(message: $"Cập nhật role {role.DisplayName} thành công!");
+            }
+
+            return HttpResponse.Error(message: "Không tìm thấy quyền.", HttpStatusCode.NotFound);
         }
     }
 }

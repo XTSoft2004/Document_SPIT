@@ -15,6 +15,15 @@ namespace Document_SPIT_BE.Controllers
         {
             _sevices = sevices;
         }
+        [HttpPost("register")]
+        public async Task<IActionResult> RegisterUser([FromBody] RegisterRequest registerRequest)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+
+            var response = await _sevices!.RegisterAsync(registerRequest);
+            return response.ToActionResult();
+        }
         [HttpPost("login")]
         public async Task<IActionResult> LoginUser([FromBody] LoginRequest loginRequest)
         {

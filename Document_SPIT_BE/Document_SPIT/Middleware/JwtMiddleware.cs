@@ -70,7 +70,7 @@ namespace Server_Manager.Middleware
                     return;
                 }
 
-                var refresh_token_old = _tokenServices.GetRefreshToken(AuthInfo.UserId);
+                var refresh_token_old = _tokenServices.GetRefreshToken(AuthInfo.Id);
                 UserTokenResponse AuthRefreshToken = _tokenServices.GetInfoFromToken(refresh_token_old);
                 if (AuthRefreshToken?.ExpiryDate < dateTimeNow)
                 {

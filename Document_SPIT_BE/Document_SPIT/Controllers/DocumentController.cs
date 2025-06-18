@@ -3,7 +3,6 @@ using Domain.Interfaces.Services;
 using Domain.Model.Request.Document;
 using Microsoft.AspNetCore.Mvc;
 using static Domain.Common.AppConstants;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Document_SPIT_BE.Controllers
 {
@@ -50,6 +49,7 @@ namespace Document_SPIT_BE.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(DefaultString.INVALID_MODEL);
+
             var (data, contentType, fileName) = await _services.DownloadFile(fileId);
             if(data == null || contentType == null || fileName == null)
                 return NotFound(new { Message = "Không tồn tại file, vui lòng kiểm tra lại" });

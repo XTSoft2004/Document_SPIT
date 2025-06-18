@@ -11,10 +11,12 @@ using Domain.Model.Request.User;
 using Domain.Model.Response.Auth;
 using Domain.Model.Response.Token;
 using Domain.Model.Response.User;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -35,7 +37,35 @@ namespace Domain.Services
             _user = user;
             userMeToken = _tokenServices.GetTokenBrowser();
         }
+        public async Task<HttpResponse> RegisterAsync(RegisterRequest registerRequest)
+        {
+            var user = _user!.Find(f => f.Username == registerRequest.Username.Trim());
+            if (user != null)
+                return HttpResponse.OK(message: "Tên đăng nhập đã tồn tại.");
 
+            var response = await HttpRequest._client.PostAsync("auth/login", new Dictionary<string, string?>
+            {
+                { "username", registerRequest.Username?.Trim() ?? string.Empty },
+                { "password", registerRequest.Password?.Trim() ?? string.Empty }
+            });
+            if (!response.IsSuccessStatusCode)
+            {
+                _user.Insert(new User()
+                {
+                    Username = registerRequest.Username.Trim(),
+                    Password = registerRequest.Password.Trim(),
+                    FullName = registerRequest.FullName.Trim(),
+                    isLocked = false,
+                    CreatedDate = DateTime.Now,
+                });
+                await UnitOfWork.CommitAsync();
+
+                return HttpResponse.OK(message: "Đăng ký thành công.");
+            }
+
+            // Nếu đăng ký không thành công thì trả về thông báo lỗi từ server CLB SPIT
+            return HttpResponse.OK(message: "Tên đăng nhập đã tồn tại trên server CLB SPIT, vui lòng chọn tên khác.");
+        }
         public async Task<HttpResponse> LoginUser(LoginRequest loginRequest)
         {
             var jsonData = new LoginDTO()
@@ -43,7 +73,9 @@ namespace Domain.Services
                 Username = loginRequest.Username?.Trim() ?? string.Empty,
                 Password = loginRequest.Password?.Trim() ?? string.Empty,
             };
+            User? user = null;
 
+            // Kiểm tra thông tin đăng nhập có hợp lệ ở server CLB SPIT hay không
             var response = await HttpRequest._client.PostAsync("auth/login", jsonData);
             if (response.IsSuccessStatusCode)
             {
@@ -54,63 +86,69 @@ namespace Domain.Services
                     string username = dataJson["username"]?.ToString() ?? string.Empty;
                     string fullName = dataJson["studentName"]?.ToString() ?? string.Empty;
                     long userId = dataJson["id"]?.ToObject<long>() ?? 0;
-                    bool isLocker = dataJson["isLocker"]?.ToObject<bool>() ?? false;
+                    bool isLocker = dataJson["isLocked"]?.ToObject<bool>() ?? false;
 
-                    #region Xử lý người dùng
-                    // Kiểm tra người dùng đã tồn tại trong hệ thống chưa, nếu chưa thì thêm mới
-                    await _userServices.AddUpdateUser(new UserRequest()
+                    user = _user!.Find(f => f.Username == username.Trim());
+                    if(user == null)
                     {
-                        UserId = userId,
-                        Username = username,
-                        FullName = fullName,
-                        IsLocked = isLocker,
-                    });
-                    #endregion
-
-                    #region Xử lý token của người dùng
-                    // Tạo JWT token và Refresh Token cho người dùng
-                    TokenResponse tokenResponse = _tokenServices.GenerateToken(new UserResponse()
-                    {
-                        UserId = userId,
-                        Username = username,
-                        FullName = fullName,
-                    }, loginRequest.DeviceId!);
-
-                    // Nếu người dùng mới thì tạo mới Refresh Token, ngược lại thì cập nhật Refresh Token
-                    await _tokenServices.UpdateRefreshToken(new TokenRequest()
-                    {
-                        UserId = userId,
-                        Token = tokenResponse.RefreshToken,
-                        ExpiryDate = tokenResponse.RefreshExpiresAt,
-                        DeviceId = loginRequest.DeviceId!
-                    });
-                    #endregion
-
-                    var loginResponse = new LoginResponse
-                    {
-                        UserId = userId,
-                        Username = username,
-                        FullName = fullName,
-                        isLocker = isLocker,
-                        AccessToken = tokenResponse.AccessToken,
-                        ExpiresAt = tokenResponse.ExpiresAt,
-                        RefreshToken = tokenResponse.RefreshToken,
-                        RefreshExpiresAt = tokenResponse.RefreshExpiresAt
-                    };
-
-                    return HttpResponse.OK(message: "Đăng nhập thành công.", data: loginResponse);
+                        await RegisterAsync(new RegisterRequest()
+                        {
+                            Username = username.Trim(),
+                            Password = loginRequest.Password!.Trim(),
+                            FullName = fullName.Trim()
+                        });
+                    }
                 }
             }
-            return HttpResponse.OK(message: "Đăng nhập thất bại!!");
+
+            if(user == null)
+            {
+                user = _user!.Find(f => f.Username == loginRequest.Username.Trim() && f.Password == loginRequest.Password.Trim());
+                if (user == null)
+                    return HttpResponse.OK(message: "Thông tin đăng nhập không hợp lệ.");
+            }
+
+            #region Xử lý token của người dùng
+            // Tạo JWT token và Refresh Token cho người dùng
+            TokenResponse tokenResponse = _tokenServices.GenerateToken(new UserResponse()
+            {
+                Id = user.Id,
+                Username = user.Username,
+                FullName = user.FullName,
+            }, loginRequest.DeviceId!);
+
+            // Nếu người dùng mới thì tạo mới Refresh Token, ngược lại thì cập nhật Refresh Token
+            await _tokenServices.UpdateRefreshToken(new TokenRequest()
+            {
+                UserId = user.Id,
+                Token = tokenResponse.RefreshToken,
+                ExpiryDate = tokenResponse.RefreshExpiresAt,
+                DeviceId = loginRequest.DeviceId!
+            });
+            #endregion
+
+            var loginResponse = new LoginResponse
+            {
+                UserId = user.Id,
+                Username = user.Username,
+                FullName = user.FullName,
+                isLocker = user.isLocked,
+                AccessToken = tokenResponse.AccessToken,
+                ExpiresAt = tokenResponse.ExpiresAt,
+                RefreshToken = tokenResponse.RefreshToken,
+                RefreshExpiresAt = tokenResponse.RefreshExpiresAt
+            };
+
+            return HttpResponse.OK(message: "Đăng nhập thành công.",data: loginResponse);
         }
         public async Task<HttpResponse> LogoutUser()
         {
-            var user = _user!.Find(f => f.UserId == userMeToken!.UserId);
+            var user = _user!.Find(f => f.Id == userMeToken!.Id);
             if(user == null)
                 return HttpResponse.OK(message: "Người dùng không tồn tại.");
             var tokenAll = _token.All().ToList();
             // Xóa token đăng nhập của người dùng theo deviceId
-            var tokenUser = _token.Find(f => f.UserId == userMeToken!.UserId && f.DeviceId == userMeToken!.DeviceId);
+            var tokenUser = _token.Find(f => f.UserId == userMeToken!.Id && f.DeviceId == userMeToken!.DeviceId);
             if (tokenUser == null)
                 return HttpResponse.OK(message: "Người dùng không có token đăng nhập.");
 

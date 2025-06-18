@@ -28,6 +28,12 @@ namespace Domain.Common
         [Display(Name = "Đang chờ duyệt")]
         Pending,
     }
+    public enum Function_Enum
+    {
+        Create_Document,
+        Update_Document,
+        Delete_Document,
+    }
     public static class EnumExtensions
     {
         public static string GetEnumDisplayName<T>(this T enumType)

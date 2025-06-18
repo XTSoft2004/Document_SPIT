@@ -21,6 +21,7 @@ namespace Document_SPIT_BE.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(DefaultString.INVALID_MODEL);
+
             var response = await _services.CreateAsync(categoryTypeRequest);
             return response.ToActionResult();
         }
@@ -29,6 +30,7 @@ namespace Document_SPIT_BE.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(DefaultString.INVALID_MODEL);
+
             var response = await _services.UpdateAsync(IdCategoryType, categoryTypeRequest);
             return response.ToActionResult();
         }
@@ -37,6 +39,7 @@ namespace Document_SPIT_BE.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(DefaultString.INVALID_MODEL);
+
             var response = await _services.DeleteAsync(IdCategoryType);
             return response.ToActionResult();
         }
