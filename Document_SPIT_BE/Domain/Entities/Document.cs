@@ -29,5 +29,6 @@ namespace Domain.Entities
         public long? DetaiDocumentId { get; set; }
         [ForeignKey(nameof(DetaiDocumentId))]
         public virtual DetailDocument? DetaiDocument { get; set; }
+        public ICollection<Report>? Reports { get; set; }
     }
 }
