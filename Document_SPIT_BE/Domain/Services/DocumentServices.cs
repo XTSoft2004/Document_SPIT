@@ -110,6 +110,7 @@ namespace Domain.Services
                 Title = "Tạo tài liệu mới",
                 function_status = Function_Enum.Create_Document,
                 UserId = documentCreate.UserId,
+                Fullname = _user.Find(f => f.Id == documentCreate.UserId)?.Fullname,
             };
 
             return HttpResponse.OK(message: "Tạo tài liệu thành công.");
@@ -177,6 +178,7 @@ namespace Domain.Services
                 Title = "Cập nhật tài liệu",
                 function_status = Function_Enum.Update_Document,
                 UserId = document.UserId,
+                Fullname = _user.Find(f => f.Id == document.UserId)?.Fullname,
             };
 
             return HttpResponse.OK(message: "Cập nhật tài liệu thành công.");
@@ -197,6 +199,7 @@ namespace Domain.Services
                 Title = "Xoá tài liệu",
                 function_status = Function_Enum.Delete_Document,
                 UserId = document.UserId,
+                Fullname = _user.Find(f => f.Id == document.UserId)?.Fullname,
             };
 
             return HttpResponse.OK(message: "Xoá tài liệu thành công.");

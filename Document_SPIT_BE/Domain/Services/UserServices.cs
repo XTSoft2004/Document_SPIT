@@ -21,6 +21,7 @@ namespace Domain.Services
     {
         private readonly IRepositoryBase<User>? _user;
         private readonly IRepositoryBase<Role>? _role;
+        private readonly IRepositoryBase<UserHistoryResponse>? _history;
         private readonly ITokenServices _tokenServices;
         private UserTokenResponse? userMeToken;
         public UserServices(IRepositoryBase<User>? user, IRepositoryBase<Role>? role, ITokenServices tokenServices)
@@ -88,6 +89,16 @@ namespace Domain.Services
             }
 
             return HttpResponse.Error(message: "Không tìm thấy quyền.", HttpStatusCode.NotFound);
+        }
+        public async Task<HttpResponse> GetHistory(long? userId)
+        {
+            var user = _user!.Find(f => f.Id == userId);
+            if (user == null)
+                return HttpResponse.Error(message: "Người dùng không tồn tại.", HttpStatusCode.NotFound);
+
+            var history = _history!.All().Where(w => w.UserId == userId).ToList();
+
+            return HttpResponse.OK(message: "Lấy lịch sử người dùng thành công.", data: history);
         }
     }
 }

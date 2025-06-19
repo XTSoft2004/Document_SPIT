@@ -27,5 +27,11 @@ namespace Domain.Interfaces.Services
         /// </summary>
         /// <returns></returns>
         Task<HttpResponse> GetMe();
+        /// <summary>
+        /// Lấy lịch sử hoạt động người dùng theo ID
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        Task<HttpResponse> GetHistory(long? userId);
     }
 }

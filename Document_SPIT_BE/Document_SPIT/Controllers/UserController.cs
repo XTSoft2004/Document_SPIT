@@ -26,5 +26,12 @@ namespace Document_SPIT_BE.Controllers
             var response = await _sevices!.GetMe();
             return response.ToActionResult();
         }
+        [HttpGet("history/{userId}")]
+        public async Task<IActionResult> GetHistory(long userId)
+        {
+            var response = await _sevices!.GetHistory(userId);
+
+            return response.ToActionResult();
+        }
     }
 }
