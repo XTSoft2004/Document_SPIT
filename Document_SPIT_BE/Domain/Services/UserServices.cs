@@ -1,17 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using Domain.Base.Services;
+﻿using Domain.Base.Services;
 using Domain.Common.Http;
 using Domain.Entities;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
 using Domain.Model.Request.User;
+using Domain.Model.Response.User;
 using HelperHttpClient;
 using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Domain.Services
 {
@@ -19,10 +21,27 @@ namespace Domain.Services
     {
         private readonly IRepositoryBase<User>? _user;
         private readonly IRepositoryBase<Role>? _role;
-        public UserServices(IRepositoryBase<User>? user, IRepositoryBase<Role>? role)
+        private readonly ITokenServices _tokenServices;
+        private UserTokenResponse? userMeToken;
+        public UserServices(IRepositoryBase<User>? user, IRepositoryBase<Role>? role, ITokenServices tokenServices)
         {
             _user = user;
             _role = role;
+            _tokenServices = tokenServices;
+            userMeToken = _tokenServices.GetTokenBrowser();
+        }
+        public async Task<HttpResponse> GetMe()
+        {
+            var user = _user!.Find(f => f.Id == userMeToken.Id); 
+            if(user == null)
+                return HttpResponse.Error(message: "Người dùng không tồn tại.", HttpStatusCode.NotFound);
+
+            return HttpResponse.OK(data: new UserResponse()
+            {
+                Id = user?.Id,
+                Username = user?.Username,
+                Fullname = user?.Fullname,
+            });
         }
         public async Task<HttpResponse> AddUpdateUser(UserRequest userRequest)
         {

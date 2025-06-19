@@ -22,5 +22,10 @@ namespace Domain.Interfaces.Services
         /// <param name="userId"></param>
         /// <returns></returns>
         Task<HttpResponse> SetRole(long? userId, string roleName);
+        /// <summary>
+        /// Lấy thông của người dùng hiện tại
+        /// </summary>
+        /// <returns></returns>
+        Task<HttpResponse> GetMe();
     }
 }

@@ -18,7 +18,13 @@ namespace Document_SPIT_BE.Controllers
         public async Task<IActionResult> SetRole(long userId,string roleName)
         {
             var response = await _sevices!.SetRole(userId, roleName);
-            return Ok(response);
+            return response.ToActionResult();
+        }
+        [HttpGet("me")]
+        public async Task<IActionResult> GetMe()
+        {
+            var response = await _sevices!.GetMe();
+            return response.ToActionResult();
         }
     }
 }

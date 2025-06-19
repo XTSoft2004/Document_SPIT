@@ -86,7 +86,7 @@ namespace Domain.Services
                     string username = dataJson["username"]?.ToString() ?? string.Empty;
                     string Fullname = dataJson["studentName"]?.ToString() ?? string.Empty;
                     long userId = dataJson["id"]?.ToObject<long>() ?? 0;
-                    bool isLocker = dataJson["isLocked"]?.ToObject<bool>() ?? false;
+                    bool isLocked = dataJson["isLocked"]?.ToObject<bool>() ?? false;
 
                     user = _user!.Find(f => f.Username == username.Trim());
                     if(user == null)
@@ -132,7 +132,7 @@ namespace Domain.Services
                 UserId = user.Id,
                 Username = user.Username,
                 Fullname = user.Fullname,
-                isLocker = user.isLocked,
+                isLocked = user.isLocked,
                 AccessToken = tokenResponse.AccessToken,
                 ExpiresAt = tokenResponse.ExpiresAt,
                 RefreshToken = tokenResponse.RefreshToken,
