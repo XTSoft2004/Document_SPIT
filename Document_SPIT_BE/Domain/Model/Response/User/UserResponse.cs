@@ -10,6 +10,6 @@ namespace Domain.Model.Response.User
     {
         public long? Id { get; set; }
         public string? Username { get; set; }
-        public string? FullName { get; set; }
+        public string? Fullname { get; set; }
     }
 }

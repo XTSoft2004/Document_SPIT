@@ -10,7 +10,7 @@ namespace Domain.Model.Response.Auth
     {
         public long? UserId { get; set; }
         public string? Username { get; set; } 
-        public string? FullName { get; set; }
+        public string? Fullname { get; set; }
         public bool? isLocker { get; set; }
         public string? AccessToken { get; set; }
         public DateTime? ExpiresAt { get; set; }

@@ -32,7 +32,7 @@ namespace Domain.Services
                 var userCreate = new User()
                 {
                     Username = userRequest.Username.Trim(),
-                    FullName = userRequest.FullName.Trim(),
+                    Fullname = userRequest.Fullname.Trim(),
                     isLocked = userRequest.IsLocked,
                     CreatedDate = DateTime.Now,
                 };
@@ -45,7 +45,7 @@ namespace Domain.Services
             else
             {
                 user.Username = userRequest.Username.Trim();
-                user.FullName = userRequest.FullName.Trim();
+                user.Fullname = userRequest.Fullname.Trim();
                 user.isLocked = userRequest.IsLocked;
                 user.ModifiedDate = DateTime.Now;
                 await UnitOfWork.CommitAsync();

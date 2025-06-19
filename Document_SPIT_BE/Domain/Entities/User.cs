@@ -17,7 +17,7 @@ namespace Domain.Entities
         public string? Username { get; set; }
         [Required, StringLength(250)]
         public string? Password { get; set; }
-        public string? FullName { get; set; }    
+        public string? Fullname { get; set; }    
         public bool isLocked { get; set; }
 
 

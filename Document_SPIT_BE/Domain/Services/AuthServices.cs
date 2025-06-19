@@ -54,7 +54,7 @@ namespace Domain.Services
                 {
                     Username = registerRequest.Username.Trim(),
                     Password = registerRequest.Password.Trim(),
-                    FullName = registerRequest.FullName.Trim(),
+                    Fullname = registerRequest.Fullname.Trim(),
                     isLocked = false,
                     CreatedDate = DateTime.Now,
                 });
@@ -84,7 +84,7 @@ namespace Domain.Services
                 if (dataJson != null)
                 {
                     string username = dataJson["username"]?.ToString() ?? string.Empty;
-                    string fullName = dataJson["studentName"]?.ToString() ?? string.Empty;
+                    string Fullname = dataJson["studentName"]?.ToString() ?? string.Empty;
                     long userId = dataJson["id"]?.ToObject<long>() ?? 0;
                     bool isLocker = dataJson["isLocked"]?.ToObject<bool>() ?? false;
 
@@ -95,7 +95,7 @@ namespace Domain.Services
                         {
                             Username = username.Trim(),
                             Password = loginRequest.Password!.Trim(),
-                            FullName = fullName.Trim()
+                            Fullname = Fullname.Trim()
                         });
                     }
                 }
@@ -114,7 +114,7 @@ namespace Domain.Services
             {
                 Id = user.Id,
                 Username = user.Username,
-                FullName = user.FullName,
+                Fullname = user.Fullname,
             }, loginRequest.DeviceId!);
 
             // Nếu người dùng mới thì tạo mới Refresh Token, ngược lại thì cập nhật Refresh Token
@@ -131,7 +131,7 @@ namespace Domain.Services
             {
                 UserId = user.Id,
                 Username = user.Username,
-                FullName = user.FullName,
+                Fullname = user.Fullname,
                 isLocker = user.isLocked,
                 AccessToken = tokenResponse.AccessToken,
                 ExpiresAt = tokenResponse.ExpiresAt,

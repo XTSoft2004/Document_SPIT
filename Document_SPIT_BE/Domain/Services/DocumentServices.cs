@@ -8,6 +8,7 @@ using Domain.Entities;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
 using Domain.Model.Request.Document;
+using Domain.Model.Response.User;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System;
@@ -24,6 +25,7 @@ namespace Domain.Services
         private readonly IRepositoryBase<Document>? _document;
         private readonly IRepositoryBase<DetailDocument>? _detailDocument;
         private readonly IRepositoryBase<User>? _user;
+        private readonly IRepositoryBase<History> _history;
         private readonly IGoogleDriverServices? _googleDriverServices;
 
         public DocumentServices(IRepositoryBase<Document>? document, IRepositoryBase<User>? user, IGoogleDriverServices? googleDriverServices, IRepositoryBase<DetailDocument>? detailDocument)
@@ -102,6 +104,14 @@ namespace Domain.Services
             _detailDocument.Update(detailDocument);
             await UnitOfWork.CommitAsync();
 
+            // Cập nhật lịch sử của User
+            var history = new UserHistoryResponse
+            {
+                Title = "Tạo tài liệu mới",
+                function_status = Function_Enum.Create_Document,
+                UserId = documentCreate.UserId,
+            };
+
             return HttpResponse.OK(message: "Tạo tài liệu thành công.");
         }
         // Cập nhật tài liệu theo IdDocument
@@ -161,6 +171,14 @@ namespace Domain.Services
             _document.Update(document);
             await UnitOfWork.CommitAsync();
 
+            // Cập nhật lịch sử của User
+            var history = new UserHistoryResponse
+            {
+                Title = "Cập nhật tài liệu",
+                function_status = Function_Enum.Update_Document,
+                UserId = document.UserId,
+            };
+
             return HttpResponse.OK(message: "Cập nhật tài liệu thành công.");
         }
         // Xoá tài liệu theo IdDocument
@@ -172,6 +190,14 @@ namespace Domain.Services
 
             _document.Delete(document);
             await UnitOfWork.CommitAsync();
+
+            // Cập nhật lịch sử của tài liệu
+            var history = new UserHistoryResponse
+            {
+                Title = "Xoá tài liệu",
+                function_status = Function_Enum.Delete_Document,
+                UserId = document.UserId,
+            };
 
             return HttpResponse.OK(message: "Xoá tài liệu thành công.");
         }
