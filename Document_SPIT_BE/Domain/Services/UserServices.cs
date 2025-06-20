@@ -21,13 +21,14 @@ namespace Domain.Services
     {
         private readonly IRepositoryBase<User>? _user;
         private readonly IRepositoryBase<Role>? _role;
-        private readonly IRepositoryBase<UserHistoryResponse>? _history;
+        private readonly IRepositoryBase<History>? _history;
         private readonly ITokenServices _tokenServices;
         private UserTokenResponse? userMeToken;
-        public UserServices(IRepositoryBase<User>? user, IRepositoryBase<Role>? role, ITokenServices tokenServices)
+        public UserServices(IRepositoryBase<User>? user, IRepositoryBase<Role>? role, ITokenServices tokenServices, IRepositoryBase<History>? history)
         {
             _user = user;
             _role = role;
+            _history = history;
             _tokenServices = tokenServices;
             userMeToken = _tokenServices.GetTokenBrowser();
         }
