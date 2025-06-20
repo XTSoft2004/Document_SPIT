@@ -8,6 +8,7 @@ using Domain.Entities;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
 using Domain.Model.Request.Document;
+using Domain.Model.Response.Document;
 using Domain.Model.Response.User;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -241,7 +242,21 @@ namespace Domain.Services
         }
         public async Task<HttpResponse> GetDocuments()
         {
-            var documents = _document!.All().ToList();
+            var documents = _document.All().Select(
+                    d => new DocumentResponse
+                    {
+                        Id = d.Id,
+                        Name = d.Name,
+                        TotalDownloads = d.DetaiDocument != null ? d.DetaiDocument.TotalDownload : 0,
+                        TotalViews = d.DetaiDocument != null ? d.DetaiDocument.TotalView : 0,
+                        FileId = d.FileId,
+                        IsPrivate = d.IsPrivate,
+                        StatusDocument = d.StatusDocument.HasValue ? d.StatusDocument.ToString() : null,
+                        UserId = d.UserId,
+                        FolderId = d.FolderId,
+                        CreatedDate = d.CreatedDate,
+                        ModifiedDate = d.ModifiedDate
+                    }).ToList();
 
             return HttpResponse.OK(documents, "Lấy danh sách tài liệu thành công.", System.Net.HttpStatusCode.OK);
         }
