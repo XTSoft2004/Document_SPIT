@@ -1,0 +1,81 @@
+'use server'
+import globalConfig from '@/app.config'
+import { ILoginRequest, ILoginResponse, IRegisterRequest } from '@/types/auth'
+import { cookies, headers } from 'next/headers'
+
+import {
+  IBaseResponse,
+  IIndexResponse,
+  IResponse,
+  IShowResponse,
+} from '@/types/global'
+import { revalidateTag } from 'next/cache'
+
+export const registerAccount = async (formData: IRegisterRequest) => {
+  const response = await fetch(`${globalConfig.baseUrl}/auth/register`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(formData),
+    next: {
+      tags: ['auth.register'],
+    },
+  })
+
+  const data = await response.json()
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    ...data,
+  } as IBaseResponse
+}
+
+export const loginAccount = async (formData: ILoginRequest) => {
+  const response = await fetch(`${globalConfig.baseUrl}/auth/login`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(formData),
+    next: {
+      tags: ['auth.login'],
+    },
+  })
+
+  const data = await response.json()
+
+  if (response.ok) {
+    const result = data.data as ILoginResponse
+    if (result != null) {
+      cookies().set('accessToken', result.accessToken)
+      cookies().set('refreshToken', result.refreshToken)
+    }
+  }
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    ...data,
+  } as IIndexResponse<ILoginResponse>
+}
+
+export const logoutAccount = async () => {
+  const response = await fetch(`${globalConfig.baseUrl}/auth/logout`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    next: {
+      tags: ['auth.logout'],
+    },
+  })
+
+  const data = await response.json()
+
+  return {
+    ok: response.ok,
+    ...data,
+  } as IResponse
+}
