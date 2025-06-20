@@ -16,6 +16,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
@@ -105,7 +106,7 @@ namespace Domain.Services
             {
                 user = _user!.Find(f => f.Username == loginRequest.Username.Trim() && f.Password == loginRequest.Password.Trim());
                 if (user == null)
-                    return HttpResponse.OK(message: "Thông tin đăng nhập không hợp lệ.");
+                    return HttpResponse.Error(message: "Thông tin đăng nhập không hợp lệ.", HttpStatusCode.BadRequest);
             }
 
             #region Xử lý token của người dùng
