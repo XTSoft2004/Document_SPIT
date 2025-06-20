@@ -57,7 +57,7 @@ namespace Document_SPIT_BE.Controllers
             Response.Headers["Content-Disposition"] = $"attachment; filename=\"{fileName}\"";
             return new FileContentResult(data, contentType);
         }
-        [HttpGet("documents")]
+        [HttpGet("")]
         public async Task<IActionResult> GetDocuments()
         {
             if (!ModelState.IsValid)
