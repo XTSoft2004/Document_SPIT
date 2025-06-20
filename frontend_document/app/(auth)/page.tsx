@@ -10,6 +10,7 @@ import { FaApple as Apple, FaFacebook as Facebook } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import PageLogin from './login/page';
 import PageRegister from './register/page';
+import RotatingText from '@/components/animations/TextAnimations/RotatingText/RotatingText';
 export default function PageAuth() {
     const [isSignIn, setIsSignIn] = useState(true);
 
@@ -24,8 +25,10 @@ export default function PageAuth() {
             <div className="w-full md:w-1/2 flex items-center justify-center px-8">
                 <div className="w-full max-w-md">
                     <div className="flex items-center space-x-2 mb-8 justify-center">
+
+
                         <span
-                            className="text-3xl font-extrabold"
+                            className="text-3xl font-bold flex items-center gap-2"
                             style={{
                                 background: 'linear-gradient(to right, #3b82f6, #a855f7)',
                                 WebkitBackgroundClip: 'text',
@@ -33,6 +36,35 @@ export default function PageAuth() {
                             }}
                         >
                             SPIT Document
+                            <span
+                                style={{
+                                    minWidth: '200px',
+                                    maxWidth: '200px',
+                                    display: 'inline-block',
+                                    background: 'linear-gradient(135deg, #e0e7ff 60%, #f3e8ff 100%)',
+                                    backdropFilter: 'blur(10px)',
+                                    WebkitBackdropFilter: 'blur(10px)',
+                                    borderRadius: '12px',
+                                    padding: '4px 8px',
+                                    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
+                                    WebkitTextFillColor: 'initial',
+                                    WebkitBackgroundClip: 'initial',
+                                    fontFamily: "'Montserrat', sans-serif",
+                                }}
+                            >
+                                <RotatingText
+                                    texts={['Technology', 'Fast', 'Easy to use', 'Efficient']}
+                                    mainClassName="px-3 sm:px-4 md:px-5 bg-transparent text-black font-bold overflow-hidden py-0.5 sm:py-1 md:py-1 justify-center rounded-lg text-lg sm:text-lg md:text-xl"
+                                    staggerFrom="last"
+                                    initial={{ y: '100%' }}
+                                    animate={{ y: 0 }}
+                                    exit={{ y: '-120%' }}
+                                    staggerDuration={0.025}
+                                    splitLevelClassName="overflow-hidden pb-0.5 sm:pb-1 md:pb-1"
+                                    transition={{ type: 'spring', damping: 30, stiffness: 400 }}
+                                    rotationInterval={2000}
+                                />
+                            </span>
                         </span>
                         {/* <svg
                             className="w-7 h-7"
