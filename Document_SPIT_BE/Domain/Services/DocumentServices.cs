@@ -239,5 +239,11 @@ namespace Domain.Services
             var (data, contentType, fileName) = result.Value;
             return (data, contentType, fileName);
         }
+        public async Task<HttpResponse> GetDocuments()
+        {
+            var documents = _document!.All().ToList();
+
+            return HttpResponse.OK(documents, "Lấy danh sách tài liệu thành công.", System.Net.HttpStatusCode.OK);
+        }
     }
 }

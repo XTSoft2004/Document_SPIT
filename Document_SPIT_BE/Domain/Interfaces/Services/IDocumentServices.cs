@@ -41,5 +41,10 @@ namespace Domain.Interfaces.Services
         /// <param name="IdDocument"></param>
         /// <returns></returns>
         Task<(byte[] Data, string ContentType, string FileName)> DownloadFile(string FileId);
+        /// <summary>
+        /// Lấy danh sách tài liệu
+        /// </summary>
+        /// <returns></returns>
+        Task<HttpResponse> GetDocuments();
     }
 }

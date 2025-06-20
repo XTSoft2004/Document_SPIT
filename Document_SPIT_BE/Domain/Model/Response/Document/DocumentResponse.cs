@@ -8,6 +8,7 @@ namespace Domain.Model.Response.Document
 {
     public class DocumentResponse
     {
+        public long? Id { get; set; }
         public string? Name { get; set; }
         public long? TotalDownloads { get; set; } = 0;
         public long? TotalViews { get; set; } = 0;
