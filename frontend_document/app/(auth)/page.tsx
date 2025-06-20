@@ -16,6 +16,7 @@ export default function PageAuth() {
 
     const handleTabChange = (tab: string) => {
         setIsSignIn(tab === 'login');
+        console.log(`Switched to ${tab} tab`);
     };
 
     return (
