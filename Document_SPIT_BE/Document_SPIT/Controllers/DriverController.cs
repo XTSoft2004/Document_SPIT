@@ -18,6 +18,21 @@ namespace Document_SPIT_BE.Controllers
             _services = services;
             _documentServices = documentServices;
         }
+        [HttpGet("thumbnail/{fileId}")]
+        public async Task<IActionResult> GetThumbnailBase64(string fileId)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+            var thumbnailBase64 = await _services.GetThumbnailBase64(fileId);
+            if (string.IsNullOrEmpty(thumbnailBase64))
+                return NotFound(new { Message = "Không tồn tại file, vui lòng kiểm tra lại" });
+
+            thumbnailBase64 = thumbnailBase64.Replace("=s220", "=s550");
+            // Convert base64 string to byte array
+            byte[] imageBytes = Convert.FromBase64String(thumbnailBase64);
+            // Set content type to image/png (or adjust if you know the actual type)
+            return File(imageBytes, "image/png");
+        }
         [HttpGet("preview/{fileId}")]
         public async Task<IActionResult> PreviewFile(string fileId)
         {

@@ -36,5 +36,11 @@ namespace Domain.Common.GoogleDriver.Interfaces
         /// <param name="folderId"></param>
         /// <returns></returns>
         Task<List<DriverItemResponse?>?> GetInfoFolder(string folderId);
+        /// <summary>
+        /// Lấy mẫu thumbnail của file
+        /// </summary>
+        /// <param name="fileId"></param>
+        /// <returns></returns>
+        Task<string> GetThumbnailBase64(string fileId);
     }
 }

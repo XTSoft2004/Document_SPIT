@@ -45,24 +45,32 @@ namespace Domain.Common.GoogleDriver.Services
         //    }
         //    return string.Empty;
         //}
-        //public async Task<string> PreviewFile(string fileId)
-        //{
-        //    string accessToken = await GetAccessToken();
-        //    var response = await _request.GetAsync($"https://www.googleapis.com/drive/v2/files/{fileId}");
-        //    if (response.IsSuccessStatusCode)
-        //    {
-        //        string fileContent = _request.Content;
-        //        var jsonData = JObject.Parse(fileContent);
-        //        if (jsonData["thumbnailLink"] != null)
-        //        {
-        //            string thumbnailLink = jsonData["thumbnailLink"].ToString();
-        //            return thumbnailLink;
-        //        }
-        //    }
-        //    Console.WriteLine("❌ Lỗi khi lấy nội dung tệp tin:");
-        //    Console.WriteLine(await response.Content.ReadAsStringAsync());
-        //    return string.Empty;
-        //}
+        public async Task<string> GetThumbnailBase64(string fileId)
+        {
+            string accessToken = await GetAccessToken();
+            var response = await _request.GetAsync($"https://www.googleapis.com/drive/v2/files/{fileId}");
+            if (response.IsSuccessStatusCode)
+            {
+                string fileContent = _request.Content;
+                var jsonData = JObject.Parse(fileContent);
+                if (jsonData["thumbnailLink"] != null)
+                {
+                    string thumbnailLink = jsonData["thumbnailLink"].ToString();
+                    using var client = new HttpClient();
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+                    var imageResponse = await client.GetAsync(thumbnailLink);
+                    if (imageResponse.IsSuccessStatusCode)
+                    {
+                        var imageBytes = await imageResponse.Content.ReadAsByteArrayAsync();
+                        string base64String = Convert.ToBase64String(imageBytes);
+                        return base64String;
+                    }
+                }
+            }
+            Console.WriteLine("❌ Lỗi khi lấy nội dung tệp tin hoặc thumbnail:");
+            Console.WriteLine(await response.Content.ReadAsStringAsync());
+            return string.Empty;
+        }
         public async Task<UploadFileResponse> UploadFile(UploadFileBase64Request uploadFileRequest)
         {
             string accessToken = await GetAccessToken();
