@@ -8,7 +8,7 @@ import { IRegisterRequest } from '@/types/auth';
 import { registerAccount } from '@/actions/auth.actions';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import MoonLoading from '@/components/ui/MoonLoading';
+import MoonLoading from '@/components/ui/Loading/MoonLoading';
 import NotificationService from '@/components/ui/Notification/NotificationService';
 import { motion } from 'framer-motion'; // Thêm Framer Motion   
 

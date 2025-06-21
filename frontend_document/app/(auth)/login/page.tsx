@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import NotificationService from '@/components/ui/Notification/NotificationService';
 import { motion } from 'framer-motion'; // Thêm Framer Motion
-import MoonLoading from '@/components/ui/MoonLoading';
+import MoonLoading from '@/components/ui/Loading/MoonLoading';
 
 export default function PageLogin() {
     const {
