@@ -1,0 +1,57 @@
+.container {
+  margin-left: auto;
+  margin-right: auto;
+  padding: 1rem;
+}
+
+.buttonGroup {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.button {
+  margin-right: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.activeButton {
+  background-color: #3b82f6;
+  color: #fff;
+  transform: scale(1.05);
+}
+
+.inactiveButton {
+  background-color: #e5e7eb;
+  color: #4b5563;
+}
+
+.inactiveButton:hover {
+  background-color: #d1d5db;
+}
+
+.loadingCard {
+  border-radius: 0.5rem;
+  min-height: 300px;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.fadeIn {
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

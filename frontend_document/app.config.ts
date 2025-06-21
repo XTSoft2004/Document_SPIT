@@ -6,9 +6,9 @@ interface IGlobalConfig {
 
 // Config for the application
 const globalConfig: IGlobalConfig = {
-  API_HOST: '192.168.1.20',
-  API_PORT: 5000,
-  baseUrl: 'http://192.168.1.20:5000',
+  API_HOST: 'xtcoder2004.io.vn',
+  API_PORT: 5555,
+  baseUrl: 'http://xtcoder2004.io.vn:5555',
 }
 
 export default globalConfig
