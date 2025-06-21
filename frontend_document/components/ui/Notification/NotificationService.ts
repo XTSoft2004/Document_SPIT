@@ -1,6 +1,8 @@
 // utils/NotificationService.ts
 import { notification } from 'antd'
 import type { NotificationArgsProps } from 'antd'
+import React from 'react'
+import { Spin } from 'antd'
 
 class NotificationService {
   private static instance: NotificationService
@@ -20,10 +22,31 @@ class NotificationService {
 
   private withDefaults(options: NotificationArgsProps): NotificationArgsProps {
     return {
+      ...options,
+      message: options.message || 'Thông báo',
       placement: this.defaultPlacement,
       duration: this.defaultDuration,
-      ...options,
     }
+  }
+
+  public loading(
+    options: NotificationArgsProps & {
+      icon?: React.ReactNode
+      message?: React.ReactNode
+    },
+  ) {
+    // Use Ant Design's Spin component for proper spinning animation
+    const defaultIcon = React.createElement(Spin, {
+      style: { marginRight: 12, marginTop: -5 },
+    })
+
+    this.api.open({
+      ...this.withDefaults(options),
+      icon: options.icon ?? defaultIcon,
+      message: options.message ?? 'Đang xử lý...',
+      duration: this.defaultDuration,
+      key: options.key || 'loading',
+    })
   }
 
   public info(options: NotificationArgsProps) {

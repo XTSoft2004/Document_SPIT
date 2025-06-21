@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FolderFilled, InboxOutlined } from '@ant-design/icons';
 import type { UploadProps } from 'antd';
 import { message, Modal, Form, Input, Button } from 'antd';
@@ -7,6 +7,7 @@ import Dragger from 'antd/es/upload/Dragger';
 import ModalSelectFolder from './Modal/ModalSelectFolder';
 import { FoldHorizontal } from 'lucide-react';
 import { IFileInfo } from '@/types/driver';
+import { set } from 'react-hook-form';
 
 export default function DraggerUpload() {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -16,6 +17,10 @@ export default function DraggerUpload() {
     const [form] = Form.useForm();
     const [isModalOpenFolder, setIsModalOpenFolder] = useState(false);
     const [selectedFolderId, setSelectedFolderId] = useState<IFileInfo | null>(null);
+    const [breadcrumb, setBreadcrumb] = useState<string>('');
+    useEffect(() => {
+        console.log(selectedFolderId);
+    }, [selectedFolderId]);
 
     const props: UploadProps = {
         name: 'file',
@@ -107,69 +112,61 @@ export default function DraggerUpload() {
                 onOk={handleOk}
                 onCancel={handleCancel}
                 okText="Upload"
+                width={900} // Tăng kích thước modal
             >
-                <Form form={form} layout="vertical">
-                    <Form.Item
-                        name="name"
-                        label="Tên tài liệu"
-                        rules={[{ required: true, message: 'Vui lòng nhập tên tài liệu' }]}
-                    >
-                        <Input placeholder="Tên tài liệu" />
-                    </Form.Item>
+                <div style={{ display: 'flex', gap: 24 }}>
+                    <div style={{ flex: 1 }}>
+                        <Form form={form} layout="vertical">
+                            <Form.Item
+                                name="name"
+                                label="Tên tài liệu"
+                                rules={[{ required: true, message: 'Vui lòng nhập tên tài liệu' }]}
+                            >
+                                <Input placeholder="Tên tài liệu" />
+                            </Form.Item>
 
-                    <Form.Item
-                        name="folderId"
-                        label="Chọn thư mục"
-                        rules={[{ required: true, message: 'Vui lòng chọn thư mục' }]}
-                    >
-                        <Button
-                            type="primary"
-                            onClick={() => setIsModalOpenFolder(true)}
-                            block
-                        >
-                            Chọn thư mục
-                        </Button>
-                        <ModalSelectFolder
-                            open={isModalOpenFolder}
-                            onClose={() => setIsModalOpenFolder(false)}
-                            onSelectFolder={(folderId: IFileInfo) => {
-                                // form.setFieldsValue({ folderId });
-                                setIsModalOpenFolder(false);
-                                setSelectedFolderId(folderId);
-                            }}
-                        />
-                        <div className='flex items-center mt-2 '>
-                            <FolderFilled className="text-xl" style={{ color: '#faad14' }} />
-                            {selectedFolderId ? (
-                                <span className="ml-2 text-black"><b>Thư mục đã chọn: </b> {selectedFolderId.name}</span>
-                            ) : (
-                                <span className="ml-2 text-black">Chưa chọn thư mục</span>
-                            )}
+                            <Form.Item
+                                name="folderId"
+                                label="Chọn thư mục"
+                                rules={[{ required: true, message: 'Vui lòng chọn thư mục' }]}
+                            >
+                                <Button
+                                    type="primary"
+                                    onClick={() => setIsModalOpenFolder(true)}
+                                    block
+                                >
+                                    Chọn thư mục
+                                </Button>
+                                <ModalSelectFolder
+                                    open={isModalOpenFolder}
+                                    onClose={() => {
+                                        setIsModalOpenFolder(false)
+                                    }}
+                                    onSelectFolder={(folder: IFileInfo, breadcrumb: string) => {
+                                        setIsModalOpenFolder(false);
+                                        setSelectedFolderId(folder);
+                                        setBreadcrumb(breadcrumb);
+                                        // Cập nhật giá trị cho trường folderId trong form
+                                        form.setFieldsValue({ folderId: folder.id });
+                                    }}
+                                />
+                                <div className='flex items-center mt-2 '>
+                                    <FolderFilled className="text-xl" style={{ color: '#faad14' }} />
+                                    {selectedFolderId ? (
+                                        <span className="ml-2 text-black truncate max-w-xs" title={breadcrumb}>{breadcrumb}</span>
+                                    ) : (
+                                        <span className="ml-2 text-black">Chưa chọn thư mục</span>
+                                    )}
+                                </div>
+                            </Form.Item>
+                        </Form>
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start' }}>
+                        <div style={{ width: '100%', maxWidth: 350, minHeight: 120, border: '1px solid #eee', borderRadius: 8, padding: 12, background: '#fafafa', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {renderPreview()}
                         </div>
-                    </Form.Item>
-
-                    <Form.Item>
-                        <Button
-                            type="dashed"
-                            onClick={() => {
-                                if (!previewUrl) {
-                                    message.warning('Chưa có tài liệu để xem trước');
-                                    return;
-                                }
-                                Modal.info({
-                                    title: 'Xem trước tài liệu',
-                                    content: renderPreview(),
-                                    width: 600,
-                                    okText: 'Đóng',
-                                    maskClosable: true, // Cho phép click ra ngoài để tắt modal
-                                });
-                            }}
-                            block
-                        >
-                            Xem trước tài liệu
-                        </Button>
-                    </Form.Item>
-                </Form>
+                    </div>
+                </div>
             </Modal>
         </>
     );

@@ -1,11 +1,7 @@
 import { AppSidebar } from "@/components/ui/Admin/Dashboard/app-sidebar"
-import { ChartAreaInteractive } from "@/components/ui/Admin/Dashboard/chart-area-interactive"
-import { DataTable } from "@/components/ui/Admin/Dashboard/data-table"
 import { SectionCards } from "@/components/ui/Admin/Dashboard/section-cards"
 import { SiteHeader } from "@/components/ui/Admin/Dashboard/site-header"
-import { SidebarInset, SidebarProvider } from "@/components/ui/shadcn-ui/sidebar"
-
-import data from "./data.json"
+import { SidebarProvider } from "@/components/ui/shadcn-ui/sidebar"
 import { ChartRadialStacked } from "@/components/ui/Admin/Dashboard/radial-chart"
 import { ChartLineInteractive } from "@/components/ui/Admin/Dashboard/chart-line-interactive"
 import ActivityRight from "@/components/ui/Admin/Dashboard/activity-right"
@@ -14,46 +10,60 @@ import DraggerUpload from "@/components/ui/Admin/Dashboard/dragger-upload"
 export default function Page() {
   return (
     <SidebarProvider>
-      <AppSidebar />
-      {/* <AppSidebar variant="inset" /> */}
-      <SidebarInset>
-        <div className="sticky top-0 z-10 w-full bg-white">
-          <SiteHeader />
-        </div>
-        <div className="flex flex-1 flex-row h-[calc(100vh-64px)]">
-          <div className="flex flex-1 flex-col overflow-y-auto">
-            <div className="@container/main flex flex-1 flex-col gap-2">
-              <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-                <SectionCards />
+      <div className="w-screen h-screen flex overflow-hidden bg-gray-50 text-gray-800">
+        {/* Sidebar */}
+        <AppSidebar />
 
-                <div className="px-4 lg:px-6">
-                  <DraggerUpload />
-                </div>
-                <div className="px-4 lg:px-6">
-                  <ChartLineInteractive />
+        {/* Main content area */}
+        <div className="flex flex-col flex-1 h-full">
+          {/* Header */}
+          <header className="sticky top-0 z-20 bg-white shadow-sm w-full">
+            <SiteHeader />
+          </header>
 
-                  <div className="rounded-xl border bg-card text-card-foreground shadow flex-col mt-3 md:hidden">
-                    <ChartRadialStacked />
-                    <hr className="my-6 border-t border-gray-200 mx-auto " style={{ width: "70%" }} />
-                    <ActivityRight />
-                  </div>
-                </div>
+          {/* Content body */}
+          <div className="flex flex-1 overflow-hidden">
+            {/* Main content scrollable */}
+            <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 space-y-6 scrollbar-hide">
+              <SectionCards />
 
-
-                {/* <DataTable data={data} /> */}
+              <div className="px-4 lg:px-6">
+                <DraggerUpload />
               </div>
-            </div>
-          </div>
-          <div
-            className="hidden md:flex mr-3 driver-item sticky top-[71px] self-start rounded-xl border bg-card text-card-foreground shadow flex-col"
-            style={{ width: "20%", height: "calc(100vh - 10vh - 24px)" }}
-          >
-            <ChartRadialStacked />
-            <hr className="my-6 border-t border-gray-200 mx-auto " style={{ width: "70%" }} />
-            <ActivityRight />
+
+              <div className="px-4 lg:px-6">
+                <ChartLineInteractive />
+              </div>
+
+              <div className="px-4 lg:px-6">
+                <ChartLineInteractive />
+              </div>
+              <div className="px-4 lg:px-6">
+                <ChartLineInteractive />
+              </div>
+              <div className="px-4 lg:px-6">
+                <ChartLineInteractive />
+              </div>
+
+              {/* Mobile-only widget */}
+              <div className="md:hidden px-4 lg:px-6 space-y-4">
+                <ChartRadialStacked />
+                <hr className="border-gray-200" />
+                <ActivityRight />
+              </div>
+            </main>
+
+            {/* Right-side widget (desktop) */}
+            <aside
+              className="hidden md:flex sticky top-[72px] self-start flex-col w-1/4 max-w-xs p-4 space-y-4 bg-white shadow-md rounded-xl mr-4"
+            >
+              <ChartRadialStacked />
+              <hr className="border-gray-200" />
+              <ActivityRight />
+            </aside>
           </div>
         </div>
-      </SidebarInset>
-    </SidebarProvider >
+      </div>
+    </SidebarProvider>
   )
 }

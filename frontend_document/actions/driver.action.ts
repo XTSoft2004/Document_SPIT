@@ -42,6 +42,15 @@ export const loadFolder = async (
     `${globalConfig.baseUrl}/driver/find/${folderId}?isOnlyFolder=${isOnlyFolder}`,
     {
       method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization:
+          headers().get('Authorization') ||
+          `Bearer ${cookies().get('accessToken')?.value || ' '}`,
+      },
+      next: {
+        tags: ['driver.folder'],
+      },
     },
   )
 
@@ -58,4 +67,29 @@ export const loadFolder = async (
     status: response.status,
     data: res,
   } as IIndexResponse<ILoadFolder>
+}
+
+export const createFolder = async (name: string, parentId: string) => {
+  const response = await fetch(
+    `${globalConfig.baseUrl}/driver/create-folder?folderName=${name}&parentId=${parentId}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization:
+          headers().get('Authorization') ||
+          `Bearer ${cookies().get('accessToken')?.value || ' '}`,
+      },
+    },
+  )
+
+  const data = await response.json()
+
+  revalidateTag('driver.folder')
+
+  return {
+    ...data,
+    ok: response.ok,
+    status: response.status,
+  } as IBaseResponse
 }

@@ -52,7 +52,7 @@ export const updateDocument = async (
 
   revalidateTag('document.index')
   revalidateTag('document.show')
-  
+
   return {
     ok: response.ok,
     status: response.status,
@@ -71,7 +71,7 @@ export const deleteDocument = async (id: string): Promise<IBaseResponse> => {
   })
 
   const data = await response.json()
-  
+
   revalidateTag('document.index')
   revalidateTag('document.show')
 

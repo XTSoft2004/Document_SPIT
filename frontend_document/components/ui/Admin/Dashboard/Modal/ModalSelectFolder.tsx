@@ -1,19 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Button, List, Typography, Skeleton } from 'antd';
-import { FileOutlined, FolderFilled } from '@ant-design/icons';
+import { FileOutlined, FolderFilled, ReloadOutlined } from '@ant-design/icons';
 import PathFolder from '@/components/ui/Document/breadcrumb-folder';
 import { IFileInfo, ILoadFolder } from '@/types/driver';
-import { loadFolder } from '@/actions/driver.action';
+import { createFolder, loadFolder } from '@/actions/driver.action';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import PhotoIcon from '@mui/icons-material/Photo';
 import DescriptionIcon from '@mui/icons-material/Description';
+import { set } from 'zod';
+import NotificationService from '@/components/ui/Notification/NotificationService';
 
 const { Text } = Typography;
 
 interface ModalSelectFolderProps {
     open: boolean;
     onClose: () => void;
-    onSelectFolder: (folderId: IFileInfo) => void;
+    onSelectFolder: (folderId: IFileInfo, breadcrumb: string) => void;
 }
 
 const getIcon = (isFolder: boolean, typeDocument: string) => {
@@ -39,6 +41,23 @@ const ModalSelectFolder: React.FC<ModalSelectFolderProps> = ({ open, onClose, on
             name: 'Home',
         },
     ]);
+
+    // Khôi phục trạng thái khi mở modal
+    useEffect(() => {
+        if (open) {
+            setCurrentFolderId('1YNGtw_N86pgMmY6uYA4MEbZAzgGH7kSS');
+            setPath([
+                {
+                    id: '1YNGtw_N86pgMmY6uYA4MEbZAzgGH7kSS',
+                    name: 'Home',
+                },
+            ]);
+            setSelectedFolderId(null);
+            setError(null);
+            setNewFolderName('');
+            setCreatingFolder(false);
+        }
+    }, [open]);
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -69,18 +88,23 @@ const ModalSelectFolder: React.FC<ModalSelectFolderProps> = ({ open, onClose, on
     const handleCreateFolder = async () => {
         if (!newFolderName.trim()) return;
 
+        NotificationService.loading({
+            message: `Đang tao thư mục "${newFolderName}"...`,
+        });
         // Giả lập API tạo folder mới
-        const newFolder: ILoadFolder = {
-            id: `new-${Date.now()}`,
-            name: newFolderName.trim(),
-            isFolder: true,
-            typeDocument: '',
-            createdTime: new Date().toISOString(),
-            md5Checksum: '',
-            parentId: currentFolderId,
-        };
+        const createResponse = await createFolder(newFolderName, currentFolderId);
+        if (!createResponse.ok) {
+            NotificationService.error({
+                message: createResponse.message || 'Tạo thư mục thất bại, vui lòng thử lại sau.',
+            });
+            return;
+        }
 
-        setItems(prev => [...prev, newFolder]);
+        fetchFolder(); // Tải lại danh sách thư mục sau khi tạo mới
+        NotificationService.success({
+            message: `Thư mục "${newFolderName}" đã được tạo thành công.`,
+        });
+        // setItems(prev => [...prev, newFolder]);
         setNewFolderName('');
         setCreatingFolder(false);
     };
@@ -108,10 +132,18 @@ const ModalSelectFolder: React.FC<ModalSelectFolderProps> = ({ open, onClose, on
                     key="select"
                     onClick={() => {
                         if (selectedFolderId) {
-                            onSelectFolder({
-                                id: selectedFolderId,
-                                name: items.find(item => item.id === selectedFolderId)?.name || ''
-                            });
+                            const selectedFolder = items.find(item => item.id === selectedFolderId);
+                            const breadcrumb = path
+                                .concat(selectedFolder ? [{ id: selectedFolder.id, name: selectedFolder.name }] : [])
+                                .map(item => item.name)
+                                .join(' / ');
+                            onSelectFolder(
+                                {
+                                    id: selectedFolderId,
+                                    name: selectedFolder?.name || ''
+                                },
+                                breadcrumb
+                            );
                         }
                         onClose();
                     }}
@@ -133,10 +165,16 @@ const ModalSelectFolder: React.FC<ModalSelectFolderProps> = ({ open, onClose, on
                 />
             </div>
 
-            <div className='mb-3'>
+            <div className='mb-3' style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Button type="dashed" onClick={() => setCreatingFolder(true)}>
                     + Tạo thư mục mới
                 </Button>
+                <Button
+                    type="text"
+                    icon={<ReloadOutlined style={{ fontSize: 18 }} />}
+                    onClick={fetchFolder}
+                    title="Tải lại thư mục"
+                />
             </div>
 
             <div style={{ maxHeight: 400, overflowY: 'auto', overflowX: 'hidden' }}>
