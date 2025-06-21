@@ -1,9 +1,12 @@
 'use client';
 import React, { useState } from 'react';
-import { InboxOutlined } from '@ant-design/icons';
+import { FolderFilled, InboxOutlined } from '@ant-design/icons';
 import type { UploadProps } from 'antd';
 import { message, Modal, Form, Input, Button } from 'antd';
 import Dragger from 'antd/es/upload/Dragger';
+import ModalSelectFolder from './Modal/ModalSelectFolder';
+import { FoldHorizontal } from 'lucide-react';
+import { IFileInfo } from '@/types/driver';
 
 export default function DraggerUpload() {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -11,6 +14,8 @@ export default function DraggerUpload() {
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [fileType, setFileType] = useState<string | null>(null);
     const [form] = Form.useForm();
+    const [isModalOpenFolder, setIsModalOpenFolder] = useState(false);
+    const [selectedFolderId, setSelectedFolderId] = useState<IFileInfo | null>(null);
 
     const props: UploadProps = {
         name: 'file',
@@ -70,12 +75,12 @@ export default function DraggerUpload() {
         if (!previewUrl || !fileType) return null;
 
         if (fileType.startsWith('image/')) {
-            return <img src={previewUrl} alt="Preview" style={{ maxWidth: '100%', maxHeight: '200px' }} />;
+            return <img src={previewUrl} alt="Preview" style={{ maxWidth: '100%', maxHeight: '500px' }} />;
         } else if (fileType === 'application/pdf') {
             return (
                 <iframe
-                    src={previewUrl}
-                    style={{ width: '100%', height: '200px', border: 'none' }}
+                    src={`${previewUrl}#toolbar=0`}
+                    style={{ width: '100%', height: '400px', border: 'none' }}
                     title="PDF Preview"
                 />
             );
@@ -112,9 +117,57 @@ export default function DraggerUpload() {
                         <Input placeholder="Tên tài liệu" />
                     </Form.Item>
 
+                    <Form.Item
+                        name="folderId"
+                        label="Chọn thư mục"
+                        rules={[{ required: true, message: 'Vui lòng chọn thư mục' }]}
+                    >
+                        <Button
+                            type="primary"
+                            onClick={() => setIsModalOpenFolder(true)}
+                            block
+                        >
+                            Chọn thư mục
+                        </Button>
+                        <ModalSelectFolder
+                            open={isModalOpenFolder}
+                            onClose={() => setIsModalOpenFolder(false)}
+                            onSelectFolder={(folderId: IFileInfo) => {
+                                // form.setFieldsValue({ folderId });
+                                setIsModalOpenFolder(false);
+                                setSelectedFolderId(folderId);
+                            }}
+                        />
+                        <div className='flex items-center mt-2 '>
+                            <FolderFilled className="text-xl" style={{ color: '#faad14' }} />
+                            {selectedFolderId ? (
+                                <span className="ml-2 text-black"><b>Thư mục đã chọn: </b> {selectedFolderId.name}</span>
+                            ) : (
+                                <span className="ml-2 text-black">Chưa chọn thư mục</span>
+                            )}
+                        </div>
+                    </Form.Item>
 
-                    <Form.Item label="Xem trước tài liệu">
-                        {renderPreview()}
+                    <Form.Item>
+                        <Button
+                            type="dashed"
+                            onClick={() => {
+                                if (!previewUrl) {
+                                    message.warning('Chưa có tài liệu để xem trước');
+                                    return;
+                                }
+                                Modal.info({
+                                    title: 'Xem trước tài liệu',
+                                    content: renderPreview(),
+                                    width: 600,
+                                    okText: 'Đóng',
+                                    maskClosable: true, // Cho phép click ra ngoài để tắt modal
+                                });
+                            }}
+                            block
+                        >
+                            Xem trước tài liệu
+                        </Button>
                     </Form.Item>
                 </Form>
             </Modal>
