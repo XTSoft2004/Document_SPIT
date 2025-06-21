@@ -31,20 +31,21 @@ export default function Page() {
                 </div>
                 <div className="px-4 lg:px-6">
                   <ChartLineInteractive />
+
+                  <div className="rounded-xl border bg-card text-card-foreground shadow flex-col mt-3 md:hidden">
+                    <ChartRadialStacked />
+                    <hr className="my-6 border-t border-gray-200 mx-auto " style={{ width: "70%" }} />
+                    <ActivityRight />
+                  </div>
                 </div>
-                <div className="px-4 lg:px-6">
-                  <ChartLineInteractive />
-                </div>
-                <div className="px-4 lg:px-6">
-                  <ChartLineInteractive />
-                </div>
+
 
                 {/* <DataTable data={data} /> */}
               </div>
             </div>
           </div>
           <div
-            className="mr-3 driver-item sticky top-[71px] self-start rounded-xl border bg-card text-card-foreground shadow flex flex-col"
+            className="hidden md:flex mr-3 driver-item sticky top-[71px] self-start rounded-xl border bg-card text-card-foreground shadow flex-col"
             style={{ width: "20%", height: "calc(100vh - 10vh - 24px)" }}
           >
             <ChartRadialStacked />

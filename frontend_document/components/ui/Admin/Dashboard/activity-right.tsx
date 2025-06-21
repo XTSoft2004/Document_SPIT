@@ -31,7 +31,7 @@ export default function ActivityRight() {
 
             <div
                 style={{
-                    maxHeight: 'calc(100vh - 55vh)',
+                    maxHeight: 'calc(100vh - 67vh)',
                     overflowY: 'auto',
                     scrollbarWidth: 'none', // Firefox
                     msOverflowStyle: 'none', // IE 10+
