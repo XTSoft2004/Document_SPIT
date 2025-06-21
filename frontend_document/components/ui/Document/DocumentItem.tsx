@@ -13,18 +13,28 @@ type Props = {
   onClick: () => void
 }
 
-const getIcon = (isFolder: boolean, typeDocument: string) => {
+const GetIcon = (isFolder: boolean, typeDocument: string) => {
   if (isFolder)
-    return <FolderOpenFilled className="text-yellow-400 bg-yellow-100 rounded p-1 text-2xl" />
+    return (
+      <FolderOpenFilled className="text-yellow-400 bg-yellow-100 rounded p-1 text-2xl" />
+    )
   switch (typeDocument) {
     case 'image':
-      return <FileImageFilled className="text-sky-400 bg-sky-100 rounded p-1 text-2xl" />
+      return (
+        <FileImageFilled className="text-sky-400 bg-sky-100 rounded p-1 text-2xl" />
+      )
     case 'pdf':
-      return <FilePdfFilled className="text-red-500 bg-red-100 rounded p-1 text-2xl" />
+      return (
+        <FilePdfFilled className="text-red-500 bg-red-100 rounded p-1 text-2xl" />
+      )
     case 'docx':
-      return <FileWordFilled className="text-indigo-500 bg-indigo-100 rounded p-1 text-2xl" />
+      return (
+        <FileWordFilled className="text-indigo-500 bg-indigo-100 rounded p-1 text-2xl" />
+      )
     default:
-      return <FileOutlined className="text-slate-500 bg-slate-100 rounded p-1 text-2xl" />
+      return (
+        <FileOutlined className="text-slate-500 bg-slate-100 rounded p-1 text-2xl" />
+      )
   }
 }
 
@@ -34,11 +44,15 @@ const DocumentItem: React.FC<Props> = ({ item, onClick }) => (
     onClick={onClick}
   >
     <div className="flex items-center gap-3 min-w-0">
-      {getIcon(item.isFolder, item.typeDocument)}
+      {GetIcon(item.isFolder, item.typeDocument)}
       <Tooltip title={item.name}>
-        <span className="font-semibold text-slate-800 text-base truncate max-w-[160px]">{item.name}</span>
+        <span className="font-semibold text-slate-800 text-base truncate max-w-[160px]">
+          {item.name}
+        </span>
       </Tooltip>
-      <span className="text-slate-400 text-sm ml-auto whitespace-nowrap">{new Date(item.createdTime).toLocaleDateString()}</span>
+      <span className="text-slate-400 text-sm ml-auto whitespace-nowrap">
+        {new Date(item.createdTime).toLocaleDateString()}
+      </span>
     </div>
   </li>
 )

@@ -64,6 +64,39 @@ export const loadFolder = async (folderId: string) => {
   } as IIndexResponse<ILoadFolder>
 }
 
+export const loadOnlyFolder = async (folderId: string) => {
+  const response = await fetch(
+    `${globalConfig.baseUrl}/driver/findFolder/${folderId}`,
+    {
+      method: 'GET',
+    },
+  )
+
+  const data = await response.json()
+  revalidateTag('driver.folder')
+
+  // Sort theo folder, = folder thì sort theo tên
+  const res = (data as ILoadFolder[]).sort((a, b) => {
+    if (a.isFolder && b.isFolder)
+      if (a.name.toLocaleLowerCase() < b.name.toLocaleLowerCase()) return -1
+      else return 1
+
+    if (a.isFolder && !b.isFolder) return -1
+    if (!a.isFolder && b.isFolder) return 1
+
+    if (!a.isFolder && !b.isFolder)
+      if (a.name.toLocaleLowerCase() < b.name.toLocaleLowerCase()) return -1
+      else return 1
+    return 0
+  })
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    data: res,
+  } as IIndexResponse<ILoadFolder>
+}
+
 export const uploadFile = async (formData: IUploadFile) => {
   const response = await fetch(`${globalConfig.baseUrl}/driver/upload`, {
     method: 'POST',
