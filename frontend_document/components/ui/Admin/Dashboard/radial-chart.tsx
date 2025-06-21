@@ -17,10 +17,13 @@ import {
     ChartTooltip,
     ChartTooltipContent,
 } from "@/components/ui/shadcn-ui/chart"
+import { IInfoGoogleDriveResponse } from "@/types/driver"
+import { useEffect, useState } from "react"
+import { getInfoGoogleDriver } from "@/actions/driver.action"
 
 export const description = "A radial chart with stacked sections"
 
-const chartData = [{ month: "january", mobile: 570, desktop: 1200 }]
+// const chartData = [{ month: "january", mobile: 15, desktop: 0.43 }]
 
 const chartConfig = {
     desktop: {
@@ -34,7 +37,33 @@ const chartConfig = {
 } satisfies ChartConfig
 
 export function ChartRadialStacked() {
-    const totalVisitors = chartData[0].desktop + chartData[0].mobile
+    // const totalVisitors = chartData[0].desktop + chartData[0].mobile
+
+    const [infoGoogleDrive, setInfoGoogleDrive] = useState<IInfoGoogleDriveResponse | null>(null)
+    const [loading, setIsLoad] = useState(true)
+    const chartData = [
+        {
+            limit: infoGoogleDrive?.limit || 0,
+            usage: infoGoogleDrive?.usage || 0,
+        },
+    ]
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [infoGoogleDrive] = await Promise.all([
+                    getInfoGoogleDriver(),
+                    // getClasses(),
+                ])
+                setInfoGoogleDrive(infoGoogleDrive)
+                chartData[0].limit = infoGoogleDrive?.limit || 0
+                chartData[0].usage = infoGoogleDrive?.usage || 0
+            } finally {
+                setIsLoad(false)
+            }
+        }
+
+        fetchData()
+    }, [])
 
     return (
         <Card className="flex flex-col rounded-xl border-0 shadow-none">
@@ -49,7 +78,7 @@ export function ChartRadialStacked() {
                     })}
                 </CardDescription>
             </CardHeader>
-            <CardContent className="flex flex-1 items-center pb-0">
+            <CardContent className="flex flex-1 items-center pb-0 pt-2">
                 <ChartContainer
                     config={chartConfig}
                     className="mx-auto aspect-square w-full max-w-[200px]"
@@ -81,17 +110,17 @@ export function ChartRadialStacked() {
                                             className="overflow-visible"
                                         >
                                             <div className="flex flex-col items-center justify-center text-center pt-5">
-                                                <p className="text-2xl font-bold text-foreground">{totalVisitors.toLocaleString()}</p>
+                                                <p className="text-2xl font-bold text-foreground">{infoGoogleDrive?.limit}</p>
                                                 <p className="text-muted-foreground">Dung lượng</p>
 
                                                 <div className="mt-2 text-sm w-100">
                                                     <div className="flex items-center justify-center pt-5">
                                                         <span className="mr-1 text-muted-foreground">Còn trống:</span>
-                                                        <span className="text-green-600 font-semibold text-base">20GB</span>
+                                                        <span className="text-green-600 font-semibold text-base">{infoGoogleDrive?.limit} GB</span>
                                                     </div>
                                                     <div className="flex items-center justify-center">
                                                         <span className="mr-1 text-muted-foreground">Đã dùng:</span>
-                                                        <span className="text-red-600 font-semibold text-base">5GB</span>
+                                                        <span className="text-red-600 font-semibold text-base">{infoGoogleDrive?.usage} GB</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -101,14 +130,14 @@ export function ChartRadialStacked() {
                             />
                         </PolarRadiusAxis>
                         <RadialBar
-                            dataKey="desktop"
+                            dataKey="usage"
                             fill="#dc2626"
                             stackId="a"
                             cornerRadius={5}
                             className="stroke-transparent stroke-2"
                         />
                         <RadialBar
-                            dataKey="mobile"
+                            dataKey="limit"
                             stackId="a"
                             cornerRadius={5}
                             fill="#16a34a"

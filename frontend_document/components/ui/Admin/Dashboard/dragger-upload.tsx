@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import React, { useState } from 'react';
 import { InboxOutlined } from '@ant-design/icons';
 import type { UploadProps } from 'antd';
@@ -8,15 +8,23 @@ import Dragger from 'antd/es/upload/Dragger';
 export default function DraggerUpload() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [fileList, setFileList] = useState<any[]>([]);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [fileType, setFileType] = useState<string | null>(null);
     const [form] = Form.useForm();
 
     const props: UploadProps = {
         name: 'file',
         multiple: false,
         beforeUpload: (file) => {
-            setFileList([file]); // lưu file lại
-            setIsModalOpen(true); // mở modal
-            return false; // chặn upload tự động
+            setFileList([file]);
+            setFileType(file.type);
+
+            // Tạo URL preview cho file
+            const url = URL.createObjectURL(file);
+            setPreviewUrl(url);
+
+            setIsModalOpen(true);
+            return false; // Chặn upload tự động
         },
         showUploadList: false,
     };
@@ -37,6 +45,8 @@ export default function DraggerUpload() {
             if (response.ok) {
                 message.success(`${fileList[0].name} uploaded successfully with description.`);
                 setFileList([]);
+                setPreviewUrl(null); // Xóa URL preview
+                setFileType(null);
                 form.resetFields();
                 setIsModalOpen(false);
             } else {
@@ -50,7 +60,28 @@ export default function DraggerUpload() {
     const handleCancel = () => {
         setIsModalOpen(false);
         setFileList([]);
+        setPreviewUrl(null); // Xóa URL preview
+        setFileType(null);
         form.resetFields();
+    };
+
+    // Hàm để render preview dựa trên loại file
+    const renderPreview = () => {
+        if (!previewUrl || !fileType) return null;
+
+        if (fileType.startsWith('image/')) {
+            return <img src={previewUrl} alt="Preview" style={{ maxWidth: '100%', maxHeight: '200px' }} />;
+        } else if (fileType === 'application/pdf') {
+            return (
+                <iframe
+                    src={previewUrl}
+                    style={{ width: '100%', height: '200px', border: 'none' }}
+                    title="PDF Preview"
+                />
+            );
+        } else {
+            return <p>🚨 Tài liệu này không hỗ trợ xem trước <b>{fileList[0]?.name}</b></p>;
+        }
     };
 
     return (
@@ -66,7 +97,7 @@ export default function DraggerUpload() {
             </Dragger>
 
             <Modal
-                title="Enter file information"
+                title="Tải lên tài liệu"
                 open={isModalOpen}
                 onOk={handleOk}
                 onCancel={handleCancel}
@@ -74,11 +105,16 @@ export default function DraggerUpload() {
             >
                 <Form form={form} layout="vertical">
                     <Form.Item
-                        name="description"
-                        label="Description"
-                        rules={[{ required: true, message: 'Please enter a description' }]}
+                        name="name"
+                        label="Tên tài liệu"
+                        rules={[{ required: true, message: 'Vui lòng nhập tên tài liệu' }]}
                     >
-                        <Input placeholder="Enter file description" />
+                        <Input placeholder="Tên tài liệu" />
+                    </Form.Item>
+
+
+                    <Form.Item label="Xem trước tài liệu">
+                        {renderPreview()}
                     </Form.Item>
                 </Form>
             </Modal>

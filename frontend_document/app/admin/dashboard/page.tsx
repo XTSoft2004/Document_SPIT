@@ -32,14 +32,20 @@ export default function Page() {
                 <div className="px-4 lg:px-6">
                   <ChartLineInteractive />
                 </div>
+                <div className="px-4 lg:px-6">
+                  <ChartLineInteractive />
+                </div>
+                <div className="px-4 lg:px-6">
+                  <ChartLineInteractive />
+                </div>
 
-                <DataTable data={data} />
+                {/* <DataTable data={data} /> */}
               </div>
             </div>
           </div>
           <div
-            className="mr-3 driver-item sticky top-[60px] self-start rounded-xl border bg-card text-card-foreground shadow flex flex-col"
-            style={{ width: "20%", height: "calc(100vh - 10vh)" }}
+            className="mr-3 driver-item sticky top-[71px] self-start rounded-xl border bg-card text-card-foreground shadow flex flex-col"
+            style={{ width: "20%", height: "calc(100vh - 10vh - 24px)" }}
           >
             <ChartRadialStacked />
             <hr className="my-6 border-t border-gray-200 mx-auto " style={{ width: "70%" }} />

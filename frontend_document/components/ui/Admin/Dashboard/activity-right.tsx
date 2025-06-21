@@ -31,7 +31,7 @@ export default function ActivityRight() {
 
             <div
                 style={{
-                    maxHeight: 400,
+                    maxHeight: 'calc(100vh - 55vh)',
                     overflowY: 'auto',
                     scrollbarWidth: 'none', // Firefox
                     msOverflowStyle: 'none', // IE 10+
@@ -48,9 +48,13 @@ export default function ActivityRight() {
                         <Card.Meta
                             avatar={<Avatar src={`https://api.dicebear.com/7.x/miniavs/svg?seed=${idx + 1}`} />}
                             title={
-                                <span>
-                                    <span className="font-semibold truncate max-w-[120px] inline-block align-bottom">User Name {idx + 1}</span>
-                                    <span className="text-gray-500"> - {2 + idx} hours ago</span>
+                                <span className="flex items-center gap-2">
+                                    <span className="font-semibold truncate inline-block align-bottom text-sm max-w-[110px]" title={`User Name ${idx + 1}`}>
+                                        {`User Name ${idx + 1}`.slice(0, 15)}
+                                    </span>
+                                    <span className="text-gray-500 text-sm truncate max-w-[80px] inline-block align-bottom" title={`- ${2 + idx} hours ago`}>
+                                        - {2 + idx} hours ago
+                                    </span>
                                 </span>
                             }
                             description={
