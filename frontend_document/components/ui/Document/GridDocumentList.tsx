@@ -1,21 +1,15 @@
 import React from 'react'
-import {
-  FileOutlined,
-  FolderOutlined,
-  FileImageOutlined,
-  FilePdfOutlined,
-} from '@ant-design/icons'
 import { Card } from 'antd'
 import { ILoadFolder } from '@/types/driver'
-import styles from './GridDocumentList.module.css'
+import { useRouter } from 'next/navigation'
+import DocumentItem from './DocumentItem'
 
 type GridDocumentListProps = {
   loading: boolean
   items: ILoadFolder[]
   error: string | null
   path: { id: string; name: string }[]
-  setPath: React.Dispatch<React.SetStateAction<{ id: string; name: string }[]>>
-  setCurrentFolderId: (folderId: string) => void
+  onPathChange: (newPath: { id: string; name: string }[]) => void
   onPreview: (fileId: string) => void
 }
 
@@ -24,64 +18,44 @@ const GridDocumentList: React.FC<GridDocumentListProps> = ({
   items,
   error,
   path,
-  setPath,
-  setCurrentFolderId,
+  onPathChange,
   onPreview,
 }) => {
-  const getIcon = (isFolder: boolean, typeDocument: string) => {
-    if (isFolder) return <FolderOutlined className="text-gray-500" />
-    switch (typeDocument) {
-      case 'image':
-        return <FileImageOutlined className="text-gray-500" />
-      case 'pdf':
-        return <FilePdfOutlined className="text-gray-500" />
-      case 'docx':
-        return <FileOutlined className="text-gray-500" />
-      default:
-        return <FileOutlined className="text-gray-500" />
-    }
-  }
+  const router = useRouter()
 
   const handleFolderClick = (folderId: string, name: string) => {
     const newPath = [...path, { id: folderId, name }]
-    setPath(newPath)
-    setCurrentFolderId(folderId)
+    onPathChange(newPath)
+    const url =
+      '/document/' +
+      newPath
+        .slice(1)
+        .map((p) => encodeURIComponent(p.name))
+        .join('/')
+    router.push(url)
   }
 
   return (
     <div className="container mx-auto p-4">
-      <div className={styles.documentWrapper}>
+      <div className="w-full min-h-[400px]">
         {loading ? (
-          <div className={styles.loadingContainer}>
-            <Card loading={true} className={styles.loadingCard} />
+          <div className="flex justify-center items-center h-full min-h-[200px]">
+            <Card loading={true} className="w-full h-full border-none shadow-none" />
           </div>
         ) : error ? (
           <div className="text-red-500 text-center">{error}</div>
         ) : (
-          <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 h-full">
+          <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
             {items.map((item) => (
-              <li
+              <DocumentItem
                 key={item.id}
-                className="flex items-center justify-between p-4 rounded-lg shadow-md cursor-pointer transition-all duration-200 bg-gray-100 hover:bg-gray-200"
+                item={item}
                 onClick={() =>
                   item.isFolder
                     ? handleFolderClick(item.id, item.name)
                     : onPreview(item.id)
                 }
-              >
-                <div className="flex items-center flex-1 min-w-0">
-                  {getIcon(item.isFolder, item.typeDocument)}
-                  <span
-                    className="ml-3 text-gray-800 font-medium truncate"
-                    title={item.name}
-                  >
-                    {item.name}
-                  </span>
-                </div>
-                <span className="text-gray-500 text-sm whitespace-nowrap ml-3">
-                  {new Date(item.createdTime).toLocaleDateString()}
-                </span>
-              </li>
+              />
             ))}
           </ul>
         )}

@@ -9,7 +9,7 @@ import {
   IShowResponse,
 } from '@/types/global'
 import { revalidateTag } from 'next/cache'
-import { ILoadFolder, IUploadFile } from '@/types/driver'
+import { ILoadFolder, IUploadFile, IFolder } from '@/types/driver'
 
 export const getThumbnail = async (fileId: string) => {
   const response = await fetch(
@@ -42,9 +42,19 @@ export const loadFolder = async (folderId: string) => {
   const data = await response.json()
   revalidateTag('driver.folder')
 
+  // Sort theo folder, = folder thì sort theo tên
   const res = (data as ILoadFolder[]).sort((a, b) => {
-    if (a.isFolder === b.isFolder) return 0
-    return a.isFolder ? -1 : 1
+    if (a.isFolder && b.isFolder)
+      if (a.name.toLocaleLowerCase() < b.name.toLocaleLowerCase()) return -1
+      else return 1
+
+    if (a.isFolder && !b.isFolder) return -1
+    if (!a.isFolder && b.isFolder) return 1
+
+    if (!a.isFolder && !b.isFolder)
+      if (a.name.toLocaleLowerCase() < b.name.toLocaleLowerCase()) return -1
+      else return 1
+    return 0
   })
 
   return {
@@ -70,4 +80,31 @@ export const uploadFile = async (formData: IUploadFile) => {
     status: response.status,
     ...data,
   } as IResponse
+}
+
+export const findFolderByName = async (name: string, parentId: string) => {
+  const response = await fetch(
+    `${globalConfig.baseUrl}/driver/find/${parentId}`,
+    {
+      method: 'GET',
+    },
+  )
+
+  const data = await response.json()
+  revalidateTag('driver.folder')
+
+  const folder = (data as ILoadFolder[]).find(
+    (item) => item.name.toLocaleLowerCase() === name.toLocaleLowerCase(),
+  )
+
+  const res = {
+    name: folder?.name || '',
+    folderId: folder?.id || '',
+  } as IFolder
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    data: res,
+  } as IShowResponse<IFolder>
 }
