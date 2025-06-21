@@ -26,7 +26,7 @@ namespace Domain.Common.GoogleDriver.Services
     public class GoogleDriverSevices : BaseService, IGoogleDriverServices
     {
         private readonly RequestHttpClient? _request;
-        private readonly IConfiguration _config; 
+        private readonly IConfiguration _config;
         private readonly IHttpClientFactory _httpClientFactory;
         public GoogleDriverSevices(IConfiguration configuration, IHttpClientFactory httpClientFactory)
         {
@@ -130,7 +130,7 @@ namespace Domain.Common.GoogleDriver.Services
             {
                 { "name", uploadFileResponse.name },
                 { "mimeType", "application/vnd.google-apps.document" } // Chuyển đổi sang Google Docs
-            };  
+            };
             var response = await _request.PostAsync($"https://www.googleapis.com/drive/v3/files/{uploadFileResponse.id}/copy", jsonData);
             if (response.IsSuccessStatusCode)
             {
@@ -239,7 +239,7 @@ namespace Domain.Common.GoogleDriver.Services
 
             return (bytes, contentType, infoFile.name);
         }
-        public async Task<List<DriverItemResponse?>?> GetInfoFolder(string folderId)
+        public async Task<List<DriverItemResponse?>?> GetInfoFolder(string folderId, bool isOnlyFolder = false)
         {
             await GetAccessToken();
             var response = await _request.GetAsync($"https://www.googleapis.com/drive/v3/files?q='{folderId}'+in+parents&fields=files(id,name,webViewLink,webContentLink,createdTime,md5Checksum)&orderBy=createdTime");
@@ -250,8 +250,37 @@ namespace Domain.Common.GoogleDriver.Services
                 if (jsonData != null)
                 {
                     var fileInfo = JsonConvert.DeserializeObject<List<DriverItemResponse?>?>(jsonData.ToString());
+
+                    if (isOnlyFolder)
+                        fileInfo = fileInfo?.Where(f => f?.IsFolder == true).ToList();
+
                     return fileInfo;
-                }        
+                }
+            }
+            return null;
+        }
+        public async Task<InfoGoogleDriverResponse?> GetInfoGoogleDriver()
+        {
+            await GetAccessToken();
+            var response = await _request.GetAsync("https://www.googleapis.com/drive/v3/about?fields=user,storageQuota");
+            if (response.IsSuccessStatusCode)
+            {
+                var result = _request.Content;
+                var info = JObject.Parse(result);
+                if (info != null)
+                {
+                    var storageQuota = info["storageQuota"];
+                    if (storageQuota != null)
+                    {
+                        var limit = storageQuota["limit"]?.Value<double>() ?? 0;
+                        var usage = storageQuota["usage"]?.Value<double>() ?? 0;
+                        return new InfoGoogleDriverResponse
+                        {
+                            limit = Math.Round(limit / Math.Pow(1024, 3), 2) - Math.Round(usage / Math.Pow(1024, 3), 2),
+                            usage = Math.Round(usage / Math.Pow(1024, 3), 2)
+                        };
+                    }
+                }
             }
             return null;
         }

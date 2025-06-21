@@ -18,6 +18,17 @@ namespace Document_SPIT_BE.Controllers
             _services = services;
             _documentServices = documentServices;
         }
+        [HttpGet("info")]
+        public async Task<IActionResult> GetInfoDriver()
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+            var response = await _services.GetInfoGoogleDriver();
+            if (response == null)
+                return NotFound(new { Message = "Không tìm thấy thông tin tài khoản Google Drive" });
+            
+            return Ok(response);
+        }
         [HttpGet("thumbnail/{fileId}")]
         public async Task<IActionResult> GetThumbnailBase64(string fileId)
         {
@@ -65,12 +76,12 @@ namespace Document_SPIT_BE.Controllers
             return Ok(response);
         }
         [HttpGet("find/{folderId}")]
-        public async Task<IActionResult> GetInfoFolder(string folderId)
+        public async Task<IActionResult> GetInfoFolder(string folderId, bool isOnlyFolder = false)
         {
             if (!ModelState.IsValid)
                 return BadRequest(DefaultString.INVALID_MODEL);
 
-            var response = await _services.GetInfoFolder(folderId);
+            var response = await _services.GetInfoFolder(folderId, isOnlyFolder);
             return Ok(response);
         }
     }
