@@ -1,3 +1,4 @@
+import globalConfig from '@/app.config';
 import React, { useRef, useState } from 'react';
 
 interface PreviewFilePopupProps {
@@ -5,10 +6,9 @@ interface PreviewFilePopupProps {
     onClose: () => void;
     fileName: string;
     folderId: string;
-    url: string;
 }
 
-export default function PreviewFile({ open, onClose, fileName, url }: PreviewFilePopupProps) {
+export default function PreviewFile({ open, onClose, fileName, folderId }: PreviewFilePopupProps) {
     const imgRef = useRef<HTMLImageElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [scale, setScale] = useState(1);
@@ -143,7 +143,7 @@ export default function PreviewFile({ open, onClose, fileName, url }: PreviewFil
                     {isImage ? (
                         <img
                             ref={imgRef}
-                            src={url}
+                            src={`${globalConfig.baseUrl}/driver/preview/${folderId}`}
                             alt={fileName}
                             style={{
                                 transform: `scale(${scale}) translate(${translate.x / scale}px, ${translate.y / scale}px)`,
@@ -158,7 +158,7 @@ export default function PreviewFile({ open, onClose, fileName, url }: PreviewFil
                         />
                     ) : (
                         <iframe
-                            src={url}
+                            src={`${globalConfig.baseUrl}/driver/preview/${folderId}#toolbar=0`}
                             className="w-full h-full rounded-b-xl border-0"
                             style={{ minHeight: '80vh', height: '100%' }}
                         />

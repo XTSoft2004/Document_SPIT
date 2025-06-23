@@ -2,12 +2,13 @@
 import PathFolder from './PathFolder';
 import { IDriveItem } from '@/types/driver';
 import { useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { ListIcon, LayoutGridIcon } from 'lucide-react';
 import GridDocumentList from './GridDocumentList';
 import Back from './Back';
 import PreviewFile from './PreviewFile';
 import globalConfig from '@/app.config';
+import GridDocumentPreview from './GridDocumentPreview';
 interface GridDocumentProps {
     content: IDriveItem[]
     slug: string[]
@@ -17,12 +18,36 @@ interface GridDocumentProps {
 export default function GridDocument({ content, slug, path }: GridDocumentProps) {
     const router = useRouter();
     const url = useMemo(() => slug.join('/'), [slug]);
-    const [mode, setMode] = useState<'list' | 'preview'>('list');
+    const [mode, setModeState] = useState<'list' | 'preview'>('list');
     const [previewFile, setPreviewFile] = useState<{ fileName: string, folderId: string } | null>(null);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        setLoading(false);
+    }, [url]);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('doc_mode') as 'list' | 'preview' | null;
+            if (saved && saved !== mode) setModeState(saved);
+        }
+    }, []);
+
+    const setMode = (m: 'list' | 'preview') => {
+        setModeState(m);
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('doc_mode', m);
+        }
+    };
 
     return (
         <>
-            <main className="min-h-[70vh] pt-4 pb-5 w-full">
+            <main className="min-h-[70vh] pt-4 pb-5 w-full relative">
+                {loading && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30">
+                        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 border-solid"></div>
+                    </div>
+                )}
                 <div className="px-0 md:px-0 w-full">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 w-full gap-3">
                         <PathFolder path={path} />
@@ -74,6 +99,17 @@ export default function GridDocument({ content, slug, path }: GridDocumentProps)
                             content={content}
                             url={url}
                             onPreviewFile={file => setPreviewFile({ fileName: file.name, folderId: file.folderId })}
+                            onFolderClick={() => setLoading(true)}
+                        />
+                    )}
+
+                    {/* Hiển thị dạng lưới */}
+                    {mode === 'preview' && (
+                        <GridDocumentPreview
+                            content={content}
+                            url={url}
+                            onPreviewFile={file => setPreviewFile({ fileName: file.name, folderId: file.folderId })}
+                            onFolderClick={() => setLoading(true)}
                         />
                     )}
 
@@ -83,7 +119,6 @@ export default function GridDocument({ content, slug, path }: GridDocumentProps)
                         onClose={() => setPreviewFile(null)}
                         fileName={previewFile?.fileName || ''}
                         folderId={previewFile?.folderId || ''}
-                        url={`${globalConfig.baseUrl}/driver/preview/${previewFile?.folderId}?toolbar=0`}
                     />
                 </div>
             </main>

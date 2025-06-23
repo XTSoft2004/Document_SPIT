@@ -9,6 +9,7 @@ interface GridDocumentListProps {
     content: IDriveItem[];
     url: string;
     onPreviewFile?: (file: IDriveItem) => void;
+    onFolderClick?: () => void;
 }
 
 function getFileIcon(name: string, isFolder: boolean) {
@@ -18,7 +19,7 @@ function getFileIcon(name: string, isFolder: boolean) {
     return <HiOutlineDocument className="w-8 h-8 text-gray-400" />;
 }
 
-export default function GridDocumentList({ content, url, onPreviewFile }: GridDocumentListProps) {
+export default function GridDocumentList({ content, url, onPreviewFile, onFolderClick }: GridDocumentListProps) {
     const router = useRouter();
 
     return (
@@ -36,8 +37,10 @@ export default function GridDocumentList({ content, url, onPreviewFile }: GridDo
                             key={item.folderId}
                             className="flex items-center gap-4 px-4 py-3 rounded-lg cursor-pointer hover:bg-blue-50 transition group"
                             onClick={() => {
-                                if (item.isFolder) router.push(path);
-                                else onPreviewFile?.(item);
+                                if (item.isFolder) {
+                                    onFolderClick?.();
+                                    router.push(path);
+                                } else onPreviewFile?.(item);
                             }}
                         >
                             <div>
