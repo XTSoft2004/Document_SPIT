@@ -1,18 +1,11 @@
 'use client';
-import React, { useEffect, useState } from 'react';
-import { Pagination, Table } from 'antd';
+import React, { useState } from 'react';
+import { Button, Pagination, Table } from 'antd';
 import type { TableColumnsType, TableProps } from 'antd';
 import useSWR from 'swr';
 import { IIndexResponse } from '@/types/global';
 import Searchbar from './Searchbar';
-
-// type FetcherResponse<T> = {
-//     totalRecords: number;
-//     totalPages: number;
-//     currentPage: number;
-//     pageSize: number;
-//     data: T[];
-// };
+import { CirclePlus } from 'lucide-react';
 
 type DataGridProps<T> = {
     rowSelection?: TableProps<T>['rowSelection'];
@@ -20,6 +13,12 @@ type DataGridProps<T> = {
     rowKey: keyof T;
     fetcher?: (search: string, page: number, limit: number) => Promise<IIndexResponse<T>>;
     nameTable?: string;
+    btnAddInfo?: {
+        title: string;
+        onClick: () => void;
+    };
+    singleSelect?: boolean;
+    onSelectionChange?: (selected: T | null) => void;
 };
 
 const DataGrid = <T extends object>({
@@ -28,12 +27,16 @@ const DataGrid = <T extends object>({
     rowKey,
     fetcher,
     nameTable,
+    btnAddInfo,
+    singleSelect = false,
+    onSelectionChange,
 }: DataGridProps<T>) => {
     const [pageIndex, setPageIndex] = useState(1);
-    const [pageSize, setPageSize] = useState(10);
+    const [pageSize, setPageSize] = useState(7);
     const [searchText, setSearchText] = useState('');
+    const [selectedKey, setSelectedKey] = useState<React.Key | null>(null);
+    const [selectedItem, setSelectedItem] = useState<T | null>(null);
 
-    // Thêm cột STT vào đầu columns
     const columnsWithSTT: TableColumnsType<T> = [
         {
             title: 'STT',
@@ -51,11 +54,7 @@ const DataGrid = <T extends object>({
         async (args: readonly [string | undefined, string, number, number]) => {
             const [, search, page, limit] = args;
             if (fetcher) {
-                return fetcher(
-                    typeof search === 'string' ? search : '',
-                    typeof page === 'number' ? page : 1,
-                    typeof limit === 'number' ? limit : 10
-                );
+                return fetcher(search, page, limit);
             } else {
                 return Promise.resolve({
                     ok: true,
@@ -65,7 +64,7 @@ const DataGrid = <T extends object>({
                     totalRecords: 0,
                     totalPages: 0,
                     currentPage: 1,
-                    pageSize: typeof limit === 'number' ? limit : 10,
+                    pageSize: limit,
                     IMeta: {},
                 } as IIndexResponse<T>);
             }
@@ -73,19 +72,31 @@ const DataGrid = <T extends object>({
         { revalidateOnFocus: false }
     );
 
-    useEffect(() => {
-        console.log('DataGrid useEffect', data);
-    },);
-
     const handleSearch = (value: string) => {
         setSearchText(value);
-        setPageIndex(1)
+        setPageIndex(1);
+    };
+
+    const handleRowClick = (record: T) => {
+        if (!singleSelect) return;
+        const key = record[rowKey] as React.Key;
+        setSelectedKey(key);
+        setSelectedItem(record);
+        onSelectionChange?.(record);
     };
 
     return (
         <>
             <div className="flex flex-col md:flex-row justify-between items-stretch gap-2 mb-2">
-                <div className="flex justify-end w-full">
+                {btnAddInfo && (
+                    <div className="w-full md:w-auto flex items-center gap-2">
+                        <Button className="w-full md:w-auto flex items-center gap-2" onClick={btnAddInfo?.onClick}>
+                            <CirclePlus size={20} />
+                            {btnAddInfo?.title || 'Thêm mới'}
+                        </Button>
+                    </div>
+                )}
+                <div className="flex w-full justify-center md:justify-end">
                     <Searchbar setSearchText={handleSearch} />
                 </div>
             </div>
@@ -95,27 +106,45 @@ const DataGrid = <T extends object>({
                 dataSource={data?.data || []}
                 loading={isLoading}
                 rowKey={rowKey as string}
-                scroll={{ x: 'max-content' }}
                 pagination={false}
-                rowSelection={rowSelection}
-                rowClassName={(record, index) =>
-                    index % 2 === 0 ? 'dark:bg-[#1E2636] bg-gray-100' : 'dark:bg-[#242f45]'
+                rowSelection={
+                    singleSelect
+                        ? undefined
+                        : {
+                            type: 'checkbox',
+                            ...rowSelection,
+                        }
                 }
-            />
-            <Pagination
-                className="flex flex-row mt-5 items-center sm:justify-end justify-between"
-                current={pageIndex}
-                pageSize={pageSize}
-                total={data?.totalRecords || 0}
-                showSizeChanger
-                showLessItems
-                pageSizeOptions={[1, 6, 10, 15, 20, 30]}
-                onShowSizeChange={(current, size) => {
-                    setPageIndex(1);
-                    setPageSize(size);
+                onRow={(record) => ({
+                    onClick: () => handleRowClick(record),
+                })}
+                rowClassName={(record) => {
+                    const key = record[rowKey];
+                    return singleSelect && key === selectedKey
+                        ? 'bg-blue-100 dark:bg-[#1e3a8a33]'
+                        : '';
                 }}
-                onChange={(page) => setPageIndex(page)}
+                bordered
+                scroll={{ x: 'max-content' }}
+                className="min-w-full"
             />
+
+            <div className="flex mt-5 items-center justify-between sm:justify-end">
+                <Pagination
+                    className="w-full flex justify-center sm:justify-end"
+                    current={pageIndex}
+                    pageSize={pageSize}
+                    total={data?.totalRecords || 0}
+                    showSizeChanger
+                    showLessItems
+                    pageSizeOptions={[1, 6, 10, 15, 20, 30]}
+                    onShowSizeChange={(current, size) => {
+                        setPageIndex(1);
+                        setPageSize(size);
+                    }}
+                    onChange={(page) => setPageIndex(page)}
+                />
+            </div>
         </>
     );
 };

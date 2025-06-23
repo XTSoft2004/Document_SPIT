@@ -82,16 +82,26 @@ export const deleteDocument = async (id: string): Promise<IBaseResponse> => {
   } as IBaseResponse
 }
 
-export const getDocuments = async () => {
-  const response = await fetch(`${globalConfig.baseUrl}/document`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
+export const getDocuments = async (
+  search: string = '',
+  pageNumber: number = -1,
+  pageSize: number = -1,
+) => {
+  const response = await fetch(
+    `${globalConfig.baseUrl}/document?search=${search}&pageNumber=${pageNumber}&pageSize=${pageSize}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization:
+          headers().get('Authorization') ||
+          `Bearer ${cookies().get('accessToken')?.value || ' '}`,
+      },
+      next: {
+        tags: ['document.index'],
+      },
     },
-    next: {
-      tags: ['document.index'],
-    },
-  })
+  )
 
   const data = await response.json()
 

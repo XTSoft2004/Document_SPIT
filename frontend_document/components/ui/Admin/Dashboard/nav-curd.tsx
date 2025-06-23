@@ -17,7 +17,7 @@ export function NavCRUD() {
     const items = [
         {
             name: "Quản lý tài liệu",
-            url: "/admin/user",
+            url: "/admin/document",
             icon: Book,
         },
         {

@@ -1,0 +1,48 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+
+const weekdays = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+const months = [
+    'Tháng Một', 'Tháng Hai', 'Tháng Ba', 'Tháng Tư', 'Tháng Năm', 'Tháng Sáu',
+    'Tháng Bảy', 'Tháng Tám', 'Tháng Chín', 'Tháng Mười', 'Tháng Mười Một', 'Tháng Mười Hai'
+];
+
+export default function RealTimeDateTime() {
+    const [dateTime, setDateTime] = useState<Date | null>(null);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setDateTime(new Date());
+        }, 1000);
+
+        // Set lần đầu ngay sau khi mounted
+        setDateTime(new Date());
+
+        return () => clearInterval(interval);
+    }, []);
+
+    if (!dateTime) return null; // tránh SSR mismatch
+
+    const weekday = weekdays[dateTime.getDay()];
+    const day = dateTime.getDate();
+    const month = months[dateTime.getMonth()];
+    const year = dateTime.getFullYear();
+    const hour = dateTime.getHours().toString().padStart(2, '0');
+    const minute = dateTime.getMinutes().toString().padStart(2, '0');
+    const second = dateTime.getSeconds().toString().padStart(2, '0');
+
+    return (
+        <div
+            className="text-sm text-gray-700 font-medium px-2 py-1 bg-gray-100 rounded-md shadow-sm"
+            style={{ width: 270, minWidth: 270, maxWidth: 270 }}
+        // Ẩn trên mobile (md trở lên mới hiện)
+        // Tailwind: hidden trên mobile, md:block trở lên
+        // Nếu không dùng Tailwind, dùng style display: none/block với media query
+        >
+            <span className="hidden md:inline">
+                {`${weekday}, ${day} ${month}, ${year} - ${hour}:${minute}:${second}`}
+            </span>
+        </div>
+    );
+}
