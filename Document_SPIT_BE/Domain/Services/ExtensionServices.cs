@@ -81,5 +81,15 @@ namespace Domain.Services
                 }    
             }
         }
+        public async Task LoadModifiedDate()
+        {
+            var documents = _document.All().ToList();
+            foreach (var document in documents)
+            {
+                document.ModifiedDate = DateTime.Now;
+                _document.Update(document);
+            }
+            await UnitOfWork.CommitAsync();
+        }
     }
 }

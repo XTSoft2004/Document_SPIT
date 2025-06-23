@@ -1,5 +1,6 @@
 ﻿using Domain.Common.Http;
 using Domain.Model.Request.Document;
+using Domain.Model.Response.Document;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,7 @@ namespace Domain.Interfaces.Services
         /// </summary>
         /// <param name="documentRequest"></param>
         /// <returns></returns>
-        Task<HttpResponse> CreateAsync(DocumentRequest documentRequest);
+        Task<HttpResponse> CreateAsync(DocumentCreateRequest documentRequest);
         /// <summary>
         /// Cập nhật tài liệu theo IdDocument
         /// </summary>
@@ -41,5 +42,14 @@ namespace Domain.Interfaces.Services
         /// <param name="IdDocument"></param>
         /// <returns></returns>
         Task<(byte[] Data, string ContentType, string FileName)> DownloadFile(string FileId);
+        /// <summary>
+        /// Lấy danh sách tài liệu với phân trang và tìm kiếm
+        /// </summary>
+        /// <param name="search"></param>
+        /// <param name="pageNumber"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="totalRecords"></param>
+        /// <returns></returns>
+        List<DocumentResponse> GetDocuments(string search, int pageNumber, int pageSize, out int totalRecords);
     }
 }

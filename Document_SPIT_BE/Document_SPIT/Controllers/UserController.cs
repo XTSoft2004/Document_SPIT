@@ -1,37 +1,76 @@
-﻿using Domain.Interfaces.Services;
+﻿using Domain.Common.Http;
+using Domain.Interfaces.Services;
+using Domain.Model.Request.User;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Document_SPIT_BE.Controllers
 {
-    [Route("user")] 
+    [Route("user")]
     [ApiController]
     public class UserController : Controller
     {
-        private readonly IUserServices? _sevices;
+        private readonly IUserServices? _services;
 
         public UserController(IUserServices? sevices)
         {
-            _sevices = sevices;
+            _services = sevices;
         }
 
-        [HttpPost("set-role/{roleName}")]
-        public async Task<IActionResult> SetRole(long userId,string roleName)
+        [HttpPost("set-role")]
+        public async Task<IActionResult> SetRole(long userId, string roleName)
         {
-            var response = await _sevices!.SetRole(userId, roleName);
+            var response = await _services!.SetRole(userId, roleName);
             return response.ToActionResult();
         }
         [HttpGet("me")]
         public async Task<IActionResult> GetMe()
         {
-            var response = await _sevices!.GetMe();
+            var response = await _services!.GetMe();
             return response.ToActionResult();
         }
         [HttpGet("history/{userId}")]
         public async Task<IActionResult> GetHistory(long userId)
         {
-            var response = await _sevices!.GetHistory(userId);
+            var response = await _services!.GetHistory(userId);
 
             return response.ToActionResult();
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetAllUsers(string search = "", int pageNumber = -1, int pageSize = -1)
+        {
+            var users = _services.GetUser(search, pageNumber, pageSize, out int totalRecords);
+
+            if (users == null)
+                return BadRequest(new { Message = "Danh sách người dùng trống !!!" });
+
+            var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+
+            return Ok(ResponseArray.ResponseList(users, totalRecords, totalPages, pageNumber, pageSize));
+        }
+        [HttpPatch("{Id}")]
+        public async Task<IActionResult> UpdateAsync(long Id, UserRequest userRequest)
+        {
+            if (userRequest == null)
+                return BadRequest(new { Message = "Thông tin người dùng không hợp lệ." });
+
+            var response = await _services!.UpdateAsync(Id, userRequest);
+            return response.ToActionResult();
+        }
+        [HttpGet("ban-account/{userId}")]
+        public async Task<IActionResult> BanAccount(long userId)
+        {
+            var response = await _services!.BanAccount(userId);
+            return response.ToActionResult();
+        }
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateAsync(UserCreateRequest userRequest)
+        {
+            if (userRequest == null)
+                return BadRequest(new { Message = "Thông tin người dùng không hợp lệ." });
+
+            var response = await _services!.CreateAsync(userRequest);
+            return response.ToActionResult();
+
         }
     }
 }

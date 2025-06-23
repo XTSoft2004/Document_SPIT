@@ -259,6 +259,25 @@ namespace Domain.Common.GoogleDriver.Services
             }
             return null;
         }
+        public async Task<HttpResponse> CreateFolder(string folderName, string parentId = "")
+        {
+            var listFolder = await GetInfoFolder(parentId, true);
+            if (listFolder != null && listFolder.Any(f => f?.Name == folderName && f?.IsFolder == true))
+                return HttpResponse.Error("Thư mục đã tồn tại trong Google Drive.");
+
+            var jsonData = new
+            {
+                name = folderName,
+                mimeType = "application/vnd.google-apps.folder",
+                parents = string.IsNullOrEmpty(parentId) ? new string[] { } : new[] { parentId }
+            };
+
+            var response = await _request.PostAsync($"https://www.googleapis.com/drive/v3/files", jsonData);
+            if (response.IsSuccessStatusCode)
+                return HttpResponse.OK("Tạo thư mục thành công.");
+
+            return HttpResponse.Error("Lỗi khi tạo thư mục trong Google Drive.");
+        }
         public async Task<InfoGoogleDriverResponse?> GetInfoGoogleDriver()
         {
             await GetAccessToken();

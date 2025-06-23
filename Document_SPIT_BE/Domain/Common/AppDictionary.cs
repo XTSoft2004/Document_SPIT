@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Domain.Common
@@ -54,6 +55,16 @@ namespace Domain.Common
         {
             string extension = Path.GetExtension(fileName).ToLowerInvariant();
             return MimeTypes.TryGetValue(extension, out var mime) ? mime : "application/octet-stream";
+        }
+        public static string GetMimeTypeFromBase64(string base64)
+        {
+            // Ví dụ: data:image/jpeg;base64,...
+            var match = Regex.Match(base64, @"^data:(?<mime>.+?);base64");
+            if (match.Success)
+            {
+                return match.Groups["mime"].Value;
+            }
+            return null;
         }
     }
 }

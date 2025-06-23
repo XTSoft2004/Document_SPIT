@@ -47,5 +47,12 @@ namespace Domain.Common.GoogleDriver.Interfaces
         /// </summary>
         /// <returns></returns>
         Task<InfoGoogleDriverResponse?> GetInfoGoogleDriver();
+        /// <summary>
+        /// Tạo một thư mục mới trong Google Drive
+        /// </summary>
+        /// <param name="folderName"></param>
+        /// <param name="parentId"></param>
+        /// <returns></returns>
+        Task<HttpResponse> CreateFolder(string folderName, string parentId = "");
     }
 }

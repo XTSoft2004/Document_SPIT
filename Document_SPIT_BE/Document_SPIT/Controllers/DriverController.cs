@@ -29,6 +29,18 @@ namespace Document_SPIT_BE.Controllers
             
             return Ok(response);
         }
+        [HttpGet("create-folder")]
+        public async Task<IActionResult> CreateFolder(string folderName, string parentId = "")
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+            if (string.IsNullOrEmpty(folderName))
+                return BadRequest(new { Message = "Tên thư mục không được để trống" });
+
+            var response = await _services.CreateFolder(folderName, parentId);
+            return response.ToActionResult();
+        }
+
         [HttpGet("thumbnail/{fileId}")]
         public async Task<IActionResult> GetThumbnailBase64(string fileId)
         {

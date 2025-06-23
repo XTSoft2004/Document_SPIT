@@ -1,4 +1,5 @@
 ﻿using Domain.Common.GoogleDriver.Interfaces;
+using Domain.Common.Http;
 using Domain.Interfaces.Services;
 using Domain.Model.Request.Document;
 using Microsoft.AspNetCore.Mvc;
@@ -18,7 +19,7 @@ namespace Document_SPIT_BE.Controllers
         }
 
         [HttpPost("create")]
-        public async Task<IActionResult> CreateAsync(DocumentRequest documentRequest)
+        public async Task<IActionResult> CreateAsync(DocumentCreateRequest documentRequest)
         {
             if (!ModelState.IsValid)
                 return BadRequest(DefaultString.INVALID_MODEL);
@@ -57,6 +58,18 @@ namespace Document_SPIT_BE.Controllers
             Response.Headers["Content-Disposition"] = $"attachment; filename=\"{fileName}\"";
             return new FileContentResult(data, contentType);
         }
+        [HttpGet]
+        public async Task<IActionResult> GetDocuments(string search = "", int pageNumber = -1, int pageSize = -1)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
 
+            var documents = _services.GetDocuments(search, pageNumber, pageSize, out int totalRecords);
+            if (documents == null || !documents.Any())
+                return NotFound(new { Message = "Danh sách tài liệu trống !!!" });
+
+            var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+            return Ok(ResponseArray.ResponseList(documents, totalRecords, totalPages, pageNumber, pageSize));
+        }
     }
 }

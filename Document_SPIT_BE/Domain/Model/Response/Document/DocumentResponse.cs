@@ -8,6 +8,7 @@ namespace Domain.Model.Response.Document
 {
     public class DocumentResponse
     {
+        public long? Id { get; set; }
         public string? Name { get; set; }
         public long? TotalDownloads { get; set; } = 0;
         public long? TotalViews { get; set; } = 0;
@@ -16,5 +17,15 @@ namespace Domain.Model.Response.Document
         public string? StatusDocument { get; set; }
         public long? UserId { get; set; }
         public string? FolderId { get; set; }
+        public string TypeFile
+        {
+            get
+            {
+                var extension = Path.GetExtension(Name);
+                return string.IsNullOrEmpty(extension) ? "Unknown" : extension.TrimStart('.').ToLower();
+            }
+        }
+        public DateTime? CreatedDate { get; set; }
+        public DateTime? ModifiedDate { get; set; }
     }
 }
