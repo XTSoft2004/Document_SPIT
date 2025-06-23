@@ -1,20 +1,23 @@
-import { IDriveItem } from '../types/driver.d.ts'
-import { getSlug } from './getSlug.ts'
+import { IDriveResponse } from '@/types/driver.js'
+import convertSlug from './convertSlug'
 
-export default function getContent(data: IDriveItem[], path: string[]) {
-  let cur = data
+export default function getContent(data: IDriveResponse[], slug: string[]) {
+  let curData = data
   const path: string[] = []
 
-  for (const item of path) {
-    const slug = getSlug({ slug: [item] })[0]
-    const found = cur.find((i) => i.name === slug)
-    if (!found) return { path, items: [] }
-    path.push(found.name)
-    cur = found.children ?? []
+  for (const segment of slug) {
+    const folder = curData.find(
+      (item) => item.isFolder && convertSlug(item.name) === segment,
+    )
+    if (!folder?.children) {
+      return { path, items: [] }
+    }
+    path.push(folder.name)
+    curData = folder.children
   }
 
   return {
     path,
-    items: cur.map(({ children, ...item }) => item),
+    items: curData.map(({ children, ...rest }) => rest),
   }
 }

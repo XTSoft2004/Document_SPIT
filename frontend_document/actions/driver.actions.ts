@@ -9,7 +9,12 @@ import {
   IShowResponse,
 } from '@/types/global'
 import { revalidateTag } from 'next/cache'
-import { ILoadFolder, IUploadFile, IFolder } from '@/types/driver'
+import {
+  ILoadFolder,
+  IUploadFile,
+  IFolder,
+  IDriveResponse,
+} from '@/types/driver'
 
 export const getThumbnail = async (fileId: string) => {
   const response = await fetch(
@@ -141,7 +146,8 @@ export const findFolderByName = async (name: string, parentId: string) => {
     data: res,
   } as IShowResponse<IFolder>
 }
-export const getTree = async (folderId: string) => {
+export const getTree = async () => {
+  const folderId = process.env.NEXT_PUBLIC_FOLDER_ID_HOME || '0'
   const response = await fetch(
     `${globalConfig.baseUrl}/driver/tree/${folderId}`,
     {
@@ -149,7 +155,9 @@ export const getTree = async (folderId: string) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      tag: 'driver.tree',
+      next: {
+        tags: ['driver.tree'],
+      },
     },
   )
 
@@ -158,6 +166,6 @@ export const getTree = async (folderId: string) => {
   return {
     ok: response.ok,
     status: response.status,
-    ...data,
+    data: data,
   } as IIndexResponse<IDriveResponse>
 }

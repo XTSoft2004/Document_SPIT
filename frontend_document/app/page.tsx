@@ -3,5 +3,9 @@ import Image from 'next/image'
 import DocumentPage from './document/[[...slug]]/page'
 
 export default function Home() {
-  return <DocumentPage></DocumentPage>
+  return (
+    <>
+      <h1>hihih</h1>
+    </>
+  )
 }
