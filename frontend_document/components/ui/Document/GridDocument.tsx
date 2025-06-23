@@ -1,26 +1,32 @@
 'use client'
 import PathFolder from './PathFolder';
-import { IDriveItem } from '@/types/driver';
-import { useRouter } from 'next/navigation';
+import { IDriveItem, IDriveResponse } from '@/types/driver';
 import { useState, useEffect, useMemo } from 'react';
 import { ListIcon, LayoutGridIcon } from 'lucide-react';
 import GridDocumentList from './GridDocumentList';
 import Back from './Back';
 import PreviewFile from './PreviewFile';
-import globalConfig from '@/app.config';
 import GridDocumentPreview from './GridDocumentPreview';
+import DocumentTreeView from './DocumentTreeView';
+import { useRouter } from 'next/navigation';
+import { ITreeNode } from '@/types/tree';
+
 interface GridDocumentProps {
     content: IDriveItem[]
     slug: string[]
     path: string[]
+    treeData: ITreeNode[]
 }
 
-export default function GridDocument({ content, slug, path }: GridDocumentProps) {
+export default function GridDocument({ content, slug, path, treeData }: GridDocumentProps & { treeData: any[] }) {
     const router = useRouter();
     const url = useMemo(() => slug.join('/'), [slug]);
     const [mode, setModeState] = useState<'list' | 'preview'>('list');
     const [previewFile, setPreviewFile] = useState<{ fileName: string, folderId: string } | null>(null);
     const [loading, setLoading] = useState(false);
+
+    const [selectedKeys, setSelectedKeys] = useState<string[]>([path[path.length - 1]]);
+    const [expandedKeys, setExpandedKeys] = useState<string[]>(path);
 
     useEffect(() => {
         setLoading(false);
@@ -37,6 +43,20 @@ export default function GridDocument({ content, slug, path }: GridDocumentProps)
         setModeState(m);
         if (typeof window !== 'undefined') {
             localStorage.setItem('doc_mode', m);
+        }
+    };
+
+
+    useEffect(() => {
+        setSelectedKeys([path[path.length - 1]]);
+        setExpandedKeys(path);
+    }, [path]);
+
+
+    const handleTreeSelect = (keys: React.Key[], info: any) => {
+        if (info.node && info.node.key) {
+            console.log(info, keys)
+            router.push(`/document/${info.node.path.join('/')}`);
         }
     };
 
@@ -93,33 +113,46 @@ export default function GridDocument({ content, slug, path }: GridDocumentProps)
                         </div>
                     </div>
 
-                    {/* Hiển thị dạng list */}
-                    {mode === 'list' && (
-                        <GridDocumentList
-                            content={content}
-                            url={url}
-                            onPreviewFile={file => setPreviewFile({ fileName: file.name, folderId: file.folderId })}
-                            onFolderClick={() => setLoading(true)}
-                        />
-                    )}
+                    <div className="flex gap-4">
+                        <div className="w-64 min-w-[200px] max-w-[300px]">
+                            <DocumentTreeView
+                                treeData={treeData}
+                                selectedKeys={selectedKeys}
+                                onSelect={handleTreeSelect}
+                                expandedKeys={expandedKeys}
+                                onExpand={(keys) => setExpandedKeys(keys.map(String))}
+                            />
+                        </div>
+                        <div className="flex-1">
+                            {/* Hiển thị dạng list */}
+                            {mode === 'list' && (
+                                <GridDocumentList
+                                    content={content}
+                                    url={url}
+                                    onPreviewFile={file => setPreviewFile({ fileName: file.name, folderId: file.folderId })}
+                                    onFolderClick={() => setLoading(true)}
+                                />
+                            )}
 
-                    {/* Hiển thị dạng lưới */}
-                    {mode === 'preview' && (
-                        <GridDocumentPreview
-                            content={content}
-                            url={url}
-                            onPreviewFile={file => setPreviewFile({ fileName: file.name, folderId: file.folderId })}
-                            onFolderClick={() => setLoading(true)}
-                        />
-                    )}
+                            {/* Hiển thị dạng lưới */}
+                            {mode === 'preview' && (
+                                <GridDocumentPreview
+                                    content={content}
+                                    url={url}
+                                    onPreviewFile={file => setPreviewFile({ fileName: file.name, folderId: file.folderId })}
+                                    onFolderClick={() => setLoading(true)}
+                                />
+                            )}
 
-                    {/* Popup preview file */}
-                    <PreviewFile
-                        open={!!previewFile}
-                        onClose={() => setPreviewFile(null)}
-                        fileName={previewFile?.fileName || ''}
-                        folderId={previewFile?.folderId || ''}
-                    />
+                            {/* Popup preview file */}
+                            <PreviewFile
+                                open={!!previewFile}
+                                onClose={() => setPreviewFile(null)}
+                                fileName={previewFile?.fileName || ''}
+                                folderId={previewFile?.folderId || ''}
+                            />
+                        </div>
+                    </div>
                 </div>
             </main>
         </>
