@@ -54,9 +54,12 @@ export default function GridDocument({ content, slug, path, treeData }: GridDocu
 
 
     const handleTreeSelect = (keys: React.Key[], info: any) => {
-        if (info.node && info.node.key) {
-            console.log(info, keys)
-            router.push(`/document/${info.node.path.join('/')}`);
+        const node = info.node;
+        if (!node) return;
+        if (node.isLeaf) {
+            setPreviewFile({ fileName: node.title, folderId: node.id });
+        } else {
+            router.push(`/document/${node.path.join('/')}`);
         }
     };
 
