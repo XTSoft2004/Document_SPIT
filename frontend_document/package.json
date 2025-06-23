@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ant-design/nextjs-registry": "^1.0.2",
     "antd": "^5.26.1",
     "autoprefixer": "^10.4.21",
     "framer-motion": "^12.18.1",

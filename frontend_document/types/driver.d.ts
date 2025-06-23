@@ -18,3 +18,15 @@ export interface IFolder {
   name: string
   folderId: string
 }
+
+export interface IDriveResponse {
+  name: string
+  folderId: string
+  isFolder: boolean
+  children: IDriveResponse[]
+}
+export interface IDriveItem {
+  name: string
+  folderId: string
+  isFolder: boolean
+}

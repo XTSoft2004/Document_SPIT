@@ -141,3 +141,23 @@ export const findFolderByName = async (name: string, parentId: string) => {
     data: res,
   } as IShowResponse<IFolder>
 }
+export const getTree = async (folderId: string) => {
+  const response = await fetch(
+    `${globalConfig.baseUrl}/driver/tree/${folderId}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      tag: 'driver.tree',
+    },
+  )
+
+  const data = await response.json()
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    ...data,
+  } as IIndexResponse<IDriveResponse>
+}
