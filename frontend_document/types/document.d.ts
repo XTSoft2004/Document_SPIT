@@ -1,11 +1,8 @@
 export interface IDocumentRequest {
-  base64String: string
-  fileName: string
-  folderId: string
   name: string
-  isPrivate: boolean
-  statusDocument: string
-  userId: number
+  fileName: string
+  base64String: string
+  folderId: string
 }
 
 export interface IDocumentResponse {

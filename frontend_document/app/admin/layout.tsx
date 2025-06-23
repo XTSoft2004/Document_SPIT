@@ -6,7 +6,7 @@ import { ChartRadialStacked } from "@/components/ui/Admin/Dashboard/radial-chart
 import { ChartLineInteractive } from "@/components/ui/Admin/Dashboard/chart-line-interactive";
 import ActivityRight from "@/components/ui/Admin/Dashboard/activity-right";
 import DraggerUpload from "@/components/ui/Admin/Dashboard/dragger-upload";
-import RightSidebar from "@/components/ui/Admin/Dashboard/right-sidebar";
+import RightSidebar, { RightSidebarMobile } from "@/components/ui/Admin/Dashboard/right-sidebar";
 
 export const metadata = {
     title: "Trang chủ | Quản trị",
@@ -39,14 +39,7 @@ export default function RootLayout({
                                 {children}
                             </div>
 
-                            {/* Mobile-only widget */}
-                            {typeof window !== "undefined" && window.location.pathname === "/admin/dashboard" && (
-                                <div className="md:hidden px-4 lg:px-6 space-y-4 overflow-x-auto">
-                                    <ChartRadialStacked />
-                                    <hr className="border-gray-200" />
-                                    <ActivityRight />
-                                </div>
-                            )}
+                            <RightSidebarMobile />
                         </main>
 
                         {/* Right-side widget (desktop) */}

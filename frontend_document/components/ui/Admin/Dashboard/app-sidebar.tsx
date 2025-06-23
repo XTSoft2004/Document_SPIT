@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/shadcn-ui/sidebar"
 import { NavCRUD } from "./nav-curd"
 import { Image } from "antd";
+import { useRouter } from "next/navigation"
 
 const data = {
   user: {
@@ -153,6 +154,8 @@ const data = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const router = useRouter();
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader className="gap-0 p-0">
@@ -162,7 +165,25 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               // asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5 flex items-center space-x-3 h-90"
             >
-              <a href="#" className="flex items-center space-x-3">
+              <div
+                className="flex items-center space-x-3 cursor-pointer"
+                onClick={() => {
+                  router.push('/admin/dashboard');
+
+                  // Use next/navigation router
+                  // If using next/router (for pages directory), import useRouter from 'next/router'
+                  // For app directory, import useRouter from 'next/navigation'
+                  // Here is for app directory:
+                  // import { useRouter } from 'next/navigation'
+                  // const router = useRouter();
+                  // router.push('/admin/dashboard');
+                  // But hooks can't be used here directly, so move hook to parent component
+
+                  // We'll lift useRouter to AppSidebar and pass as prop or use a callback
+                  // But for simplicity, see below in main component
+                }}
+                id="sidebar-logo"
+              >
                 <div className="flex items-center justify-center h-12 w-12">
                   <Image
                     src="/images/logo/logo_clb.png"
@@ -177,7 +198,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <span className="font-semibold text-lg text-primary">
                   Document SPIT
                 </span>
-              </a>
+              </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

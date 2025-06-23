@@ -7,9 +7,10 @@ import NotificationService from "@/components/ui/Notification/NotificationServic
 import DataGrid from "@/components/ui/Table/DataGrid";
 import Searchbar from "@/components/ui/Table/Searchbar";
 import { IUserResponse } from "@/types/user";
+import { reloadSWR } from "@/utils/swrReload";
 import { Button, TableColumnType } from "antd";
 import { Lock, LockOpen, Pen } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { mutate } from "swr";
 
 export default function UserPage() {
@@ -130,9 +131,6 @@ export default function UserPage() {
 
     const [isShowModalUpdate, setIsShowModalUpdate] = useState(false);
     const [isShowModalCreate, setIsShowModalCreate] = useState(false);
-    const handleSearch = (value: string) => {
-
-    };
     return (
         <>
             <DataGrid<IUserResponse>
@@ -149,6 +147,7 @@ export default function UserPage() {
                         setIsShowModalCreate(true);
                     },
                 }}
+                singleSelect={true}
             />
 
             <ModalUpdateUser
@@ -156,7 +155,7 @@ export default function UserPage() {
                 user={selectedUser}
                 onCancel={() => {
                     setIsShowModalUpdate(false);
-                    mutate(['user', '', 1, 10]);
+                    reloadSWR()
                 }}
             />
 
@@ -164,7 +163,7 @@ export default function UserPage() {
                 visible={isShowModalCreate}
                 onCancel={() => {
                     setIsShowModalCreate(false);
-                    mutate(['user', '', 1, 10]);
+                    reloadSWR()
                 }}
             />
         </>

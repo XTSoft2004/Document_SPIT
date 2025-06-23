@@ -19,15 +19,13 @@ export const createDocument = async (
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${cookies().get('token')?.value || ''}`,
+      Authorization: `Bearer ${cookies().get('accessToken')?.value || ''}`,
     },
     body: JSON.stringify(formData),
   })
 
   const data = await response.json()
-
   revalidateTag('document.index')
-  revalidateTag('document.show')
 
   return {
     ok: response.ok,
@@ -43,7 +41,7 @@ export const updateDocument = async (
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${cookies().get('token')?.value || ''}`,
+      Authorization: `Bearer ${cookies().get('accessToken')?.value || ''}`,
     },
     body: JSON.stringify(formData),
   })
@@ -51,7 +49,6 @@ export const updateDocument = async (
   const data = await response.json()
 
   revalidateTag('document.index')
-  revalidateTag('document.show')
 
   return {
     ok: response.ok,
@@ -65,7 +62,7 @@ export const deleteDocument = async (id: string): Promise<IBaseResponse> => {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${cookies().get('token')?.value || ''}`,
+      Authorization: `Bearer ${cookies().get('accessToken')?.value || ''}`,
     },
     body: JSON.stringify({ id }),
   })

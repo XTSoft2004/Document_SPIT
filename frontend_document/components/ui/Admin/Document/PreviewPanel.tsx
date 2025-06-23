@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "antd";
 import { Tag, XCircle } from "lucide-react";
 import { IDocumentResponse } from "@/types/document";
@@ -26,7 +26,7 @@ const PreviewPanel = ({ selectedItem, onClose, onReload }: PreviewPanelProps) =>
     const isImage = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'].includes(selectedItem.typeFile?.toLowerCase());
 
     return (
-        <div className="flex-shrink-0 h-[90%] w-[350px]">
+        <div className="w-full md:w-[350px] h-[90%]">
             <div className="p-2 bg-white rounded-xl shadow-lg border border-gray-100 h-full flex flex-col">
                 <div className="font-semibold text-gray-700 mb-2 flex items-center justify-between">
                     Xem trước file:

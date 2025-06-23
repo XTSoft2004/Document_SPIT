@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Pagination, Table } from 'antd';
 import type { TableColumnsType, TableProps } from 'antd';
 import useSWR from 'swr';
@@ -36,6 +36,22 @@ const DataGrid = <T extends object>({
     const [searchText, setSearchText] = useState('');
     const [selectedKey, setSelectedKey] = useState<React.Key | null>(null);
     const [selectedItem, setSelectedItem] = useState<T | null>(null);
+    const [internalReloadFlag, setInternalReloadFlag] = useState(0);
+
+    const triggerReload = () => {
+        setInternalReloadFlag(prev => prev + 1);
+    };
+
+    // Lắng nghe sự kiện reload từ hệ thống
+    useEffect(() => {
+        const handleReload = () => {
+            triggerReload();
+        };
+        window.addEventListener('reload-datagrid', handleReload);
+        return () => {
+            window.removeEventListener('reload-datagrid', handleReload);
+        };
+    }, []);
 
     const columnsWithSTT: TableColumnsType<T> = [
         {
@@ -50,7 +66,7 @@ const DataGrid = <T extends object>({
     ];
 
     const { data, isLoading } = useSWR<IIndexResponse<T>>(
-        [nameTable, searchText, pageIndex, pageSize] as const,
+        [nameTable, searchText, pageIndex, pageSize, internalReloadFlag] as const,
         async (args: readonly [string | undefined, string, number, number]) => {
             const [, search, page, limit] = args;
             if (fetcher) {

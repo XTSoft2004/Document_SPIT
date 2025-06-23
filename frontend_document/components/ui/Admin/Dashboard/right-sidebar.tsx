@@ -5,7 +5,7 @@ import { useEffect, useState } from "react"
 import { ChartRadialStacked } from "./radial-chart"
 import ActivityRight from "./activity-right"
 
-export default function RightSidebar() {
+function RightSidebar() {
     const [show, setShow] = useState(false)
 
     useEffect(() => {
@@ -24,3 +24,25 @@ export default function RightSidebar() {
         </aside>
     )
 }
+
+export function RightSidebarMobile() {
+    const [show, setShow] = useState(false)
+
+    useEffect(() => {
+        if (typeof window !== "undefined" && window.location.pathname.startsWith("/admin/dashboard")) {
+            setShow(true)
+        }
+    }, [])
+
+    if (!show) return null
+
+    return (
+        <div className="md:hidden px-4 lg:px-6 space-y-4 overflow-x-auto">
+            <ChartRadialStacked />
+            <hr className="border-gray-200" />
+            <ActivityRight />
+        </div>
+    )
+}
+
+export default RightSidebar;
