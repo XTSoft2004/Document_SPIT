@@ -24,14 +24,16 @@ const Search = ({ allItems, onResult }: SearchProps) => {
     }, [query, allItems, onResult]);
 
     return (
-        <Input
-            allowClear
-            prefix={<SearchOutlined />}
-            placeholder="Tìm kiếm toàn bộ file hoặc thư mục..."
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-            className="mb-2"
-        />
+        <div className="flex justify-center items-center">
+            <Input
+                allowClear
+                prefix={<SearchOutlined className="text-blue-500" />}
+                placeholder="Tìm kiếm toàn bộ file hoặc thư mục..."
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                className="w-[150px] rounded-lg shadow-md px-3 py-2"
+            />
+        </div>
     );
 };
 

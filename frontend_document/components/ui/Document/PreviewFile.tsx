@@ -1,5 +1,7 @@
 import globalConfig from '@/app.config';
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
+import { Card, Skeleton } from 'antd';
+import LoadingSkeleton from '../Loading/LoadingSkeleton';
 
 interface PreviewFilePopupProps {
     open: boolean;
@@ -16,6 +18,7 @@ export default function PreviewFile({ open, onClose, fileName, folderId }: Previ
     const [origin, setOrigin] = useState({ x: 0, y: 0 });
     const [translate, setTranslate] = useState({ x: 0, y: 0 });
     const [isFullscreen, setIsFullscreen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleZoomIn = () => setScale((s) => Math.min(s + 0.2, 5));
     const handleZoomOut = () => setScale((s) => Math.max(s - 0.2, 0.2));
@@ -54,6 +57,24 @@ export default function PreviewFile({ open, onClose, fileName, folderId }: Previ
             }
         }
     };
+
+    useEffect(() => {
+        if (open && folderId) {
+            setIsLoading(true);
+            const timer = setTimeout(() => {
+                setIsLoading(false);
+            }, 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [open, folderId]);
+
+    useEffect(() => {
+        if (!open) {
+            setScale(1);
+            setTranslate({ x: 0, y: 0 });
+            setIsLoading(false);
+        }
+    }, [open]);
 
     React.useEffect(() => {
         const onFullScreenChange = () => {
@@ -134,13 +155,23 @@ export default function PreviewFile({ open, onClose, fileName, folderId }: Previ
                     )}
                 </div>
                 <div
-                    className="flex-1 overflow-auto p-1 flex justify-center items-center"
+                    className="flex-1 overflow-auto flex justify-center items-center"
                     style={{ cursor: isImage && isPanning ? 'grabbing' : isImage ? 'grab' : 'default' }}
                     onMouseMove={isImage ? handleMouseMove : undefined}
                     onMouseUp={isImage ? handleMouseUp : undefined}
                     onMouseLeave={isImage ? handleMouseUp : undefined}
                 >
-                    {isImage ? (
+                    {isLoading ? (
+                        <div className="w-full max-w-2xl mx-auto p-8">
+                            <LoadingSkeleton
+                                count={1}
+                                columns={1}
+                                showImage={true}
+                                imageHeight="20rem"
+                                rows={1}
+                            />
+                        </div>
+                    ) : isImage ? (
                         <img
                             ref={imgRef}
                             src={`${globalConfig.baseUrl}/driver/preview/${folderId}`}
@@ -159,7 +190,7 @@ export default function PreviewFile({ open, onClose, fileName, folderId }: Previ
                     ) : (
                         <iframe
                             src={`${globalConfig.baseUrl}/driver/preview/${folderId}#toolbar=0`}
-                            className="w-full h-full rounded-b-xl border-0"
+                            className="w-full h-full border-0"
                             style={{ minHeight: '80vh', height: '100%' }}
                         />
                     )}

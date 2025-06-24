@@ -1,34 +1,83 @@
 'use client';
 
 import Image from 'next/image';
-import { Avatar } from 'antd';
-import { UserOutlined } from '@ant-design/icons';
-import { useRouter } from 'next/navigation'
+import { Avatar, Input } from 'antd';
+import { SearchOutlined, UserOutlined } from '@ant-design/icons';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { ITreeNode } from '@/types/tree';
+import { IDriveItem } from '@/types/driver';
 
-const Header = () => {
+interface HeaderProps {
+    treeData?: ITreeNode[];
+    allItems?: IDriveItem[];
+    onMobileSearch?: (results: IDriveItem[] | null) => void;
+}
+
+const Header = ({ treeData, allItems, onMobileSearch }: HeaderProps) => {
     const router = useRouter();
-    return (
-        <header className="w-full flex items-center justify-between px-6 py-3 bg-white shadow-lg border-b border-gray-200">
-            {/* Left: Logo */}
-            <div className="flex-shrink-0">
-                <Image
-                    src="/logo/logo-500x500.png"
-                    alt="Logo"
-                    width={50}
-                    height={50}
-                    className="rounded-full object-cover transition-transform hover:scale-105"
-                    onClick={() => router.push('/document')}
-                />
-            </div>
+    const [searchQuery, setSearchQuery] = useState("");
 
-            {/* Right: Avatar */}
-            <div className="flex-shrink-0">
-                <Avatar
-                    shape="circle"
-                    size={48}
-                    icon={<UserOutlined className="text-gray-600" />}
-                    className="hover:shadow-md transition-shadow duration-200"
-                />
+    useEffect(() => {
+        if (allItems && onMobileSearch) {
+            if (!searchQuery.trim()) {
+                onMobileSearch(null);
+            } else {
+                const lower = searchQuery.toLowerCase();
+                const filtered = allItems.filter(item =>
+                    item.name.toLowerCase().includes(lower)
+                );
+                onMobileSearch(filtered);
+            }
+        }
+    }, [searchQuery, allItems, onMobileSearch]);
+    return (
+        <header className="w-full flex flex-col bg-white shadow-lg border-b border-gray-200">
+            {/* Main header */}
+            <div className="flex items-center justify-between px-4 sm:px-6 py-3">
+                {/* Left: Logo */}
+                <div className="flex-shrink-0">
+                    <Image
+                        src="/logo/logo-500x500.png"
+                        alt="Logo"
+                        width={40}
+                        height={40}
+                        className="sm:w-[50px] sm:h-[50px] rounded-full object-cover transition-transform hover:scale-105 cursor-pointer"
+                        onClick={() => router.push('/document')}
+                    />
+                </div>
+
+                {/* Only show search bar on mobile */}
+                {allItems && (
+                    <div className="flex-1 flex justify-center items-center w-full sm:hidden">
+                        <div className="w-full max-w-xs">
+                            <Input
+                                allowClear
+                                placeholder="Tìm kiếm toàn bộ file hoặc thư mục..."
+                                prefix={<SearchOutlined className="text-blue-500" />}
+                                value={searchQuery}
+                                onChange={e => setSearchQuery(e.target.value)}
+                                className="rounded-lg shadow-sm border-gray-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition-all duration-200"
+                                size="large"
+                                style={{
+                                    width: '100%',
+                                    minWidth: 60,
+                                    transition: 'max-width 0.3s, min-width 0.3s'
+                                }}
+                            />
+                        </div>
+                    </div>
+                )}
+
+                {/* Right: Avatar */}
+                <div className="flex-shrink-0">
+                    <Avatar
+                        shape="circle"
+                        size={40}
+                        icon={<UserOutlined className="text-gray-600" />}
+                        className="sm:w-12 sm:h-12 hover:shadow-md transition-shadow duration-200"
+                    />
+                </div>
             </div>
         </header>
     );

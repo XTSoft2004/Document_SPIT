@@ -1,17 +1,17 @@
 'use client'
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { ListIcon, LayoutGridIcon } from 'lucide-react';
 import PathFolder from './PathFolder';
-import { IDriveItem, IDriveResponse } from '@/types/driver';
-import { useState, useEffect, useMemo } from 'react';
-import { ListIcon, LayoutGridIcon, ChevronRight, ChevronLeft } from 'lucide-react';
 import GridDocumentList from './GridDocumentList';
 import Back from './Back';
 import PreviewFile from './PreviewFile';
 import GridDocumentPreview from './GridDocumentPreview';
-import DocumentTreeView from './DocumentTreeView';
-import { useRouter } from 'next/navigation';
+import SidebarTree from './SidebarTree';
+import { flattenData } from "@/utils/flattenData";
+import { IDriveItem, IDriveResponse } from '@/types/driver';
 import { ITreeNode } from '@/types/tree';
 import Search from './Search';
-import { flattenData } from "@/utils/flattenData";
 
 interface GridDocumentProps {
     data: IDriveResponse[]
@@ -19,114 +19,106 @@ interface GridDocumentProps {
     slug: string[]
     path: string[]
     treeData: ITreeNode[]
+    mobileSearchResults?: IDriveItem[] | null
 }
 
-export default function GridDocument({ data, content, slug, path, treeData }: GridDocumentProps & { treeData: any[] }) {
+export default function GridDocument({ data, content, slug, path, treeData, mobileSearchResults }: GridDocumentProps) {
     const router = useRouter();
     const url = useMemo(() => slug.join('/'), [slug]);
-    const [mode, setModeState] = useState<'list' | 'preview'>('list');
+    const [mode, setMode] = useState<'list' | 'preview'>('list');
     const [previewFile, setPreviewFile] = useState<{ fileName: string, folderId: string } | null>(null);
-    const [, setLoading] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [showTree, setShowTree] = useState(true);
     const [filtered, setFiltered] = useState<IDriveItem[] | null>(null);
+
     const allItems = useMemo(() => flattenData(data), [data]);
-    const [selectedKeys, setSelectedKeys] = useState<string[]>([path[path.length - 1]]);
+    const [selectedKeys, setSelectedKeys] = useState<string[]>([path.at(-1) || '']);
     const [expandedKeys, setExpandedKeys] = useState<string[]>(path);
 
     useEffect(() => {
-        setLoading(false);
+        setLoading(true);
+        const timer = setTimeout(() => setLoading(false), 300);
+        return () => clearTimeout(timer);
     }, [url]);
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const saved = localStorage.getItem('doc_mode') as 'list' | 'preview' | null;
-            if (saved && saved !== mode) setModeState(saved);
+            if (saved) setMode(saved);
         }
     }, []);
 
-    const setMode = (m: 'list' | 'preview') => {
-        setModeState(m);
-        if (typeof window !== 'undefined') {
-            localStorage.setItem('doc_mode', m);
-        }
-    };
-
-
     useEffect(() => {
-        setSelectedKeys([path[path.length - 1]]);
+        setSelectedKeys([path.at(-1) || '']);
         setExpandedKeys(path);
     }, [path]);
 
+    const handleSetMode = useCallback((m: 'list' | 'preview') => {
+        setMode(m);
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('doc_mode', m);
+        }
+    }, []);
 
-    const handleTreeSelect = (_: React.Key[], info: any) => {
+    const handleTreeSelect = useCallback((_: React.Key[], info: any) => {
         const node = info.node;
         if (!node) return;
-        console.log(info)
         if (node.isLeaf) {
             setPreviewFile({ fileName: node.title, folderId: node.id });
         } else {
             router.push(`/document/${node.path.join('/')}`);
         }
-    };
+    }, [router]);
+
+    const displayContent = useMemo(() => {
+        if (mobileSearchResults !== undefined && mobileSearchResults !== null) {
+            return mobileSearchResults;
+        }
+        return filtered ?? content;
+    }, [mobileSearchResults, filtered, content]);
 
     return (
         <div className="flex h-full min-h-0">
-            {/* TreeView bên trái */}
-            {showTree && (
-                <>
-                    <div className="flex h-full">
-                        <div className="w-64 min-w-[200px] max-w-[300px] flex-shrink-0 h-full max-h-full overflow-auto border-r border-gray-200 bg-white relative flex flex-col pt-4">
-                            <div className="sticky top-0 z-10 bg-white border-b border-gray-100 flex flex-col p-2 pl-0">
-                                <div className="flex items-center">
-                                    <button
-                                        className="p-1 rounded bg-white shadow hover:bg-gray-200 border border-gray-200 mr-2 ml-0"
-                                        onClick={() => setShowTree(false)}
-                                        title="Ẩn cây thư mục"
-                                        style={{ minWidth: 0 }}
-                                    >
-                                        <ChevronLeft className="w-5 h-5 text-blue-600" />
-                                    </button>
-                                    <span className="font-medium text-gray-700 flex-1 pl-2">Cây thư mục</span>
-                                </div>
-                                {/* Search nằm ngay dưới tiêu đề */}
-                                <Search allItems={allItems} onResult={setFiltered} />
-                            </div>
-                            <DocumentTreeView
-                                treeData={treeData}
-                                selectedKeys={selectedKeys}
-                                onSelect={handleTreeSelect}
-                                expandedKeys={expandedKeys}
-                                onExpand={(keys) => setExpandedKeys(keys.map(String))}
-                            />
-                        </div>
-                    </div>
-                </>
-            )}
-            {/* Button hiện cây thư mục */}
-            {!showTree && (
-                <button
-                    className="fixed left-0 top-24 z-30 p-1 rounded border border-gray-300 bg-white shadow hover:bg-blue-50 transition"
-                    onClick={() => setShowTree(true)}
-                    title="Hiện cây thư mục"
-                    style={{ minWidth: 0 }}
-                >
-                    <ChevronRight className="w-5 h-5 text-blue-600" />
-                </button>
-            )}
-            {/* Phần phải: PathFolder trên, document dưới */}
+            <SidebarTree
+                treeData={treeData}
+                selectedKeys={selectedKeys}
+                onSelect={handleTreeSelect}
+                expandedKeys={expandedKeys}
+                onExpand={keys => setExpandedKeys(keys.map(String))}
+                showTree={showTree}
+                onToggleTree={setShowTree}
+                allItems={allItems}
+                onSearchResult={setFiltered}
+            />
             <div className="flex-1 flex flex-col min-h-0 relative">
-                {/* PathFolder và các nút ở trên */}
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 w-full gap-3 flex-shrink-0 pt-4 px-4">
-                    <PathFolder path={path} />
-                    <div className="flex gap-2 items-center">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 sm:mb-4 w-full gap-2 sm:gap-3 flex-shrink-0 pt-3 sm:pt-4 px-3 sm:px-4">
+                    <div className="flex items-center gap-2 sm:gap-3 min-w-0 overflow-hidden">
+                        <PathFolder path={path} />
+                    </div>
+                    <div className="flex gap-1 sm:gap-2 items-center justify-end flex-shrink-0">
+                        {
+                            (!showTree && window.innerWidth > 768) && (
+                                <>
+                                    <div className="flex items-center ml-0 sm:ml-4 md:flex">
+                                        <Search allItems={allItems} onResult={setFiltered} />
+                                    </div>
+                                </>
+                            )
+                        }
+                        <button
+                            className="sm:hidden p-2 rounded bg-gray-200 text-gray-500 ml-2"
+                            onClick={() => setShowTree(!showTree)}
+                            title={showTree ? "Ẩn sidebar" : "Hiện sidebar"}
+                        >
+                            {showTree ? "Ẩn thư mục" : "Hiện thư mục"}
+                        </button>
                         <Back path={path} />
-                        {/* SwitchMode */}
                         <button
                             className={`relative overflow-hidden p-2 rounded transition-all duration-200 ${mode === 'list'
                                 ? 'bg-blue-100 text-blue-600 scale-110 shadow'
                                 : 'bg-gray-200 text-gray-500 scale-100'
                                 }`}
-                            onClick={() => setMode('list')}
+                            onClick={() => handleSetMode('list')}
                             title="Chế độ danh sách"
                         >
                             <span
@@ -144,7 +136,7 @@ export default function GridDocument({ data, content, slug, path, treeData }: Gr
                                 ? 'bg-blue-100 text-blue-600 scale-110 shadow'
                                 : 'bg-gray-200 text-gray-500 scale-100'
                                 }`}
-                            onClick={() => setMode('preview')}
+                            onClick={() => handleSetMode('preview')}
                             title="Chế độ lưới"
                         >
                             <span
@@ -159,22 +151,23 @@ export default function GridDocument({ data, content, slug, path, treeData }: Gr
                         </button>
                     </div>
                 </div>
-                {/* Document content bên dưới, scrollable */}
-                <div className="flex-1 min-h-0 overflow-auto px-4 pb-5">
-                    {mode === 'list' && (
+                {/* Content area với responsive padding */}
+                <div className="flex-1 min-h-0 overflow-auto px-3 sm:px-4 pb-4 sm:pb-5">
+                    {mode === 'list' ? (
                         <GridDocumentList
-                            content={filtered ?? content}
+                            content={displayContent}
                             url={url}
                             onPreviewFile={file => setPreviewFile({ fileName: file.name, folderId: file.folderId })}
                             onFolderClick={() => setLoading(true)}
+                            loading={loading}
                         />
-                    )}
-                    {mode === 'preview' && (
+                    ) : (
                         <GridDocumentPreview
-                            content={filtered ?? content}
+                            content={displayContent}
                             url={url}
                             onPreviewFile={file => setPreviewFile({ fileName: file.name, folderId: file.folderId })}
                             onFolderClick={() => setLoading(true)}
+                            loading={loading}
                         />
                     )}
                     <PreviewFile
@@ -185,6 +178,6 @@ export default function GridDocument({ data, content, slug, path, treeData }: Gr
                     />
                 </div>
             </div>
-        </div>
-    )
+        </div >
+    );
 }
