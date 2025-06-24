@@ -69,7 +69,7 @@ export default function PageRegister() {
                                 errors={errors}
                                 name="username"
                                 placeholder="Choose a username"
-                                label="Username"
+                                // label="Username"
                                 icon={<CircleUser size={20} className="text-gray-400" />}
                             />
                         </motion.div>
@@ -84,7 +84,6 @@ export default function PageRegister() {
                                 name="password"
                                 type="password"
                                 placeholder="Create a password"
-                                label="Password"
                                 icon={<KeyRound size={20} className="text-gray-400" />}
                             />
                         </motion.div>
@@ -99,7 +98,6 @@ export default function PageRegister() {
                                 name="fullname"
                                 type="text"
                                 placeholder="Enter your full name"
-                                label="Full Name"
                                 icon={<SquareUserRound size={20} className="text-gray-400" />}
                             />
                         </motion.div>

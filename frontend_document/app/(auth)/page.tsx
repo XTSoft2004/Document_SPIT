@@ -90,47 +90,49 @@ export default function PageAuth() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.6, duration: 0.5 }}
-                        className="flex mb-2 space-x-1 bg-gray-100/80 backdrop-blur-sm p-1.5 rounded-2xl justify-center relative shadow-inner"
+                        className="flex mb-6 space-x-1 bg-gray-100/80 backdrop-blur-sm p-1.5 rounded-2xl justify-center relative shadow-inner"
                     >
                         <motion.div
                             layout
-                            transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                             className="absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] rounded-xl bg-white shadow-lg border border-white/20"
                             style={{
                                 left: isSignIn ? '6px' : 'calc(50% + 2px)',
                             }}
                         />
-                        <button
+                        <motion.button
                             onClick={() => handleTabChange('login')}
-                            className={`flex-1 px-6 py-3 font-semibold rounded-xl relative z-10 transition-all duration-300 ease-out ${isSignIn
-                                ? 'text-blue-700 shadow-sm'
-                                : 'text-gray-500 hover:text-gray-700'
-                                } focus:outline-none focus:ring-2 focus:ring-blue-500/20`}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className={`flex-1 px-6 py-3 font-semibold rounded-xl relative z-10 transition-all duration-300 ease-out`}
                             aria-selected={isSignIn}
                         >
                             Sign In
-                        </button>
-                        <button
+                        </motion.button>
+                        <motion.button
                             onClick={() => handleTabChange('register')}
-                            className={`flex-1 px-6 py-3 font-semibold rounded-xl relative z-10 transition-all duration-300 ease-out ${!isSignIn
-                                ? 'text-blue-700 shadow-sm'
-                                : 'text-gray-500 hover:text-gray-700'
-                                } focus:outline-none focus:ring-2 focus:ring-blue-500/20`}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className={`flex-1 px-6 py-3 font-semibold rounded-xl relative z-10 transition-all duration-300 ease-out`}
                             aria-selected={!isSignIn}
                         >
                             Sign Up
-                        </button>
-                    </motion.div>                    {/* Form Container with Glass Effect */}
-                    <div className="min-h-[400px] flex items-center justify-center">
-                        <div className="w-full bg-white/50 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-white/20">
+                        </motion.button>
+                    </motion.div>{/* Form Container with Glass Effect */}
+                    <div className="h-[480px] flex items-center justify-center">
+                        <div className="w-full h-full bg-white/50 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-white/20 flex flex-col justify-center">
                             <AnimatePresence mode="wait">
                                 <motion.div
                                     key={isSignIn ? 'signIn' : 'signUp'}
-                                    initial={{ opacity: 0, x: isSignIn ? 50 : -50 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: isSignIn ? -50 : 50 }}
-                                    transition={{ duration: 0.4, ease: "easeInOut" }}
-                                    className="w-full"
+                                    initial={{ opacity: 0, x: isSignIn ? 50 : -50, scale: 0.95 }}
+                                    animate={{ opacity: 1, x: 0, scale: 1 }}
+                                    exit={{ opacity: 0, x: isSignIn ? -50 : 50, scale: 0.95 }}
+                                    transition={{
+                                        duration: 0.5,
+                                        ease: [0.25, 0.1, 0.25, 1],
+                                        layout: { duration: 0.3 }
+                                    }}
+                                    className="w-full h-full flex items-center justify-center"
                                 >
                                     {isSignIn ? <PageLogin /> : <PageRegister />}
                                 </motion.div>

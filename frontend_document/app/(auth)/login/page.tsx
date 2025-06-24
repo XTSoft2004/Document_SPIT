@@ -70,7 +70,6 @@ export default function PageLogin() {
                                 errors={errors}
                                 name="username"
                                 placeholder="Enter your username"
-                                label="Username"
                                 icon={<CircleUser size={20} className="text-gray-400" />}
                             />
                         </motion.div>
@@ -85,7 +84,6 @@ export default function PageLogin() {
                                 name="password"
                                 type="password"
                                 placeholder="Enter your password"
-                                label="Password"
                                 icon={<KeyRound size={20} className="text-gray-400" />}
                             />
                         </motion.div>
