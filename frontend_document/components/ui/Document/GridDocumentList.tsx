@@ -61,7 +61,7 @@ export default function GridDocumentList({
                 const path = `/document/${url}/${convertSlug(item.name)}`;
                 return (
                     <div
-                        key={item.name}
+                        key={item.folderId}
                         className="flex items-center gap-4 px-5 py-4 cursor-pointer bg-white border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all duration-200 group"
                         onClick={() => handleItemClick(item, path)}
                     >
