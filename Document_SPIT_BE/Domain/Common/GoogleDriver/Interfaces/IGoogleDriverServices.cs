@@ -59,11 +59,5 @@ namespace Domain.Common.GoogleDriver.Interfaces
         /// <param name="folderId"></param>
         /// <returns></returns>
         Task<List<TreeDocumentResponse>> GetTreeDocument(string folderId);
-        /// <summary>
-        /// Trả về folder của folderId
-        /// </summary>
-        /// <param name="folderId"></param>
-        /// <returns></returns>
-        Task<List<DriverItemResponse?>?> GetOnlyFolder(string folderId);
     }
 }

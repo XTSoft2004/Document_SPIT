@@ -105,13 +105,5 @@ namespace Document_SPIT_BE.Controllers
             var response = await _services.GetTreeDocument(folderId);
             return Ok(response);
         }
-        [HttpGet("findFolder/{folderId}")]
-        public async Task<IActionResult> GetOnlyFolder(string folderId)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(DefaultString.INVALID_MODEL);
-            var response = await _services.GetOnlyFolder(folderId);
-            return Ok(response);
-        }
     }
 }

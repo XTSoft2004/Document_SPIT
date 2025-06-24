@@ -355,27 +355,5 @@ namespace Domain.Common.GoogleDriver.Services
             var allItems = await GetAllDriveItems();
             return BuildDriveTree(allItems, rootFolderId);
         }
-        public async Task<List<DriverItemResponse?>?> GetOnlyFolder(string folderId)
-        {
-            await GetAccessToken();
-            var response = await _request.GetAsync(
-                $"https://www.googleapis.com/drive/v3/files?q='{folderId}'+in+parents&fields=files(id,name,webViewLink,webContentLink,createdTime,md5Checksum,mimeType)&orderBy=createdTime"
-            );
-            var result = _request.Content;
-            var jsonData = JObject.Parse(result)?["files"];
-            if (jsonData != null)
-            {
-                var filesInfo = JsonConvert.DeserializeObject<List<DriverItemResponse>>(jsonData.ToString());
-                var folders = filesInfo
-                    .Where(file => file.IsFolder)
-                    .ToList();
-
-                foreach (var file in folders)
-                    file.parentId = folderId;
-
-                return folders;
-            }
-            return null;
-        }
     }
 }
