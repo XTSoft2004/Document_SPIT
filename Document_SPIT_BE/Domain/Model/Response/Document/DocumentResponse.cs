@@ -13,6 +13,7 @@ namespace Domain.Model.Response.Document
         public long? TotalDownloads { get; set; } = 0;
         public long? TotalViews { get; set; } = 0;
         public string? FileId { get; set; }
+        public string? FileName { get; set; }
         public bool? IsPrivate { get; set; }
         public string? StatusDocument { get; set; }
         public long? UserId { get; set; }
@@ -21,7 +22,7 @@ namespace Domain.Model.Response.Document
         {
             get
             {
-                var extension = Path.GetExtension(Name);
+                var extension = Path.GetExtension(FileName);
                 return string.IsNullOrEmpty(extension) ? "Unknown" : extension.TrimStart('.').ToLower();
             }
         }

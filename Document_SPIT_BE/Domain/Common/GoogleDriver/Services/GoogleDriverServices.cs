@@ -224,15 +224,6 @@ namespace Domain.Common.GoogleDriver.Services
                 // Tự động lấy contentType
                 var ext = Path.GetExtension(infoFile.name)?.ToLower();
                 contentType = AppDictionary.GetMimeTypeDriver($"a{ext}");
-                //contentType = ext switch
-                //{
-                //    ".pdf" => "application/pdf",
-                //    ".jpg" or ".jpeg" => "image/jpeg",
-                //    ".png" => "image/png",
-                //    ".webp" => "image/webp",
-                //    ".gif" => "image/gif",
-                //    _ => "application/octet-stream" // fallback
-                //};
             }
 
             var bytes = await response.Content.ReadAsByteArrayAsync();

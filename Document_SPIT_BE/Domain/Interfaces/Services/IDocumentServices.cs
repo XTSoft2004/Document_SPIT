@@ -51,5 +51,11 @@ namespace Domain.Interfaces.Services
         /// <param name="totalRecords"></param>
         /// <returns></returns>
         List<DocumentResponse> GetDocuments(string search, int pageNumber, int pageSize, out int totalRecords);
+        /// <summary>
+        /// Lấy tài liệu theo IdDocument
+        /// </summary>
+        /// <param name="DocumentId"></param>
+        /// <returns></returns>
+        Task<(byte[] Data, string ContentType, string FileName)?> GetPreviewByDocumetId(long DocumentId);
     }
 }

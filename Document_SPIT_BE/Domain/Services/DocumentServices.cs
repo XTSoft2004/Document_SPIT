@@ -84,6 +84,7 @@ namespace Domain.Services
             {
                 Name = documentRequest.name?.Trim(),
                 FileId = FileId.id,
+                FileName = documentRequest.fileName?.Trim() ?? "Không rõ",
                 Md5Checksum = md5Hash,
                 IsPrivate = false,
                 StatusDocument = StatusDocument_Enum.Pending,
@@ -133,52 +134,64 @@ namespace Domain.Services
             if (document == null)
                 return HttpResponse.Error("Tài liệu không tồn tại.", System.Net.HttpStatusCode.NotFound);
 
-            if (!EnumExtensions.IsValidDisplayName(documentRequest.StatusDocument, typeof(StatusDocument_Enum)))
-                return HttpResponse.Error("Trạng thái điểm danh không hợp lệ.", System.Net.HttpStatusCode.BadRequest);
-
+            StatusDocument_Enum? enumStatusDocument = null;   
+            if (documentRequest.StatusDocument != null)
+            {
+                enumStatusDocument = EnumExtensions.GetEnumValueFromDisplayName<StatusDocument_Enum>(documentRequest.StatusDocument);
+                if (enumStatusDocument == null)
+                    return HttpResponse.Error("Trạng thái điểm danh không hợp lệ.", System.Net.HttpStatusCode.BadRequest);
+            }
+            
             var user = _user!.Find(f => f.Id == userMeToken.Id);
             if (user == null)
                 return HttpResponse.Error("Người dùng không tồn tại.", System.Net.HttpStatusCode.BadRequest);
 
-            if (await _googleDriverServices.GetInfoFolder(documentRequest.FolderId) == null)
-                return HttpResponse.Error("Thư mục không tồn tại hoặc không hợp lệ.", System.Net.HttpStatusCode.BadRequest);
-
-            // Kiểm tra thông tin tài liệu
-            if (AppExtension.IsBase64String(documentRequest.Base64String) == false)
-                return HttpResponse.Error("Base64 không hợp lệ, vui lòn kiểm tra lại.", System.Net.HttpStatusCode.BadRequest);
-
-            // Tính toán MD5 từ Base64
-            var md5Hash = AppExtension.GetMd5FromBase64(documentRequest.Base64String);
-            if (_document.Find(f => f.Md5Checksum == md5Hash) != null)
-                return HttpResponse.Error("Tài liệu đã tồn tại.", System.Net.HttpStatusCode.Conflict);
-            else
+            if(!string.IsNullOrEmpty(documentRequest.FolderId?.Trim()) &&
+                !string.IsNullOrEmpty(documentRequest.Base64String) &&
+                !string.IsNullOrEmpty(documentRequest.FileName))
             {
-                // Nếu tài liệu đã có FileId thì không cần tải lên lại, chỉ cập nhật MD5 và thông tin khác
-                UploadFileResponse FileId = await _googleDriverServices.UploadFile(new UploadFileBase64Request
-                {
-                    Base64String = documentRequest.Base64String,
-                    FileName = documentRequest.Name?.Trim() ?? "Không rõ",
-                    FolderId = documentRequest.FolderId?.Trim()
-                });
-                if (FileId == null || string.IsNullOrEmpty(FileId.id))
-                    return HttpResponse.Error("Tải lên tài liệu thất bại.", System.Net.HttpStatusCode.InternalServerError);
+                if (await _googleDriverServices.GetInfoFolder(documentRequest.FolderId) == null)
+                    return HttpResponse.Error("Thư mục không tồn tại hoặc không hợp lệ.", System.Net.HttpStatusCode.BadRequest);
+
+                // Kiểm tra thông tin tài liệu
+                if (AppExtension.IsBase64String(documentRequest.Base64String) == false)
+                    return HttpResponse.Error("Base64 không hợp lệ, vui lòn kiểm tra lại.", System.Net.HttpStatusCode.BadRequest);
+
+                // Tính toán MD5 từ Base64
+                var md5Hash = AppExtension.GetMd5FromBase64(documentRequest.Base64String);
+                if (_document.Find(f => f.Md5Checksum == md5Hash) != null)
+                    return HttpResponse.Error("Tài liệu đã tồn tại.", System.Net.HttpStatusCode.Conflict);
                 else
                 {
-                    document.FileId = FileId.id ?? document.FileId;
-                    document.Md5Checksum = md5Hash ?? document.Md5Checksum;
+                    // Nếu tài liệu đã có FileId thì không cần tải lên lại, chỉ cập nhật MD5 và thông tin khác
+                    UploadFileResponse FileId = await _googleDriverServices.UploadFile(new UploadFileBase64Request
+                    {
+                        Base64String = documentRequest.Base64String,
+                        FileName = documentRequest.Name?.Trim() ?? "Không rõ",
+                        FolderId = documentRequest.FolderId?.Trim()
+                    });
+                    if (FileId == null || string.IsNullOrEmpty(FileId.id))
+                        return HttpResponse.Error("Tải lên tài liệu thất bại.", System.Net.HttpStatusCode.InternalServerError);
+                    else
+                    {
+                        document.FileId = FileId.id ?? document.FileId;
+                        document.FileName = documentRequest.FileName?.Trim() ?? document.FileName;
+                        document.Md5Checksum = md5Hash ?? document.Md5Checksum;
+                    }
                 }
+                document.FolderId = documentRequest.FolderId?.Trim() ?? document.FolderId;
             }
 
             document.Name = documentRequest.Name?.Trim() ?? document.Name;
             document.IsPrivate = documentRequest.IsPrivate ?? document.IsPrivate;
-            document.StatusDocument = EnumExtensions.GetEnumFromDisplayName<StatusDocument_Enum>(documentRequest.StatusDocument);
+            document.StatusDocument = enumStatusDocument ?? document.StatusDocument;
 
             // Cập nhật thông tin người dùng
             document.UserId = userMeToken.Id ?? document.UserId;
             document.User = user;
 
-            document.FolderId = documentRequest.FolderId?.Trim() ?? document.FolderId;
             document.ModifiedDate = DateTime.Now;
+            document.ModifiedBy = userMeToken.Username ?? document.ModifiedBy;
 
             _document.Update(document);
             await UnitOfWork.CommitAsync();
@@ -286,6 +299,7 @@ namespace Domain.Services
                 Id = s.Id,
                 Name = s.Name,
                 FileId = s.FileId,
+                FileName = s.FileName,  
                 IsPrivate = s.IsPrivate,
                 StatusDocument = s.StatusDocument.ToString(),
                 UserId = s.UserId,
@@ -295,6 +309,15 @@ namespace Domain.Services
             }).ToList();
 
             return documentsSearch;
+        }
+        public async Task<(byte[] Data, string ContentType, string FileName)?> GetPreviewByDocumetId(long DocumentId)
+        {
+            var document = _document!.Find(f => f.Id == DocumentId);    
+            if (document == null)
+                return (null, null, null);
+
+            await ViewFile(document.FileId);
+            return await _googleDriverServices.GetGoogleDrivePreviewAsync(document.FileId);
         }
     }
 }

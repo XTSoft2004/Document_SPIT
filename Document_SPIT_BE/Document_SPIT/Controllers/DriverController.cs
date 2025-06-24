@@ -65,7 +65,7 @@ namespace Document_SPIT_BE.Controllers
             var result = await _services.GetGoogleDrivePreviewAsync(fileId);
             if (result == null)
                 return NotFound(new { Message = "Không tồn tại file, vui lòng kiểm tra lại" });
-            _documentServices.ViewFile(fileId);
+            await _documentServices.ViewFile(fileId);
 
             var (data, contentType, fileName) = result.Value;
             

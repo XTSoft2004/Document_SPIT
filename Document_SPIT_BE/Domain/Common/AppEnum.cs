@@ -85,5 +85,30 @@ namespace Domain.Common
                                       ?.Name ?? e.ToString())
                        .ToList();
         }
+        // Lấy tất cả tên hiển thị của enum T
+        public static T? GetEnumValueFromDisplayName<T>(string input) where T : struct, Enum
+        {
+            var type = typeof(T);
+            var fields = type.GetFields(BindingFlags.Public | BindingFlags.Static);
+
+            foreach (var field in fields)
+            {
+                // So sánh với Display(Name)
+                var displayAttr = field.GetCustomAttribute<DisplayAttribute>();
+                if (displayAttr?.Name != null &&
+                    displayAttr.Name.Equals(input, StringComparison.OrdinalIgnoreCase))
+                {
+                    return (T)field.GetValue(null)!;
+                }
+
+                // So sánh với tên enum (Approved, Rejected, Pending)
+                if (field.Name.Equals(input, StringComparison.OrdinalIgnoreCase))
+                {
+                    return (T)field.GetValue(null)!;
+                }
+            }
+
+            return null;
+        }
     }
 }
