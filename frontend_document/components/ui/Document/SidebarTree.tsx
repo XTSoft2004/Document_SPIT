@@ -56,7 +56,7 @@ export default function SidebarTrees({
                             >
                                 <ChevronLeft className="w-5 h-5 text-blue-600" />
                             </button>
-                            <span className="font-medium text-gray-700 flex-1 pl-2">Cây thư mục</span>
+                            <span className="font-medium text-gray-700 flex-1 pl-2">Document SPIT</span>
                         </div>
                         <div className="flex items-center ml-4">
                             <Search allItems={allItems} onResult={onSearchResult} />

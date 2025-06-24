@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Header from "@/layout/Header";
+import Header from "@/components/ui/Document/Header";
 import GridDocument from "@/components/ui/Document/GridDocument";
 import { IDriveResponse, IDriveItem } from "@/types/driver";
 import { ITreeNode } from "@/types/tree";

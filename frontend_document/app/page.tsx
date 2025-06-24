@@ -1,8 +1,12 @@
 'use client'
-import Image from 'next/image'
-import DocumentPage from './document/[[...slug]]/page'
-import PageAuth from './(auth)/page';
+import Loading from "@/components/animations/Loading";
+import Header from "@/layout/Header";
 
 export default function Home() {
-  return <PageAuth></PageAuth>;
+  return (
+    <>
+      <Header />
+      {/* <Loading isVisible={true} duration={2000} /> */}
+    </>
+  )
 }

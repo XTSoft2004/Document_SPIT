@@ -1,82 +1,76 @@
-'use client';
-
 import Image from 'next/image';
-import { Avatar, Input } from 'antd';
-import { SearchOutlined, UserOutlined } from '@ant-design/icons';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { ITreeNode } from '@/types/tree';
-import { IDriveItem } from '@/types/driver';
+import Link from 'next/link';
 
-interface HeaderProps {
-    treeData?: ITreeNode[];
-    allItems?: IDriveItem[];
-    onMobileSearch?: (results: IDriveItem[] | null) => void;
-}
-
-const Header = ({ treeData, allItems, onMobileSearch }: HeaderProps) => {
-    const router = useRouter();
-    const [searchQuery, setSearchQuery] = useState("");
-
-    useEffect(() => {
-        if (allItems && onMobileSearch) {
-            if (!searchQuery.trim()) {
-                onMobileSearch(null);
-            } else {
-                const lower = searchQuery.toLowerCase();
-                const filtered = allItems.filter(item =>
-                    item.name.toLowerCase().includes(lower)
-                );
-                onMobileSearch(filtered);
-            }
-        }
-    }, [searchQuery, allItems, onMobileSearch]);
+const Header = () => {
     return (
-        <header className="w-full flex flex-col bg-white shadow-lg border-b border-gray-200">
-            {/* Main header */}
-            <div className="flex items-center justify-between px-4 sm:px-6 py-3">
-                {/* Left: Logo */}
-                <div className="flex-shrink-0">
-                    <Image
-                        src="/logo/logo-500x500.png"
-                        alt="Logo"
-                        width={40}
-                        height={40}
-                        className="sm:w-[50px] sm:h-[50px] rounded-full object-cover transition-transform hover:scale-105 cursor-pointer"
-                        onClick={() => router.push('/document')}
-                    />
-                </div>
-
-                {/* Only show search bar on mobile */}
-                {allItems && (
-                    <div className="flex-1 flex justify-center items-center w-full sm:hidden">
-                        <div className="w-full max-w-xs">
-                            <Input
-                                allowClear
-                                placeholder="Tìm kiếm toàn bộ file hoặc thư mục..."
-                                prefix={<SearchOutlined className="text-blue-500" />}
-                                value={searchQuery}
-                                onChange={e => setSearchQuery(e.target.value)}
-                                className="rounded-lg shadow-sm border-gray-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition-all duration-200"
-                                size="large"
-                                style={{
-                                    width: '100%',
-                                    minWidth: 60,
-                                    transition: 'max-width 0.3s, min-width 0.3s'
-                                }}
+        <header className="bg-white sticky top-0 z-40">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex items-center justify-between h-16">
+                    {/* Logo bên trái */}
+                    <div className="flex items-center">
+                        <Link href="/" className="flex items-center">
+                            <Image
+                                src="/logo/logo-500x500.png"
+                                alt="Logo"
+                                width={40}
+                                height={40}
+                                className="rounded-lg"
+                                priority
                             />
-                        </div>
+                        </Link>
                     </div>
-                )}
 
-                {/* Right: Avatar */}
-                <div className="flex-shrink-0">
-                    <Avatar
-                        shape="circle"
-                        size={40}
-                        icon={<UserOutlined className="text-gray-600" />}
-                        className="sm:w-12 sm:h-12 hover:shadow-md transition-shadow duration-200"
-                    />
+                    {/* Navigation chính giữa */}
+                    <nav className="hidden md:flex items-center space-x-1">
+                        <Link
+                            href="/"
+                            className="relative group px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-all duration-300 ease-in-out"
+                        >
+                            <span className="relative z-10">Trang chủ</span>
+                            <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg opacity-0 group-hover:opacity-100 transform scale-95 group-hover:scale-100 transition-all duration-300"></div>
+                            <div className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-blue-700 group-hover:w-full group-hover:left-0 transition-all duration-300"></div>
+                        </Link>
+                        <Link
+                            href="/document"
+                            className="relative group px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-all duration-300 ease-in-out"
+                        >
+                            <span className="relative z-10">Tài liệu</span>
+                            <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg opacity-0 group-hover:opacity-100 transform scale-95 group-hover:scale-100 transition-all duration-300"></div>
+                            <div className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-blue-700 group-hover:w-full group-hover:left-0 transition-all duration-300"></div>
+                        </Link>
+                        <Link
+                            href="/contribute"
+                            className="relative group px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-all duration-300 ease-in-out"
+                        >
+                            <span className="relative z-10">Đóng góp</span>
+                            <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg opacity-0 group-hover:opacity-100 transform scale-95 group-hover:scale-100 transition-all duration-300"></div>
+                            <div className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-blue-700 group-hover:w-full group-hover:left-0 transition-all duration-300"></div>
+                        </Link>
+                    </nav>
+
+                    {/* Auth buttons bên phải */}
+                    <div className="flex items-center space-x-4">
+                        <Link
+                            href="/auth"
+                            className="relative inline-flex items-center px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-full shadow-lg hover:from-blue-700 hover:to-blue-800 hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 ease-in-out"
+                        >
+                            <span className="relative z-10">Đăng nhập</span>
+                            <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full opacity-0 hover:opacity-20 transition-opacity duration-300"></div>
+                        </Link>
+                    </div>
+
+                    {/* Mobile menu button */}
+                    <div className="md:hidden">
+                        <button
+                            type="button"
+                            className="text-gray-700 hover:text-blue-600 p-2"
+                            aria-label="Menu"
+                        >
+                            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
         </header>
