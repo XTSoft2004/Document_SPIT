@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import NotificationService from '@/components/ui/Notification/NotificationService';
 import { motion } from 'framer-motion'; // Thêm Framer Motion
-import MoonLoading from '@/components/ui/Loading/MoonLoading';
+import ModernAuthLoading from '@/components/ui/Loading/ModernAuthLoading';
 
 export default function PageLogin() {
     const {
@@ -44,45 +44,73 @@ export default function PageLogin() {
         NotificationService.error({
             message: login.message || 'Đăng nhập thất bại',
         });
-    };
-
-    return (
+    }; return (
         <motion.div
-            initial={{ opacity: 0, x: -100 }} // Bắt đầu từ trái
-            animate={{ opacity: 1, x: 0 }}    // Trượt sang phải đến đúng vị trí
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 50 }}
             transition={{ duration: 0.4, ease: 'easeOut' }}
-            exit={{ opacity: 0, x: 100 }}
+            className="w-full"
+            style={{ height: 320 }} // Chiều dài cố định
         >
             {loading ? (
-                <MoonLoading />
+                <ModernAuthLoading />
             ) : (
                 <form
                     onSubmit={handleSubmit(onSubmit)}
-                    className="space-y-5 min-h-[150px] transition-all duration-300 ease-in-out"
+                    className="space-y-6"
                 >
-                    <CustomTextField
-                        control={control}
-                        errors={errors}
-                        name="username"
-                        placeholder="Tên đăng nhập"
-                        icon={<CircleUser size={25} />}
-                    />
-                    <CustomTextField
-                        control={control}
-                        errors={errors}
-                        name="password"
-                        type="password"
-                        placeholder="Mật khẩu"
-                        icon={<KeyRound size={25} />}
-                    />
-                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                        <Button
-                            type="primary"
-                            htmlType="submit"
-                            className="mt-3 w-full h-12 text-lg font-bold rounded-[16px]"
+                    <div className="space-y-5">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.1, duration: 0.3 }}
+                        >                            <CustomTextField
+                                control={control}
+                                errors={errors}
+                                name="username"
+                                placeholder="Enter your username"
+                                label="Username"
+                                icon={<CircleUser size={20} className="text-gray-400" />}
+                            />
+                        </motion.div>
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2, duration: 0.3 }}
+                        >                            <CustomTextField
+                                control={control}
+                                errors={errors}
+                                name="password"
+                                type="password"
+                                placeholder="Enter your password"
+                                label="Password"
+                                icon={<KeyRound size={20} className="text-gray-400" />}
+                            />
+                        </motion.div>
+                    </div>
+
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3, duration: 0.3 }}
+                        className="pt-2"
+                    >
+                        <motion.div
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="w-full"
                         >
-                            Đăng nhập
-                        </Button>
+                            <Button
+                                type="primary"
+                                htmlType="submit"
+                                className="w-full h-12 text-base font-semibold rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 border-none shadow-lg hover:shadow-xl transition-all duration-300"
+                                style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)' }}
+                            >
+                                Sign In
+                            </Button>
+                        </motion.div>
                     </motion.div>
                 </form>
             )}

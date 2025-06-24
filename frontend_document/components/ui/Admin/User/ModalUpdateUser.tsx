@@ -25,9 +25,11 @@ const ModalUpdateUser: React.FC<ModalUpdateUserProps> = ({
         } else {
             form.resetFields();
         }
-    }, [user, form]);
+    }, [user, form]); const handleOk = async () => {
+        await handleSubmit();
+    };
 
-    const handleOk = async () => {
+    const handleSubmit = async () => {
         try {
             setLoading(true);
             const values = await form.validateFields();
@@ -65,9 +67,18 @@ const ModalUpdateUser: React.FC<ModalUpdateUserProps> = ({
             confirmLoading={loading}
             okText="Cập nhật"
             cancelText="Hủy"
-            destroyOnClose
-        >
-            <Form form={form} layout="vertical">
+            destroyOnClose        >
+            <Form
+                form={form}
+                layout="vertical"
+                onFinish={handleSubmit}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSubmit();
+                    }
+                }}
+            >
                 <Form.Item
                     label="Tên tài khoản:"
                     name="username"

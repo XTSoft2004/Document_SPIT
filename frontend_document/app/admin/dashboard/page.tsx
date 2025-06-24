@@ -4,7 +4,7 @@ import { SectionCards } from "@/components/ui/Admin/Dashboard/section-cards";
 
 export default function DashboardPage() {
     return (
-        <>
+        <div className="space-y-6">
             <SectionCards />
 
             <div className="px-4 lg:px-6">
@@ -14,6 +14,6 @@ export default function DashboardPage() {
             <div className="px-4 lg:px-6">
                 <ChartLineInteractive />
             </div>
-        </>
+        </div>
     );
 }

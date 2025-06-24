@@ -21,14 +21,14 @@ export function NavCRUD() {
 
     const items = [
         {
-            name: "Quản lý tài liệu",
-            url: "/admin/document",
-            icon: Book,
-        },
-        {
             name: "Quản lý người dùng",
             url: "/admin/user",
             icon: UserRound,
+        },
+        {
+            name: "Quản lý tài liệu",
+            url: "/admin/document",
+            icon: Book,
         },
         {
             name: "Quản lý lịch sử",
@@ -78,8 +78,8 @@ export function NavCRUD() {
                 type="button"
                 onClick={() => handleNavigation("/admin/dashboard")}
                 className={`flex items-center gap-2 w-full text-left transition-all duration-200 ${isCurrentPage("/admin/dashboard")
-                        ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 font-medium"
-                        : "hover:bg-gray-50 dark:hover:bg-gray-700"
+                    ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 font-medium"
+                    : "hover:bg-gray-50 dark:hover:bg-gray-700"
                     } ${isLoading("/admin/dashboard") ? "opacity-70" : ""}`}
                 disabled={isLoading("/admin/dashboard")}
             >
@@ -104,8 +104,8 @@ export function NavCRUD() {
                             type="button"
                             onClick={() => handleNavigation(item.url)}
                             className={`flex items-center gap-2 w-full text-left transition-all duration-200 ${isCurrentPage(item.url)
-                                    ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 font-medium"
-                                    : "hover:bg-gray-50 dark:hover:bg-gray-700"
+                                ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 font-medium"
+                                : "hover:bg-gray-50 dark:hover:bg-gray-700"
                                 } ${isLoading(item.url) ? "opacity-70" : ""} ${item.url === "#" ? "opacity-50 cursor-not-allowed" : ""
                                 }`}
                             disabled={isLoading(item.url) || item.url === "#"}

@@ -113,3 +113,189 @@
 .dark .ant-table-tbody > tr:hover > td {
   background-color: #374151 !important;
 }
+
+/* Modern Input Styles - Enhanced */
+.modern-input.ant-input,
+.modern-input.ant-input-password {
+  border-radius: 16px !important;
+  border: 2px solid #e5e7eb !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(8px) !important;
+  transition: all 0.3s ease !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  height: 60px !important;
+  padding: 16px !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
+}
+
+.modern-input.ant-input:hover,
+.modern-input.ant-input-password:hover {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: #d1d5db !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+  transform: translateY(-1px) !important;
+}
+
+.modern-input.ant-input:focus,
+.modern-input.ant-input-password:focus,
+.modern-input.ant-input-focused,
+.modern-input.ant-input-password.ant-input-focused {
+  background: rgba(255, 255, 255, 1) !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 4px rgba(59, 130, 246, 0.1) !important;
+  outline: none !important;
+  transform: scale(1.02) translateY(-2px) !important;
+}
+
+.modern-input.ant-input::placeholder,
+.modern-input.ant-input-password input::placeholder {
+  color: #9ca3af !important;
+  font-weight: 400 !important;
+  transition: all 0.2s ease !important;
+}
+
+.modern-input.ant-input:focus::placeholder,
+.modern-input.ant-input-password:focus input::placeholder {
+  color: #d1d5db !important;
+  transform: translateX(4px) !important;
+}
+
+/* Enhanced Error state */
+.modern-input.ant-input.ant-input-status-error,
+.modern-input.ant-input-password.ant-input-status-error {
+  border-color: #f87171 !important;
+  background: rgba(254, 242, 242, 0.9) !important;
+  animation: shake 0.5s ease-in-out !important;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+.modern-input.ant-input.ant-input-status-error:focus,
+.modern-input.ant-input-password.ant-input-status-error:focus {
+  border-color: #ef4444 !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 4px rgba(239, 68, 68, 0.15) !important;
+  background: rgba(254, 242, 242, 1) !important;
+}
+
+/* Password input specific - Enhanced */
+.modern-input.ant-input-password .ant-input {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  height: auto !important;
+  font-weight: 500 !important;
+}
+
+.modern-input.ant-input-password .ant-input-suffix {
+  color: #6b7280 !important;
+  transition: all 0.2s ease !important;
+}
+
+.modern-input.ant-input-password:hover .ant-input-suffix,
+.modern-input.ant-input-password:focus .ant-input-suffix {
+  color: #3b82f6 !important;
+}
+
+/* Success state indicator */
+.modern-input.ant-input.input-success,
+.modern-input.ant-input-password.input-success {
+  border-color: #10b981 !important;
+  background: rgba(236, 253, 245, 0.8) !important;
+}
+
+.modern-input.ant-input.input-success:focus,
+.modern-input.ant-input-password.input-success:focus {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 4px rgba(16, 185, 129, 0.1) !important;
+}
+
+/* Dark mode support for inputs - Enhanced */
+.dark .modern-input.ant-input,
+.dark .modern-input.ant-input-password {
+  background: rgba(31, 41, 55, 0.8) !important;
+  border-color: #4b5563 !important;
+  color: #f3f4f6 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+.dark .modern-input.ant-input:hover,
+.dark .modern-input.ant-input-password:hover {
+  background: rgba(31, 41, 55, 0.95) !important;
+  border-color: #6b7280 !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
+}
+
+.dark .modern-input.ant-input:focus,
+.dark .modern-input.ant-input-password:focus {
+  background: rgba(31, 41, 55, 1) !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3),
+    0 4px 6px -2px rgba(0, 0, 0, 0.1), 0 0 0 4px rgba(59, 130, 246, 0.2) !important;
+}
+
+.dark .modern-input.ant-input::placeholder,
+.dark .modern-input.ant-input-password input::placeholder {
+  color: #9ca3af !important;
+}
+
+.dark .modern-input.ant-input.ant-input-status-error,
+.dark .modern-input.ant-input-password.ant-input-status-error {
+  background: rgba(127, 29, 29, 0.3) !important;
+  border-color: #f87171 !important;
+}
+
+/* Floating label styles */
+.floating-label {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: white;
+  padding: 0 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  pointer-events: none;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.floating-label.active {
+  top: 0;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: #3b82f6;
+}
+
+.floating-label.error {
+  color: #ef4444;
+}
+
+.dark .floating-label {
+  background: #1f2937;
+  color: #9ca3af;
+}
+
+.dark .floating-label.active {
+  color: #3b82f6;
+}
+
+.dark .floating-label.error {
+  color: #f87171;
+}

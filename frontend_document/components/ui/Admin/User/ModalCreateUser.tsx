@@ -15,9 +15,11 @@ const ModalUpdateUser: React.FC<ModalCreateUserProps> = ({
     onCancel,
 }) => {
     const [form] = Form.useForm();
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(false); const handleOk = async () => {
+        await handleSubmit();
+    };
 
-    const handleOk = async () => {
+    const handleSubmit = async () => {
         try {
             setLoading(true);
             const values = await form.validateFields();
@@ -37,9 +39,7 @@ const ModalUpdateUser: React.FC<ModalCreateUserProps> = ({
                 NotificationService.error({
                     message: response.message || "Thêm tài khoản thất bại",
                 });
-            }
-
-            onCancel();
+            } onCancel();
         } catch (error) {
             // Validation failed
         } finally {
@@ -58,7 +58,17 @@ const ModalUpdateUser: React.FC<ModalCreateUserProps> = ({
             cancelText="Hủy"
             destroyOnClose
         >
-            <Form form={form} layout="vertical">
+            <Form
+                form={form}
+                layout="vertical"
+                onFinish={handleSubmit}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSubmit();
+                    }
+                }}
+            >
                 <Form.Item
                     label="Tên tài khoản:"
                     name="username"

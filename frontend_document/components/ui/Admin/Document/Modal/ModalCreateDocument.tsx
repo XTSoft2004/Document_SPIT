@@ -28,9 +28,11 @@ const ModalCreateDocument: React.FC<ModalCreateDocumentProps> = ({ visible, onCa
         updateMedia();
         window.addEventListener("resize", updateMedia);
         return () => window.removeEventListener("resize", updateMedia);
-    }, []);
+    }, []); const handleOk = async () => {
+        await handleSubmit();
+    };
 
-    const handleOk = async () => {
+    const handleSubmit = async () => {
         try {
             setLoading(true);
             const values = await form.validateFields();
@@ -77,9 +79,18 @@ const ModalCreateDocument: React.FC<ModalCreateDocumentProps> = ({ visible, onCa
             cancelText="Hủy"
             destroyOnClose
             width={isMobile ? "100%" : previewSrc ? 1000 : 600}
-            style={{ top: 20 }}
-        >
-            <Form form={form} layout="vertical">
+            style={{ top: 20 }}        >
+            <Form
+                form={form}
+                layout="vertical"
+                onFinish={handleSubmit}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSubmit();
+                    }
+                }}
+            >
                 <Row gutter={[16, 16]}>
                     <Col xs={24} sm={24} md={previewSrc ? 12 : 24}>
                         <Form.Item
