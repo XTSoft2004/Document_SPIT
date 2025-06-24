@@ -1,3 +1,301 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Shimmer animation for page loading */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Dark mode styles for Antd components */
+.dark .ant-table-thead > tr > th {
+  background-color: #374151 !important;
+  color: #f3f4f6 !important;
+  border-bottom: 1px solid #4b5563 !important;
+}
+
+.dark .ant-table-tbody > tr > td {
+  background-color: #1f2937 !important;
+  color: #f3f4f6 !important;
+  border-bottom: 1px solid #374151 !important;
+}
+
+.dark .ant-table-tbody > tr:hover > td {
+  background-color: #374151 !important;
+}
+
+/* Modern Input Styles - Enhanced */
+.modern-input.ant-input,
+.modern-input.ant-input-password {
+  border-radius: 16px !important;
+  border: 2px solid #e5e7eb !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(8px) !important;
+  transition: all 0.3s ease !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  height: 60px !important;
+  padding: 16px !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
+}
+
+.modern-input.ant-input:hover,
+.modern-input.ant-input-password:hover {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: #d1d5db !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+  transform: translateY(-1px) !important;
+}
+
+.modern-input.ant-input:focus,
+.modern-input.ant-input-password:focus,
+.modern-input.ant-input-focused,
+.modern-input.ant-input-password.ant-input-focused {
+  background: rgba(255, 255, 255, 1) !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 4px rgba(59, 130, 246, 0.1) !important;
+  outline: none !important;
+  transform: scale(1.02) translateY(-2px) !important;
+}
+
+.modern-input.ant-input::placeholder,
+.modern-input.ant-input-password input::placeholder {
+  color: #9ca3af !important;
+  font-weight: 400 !important;
+  transition: all 0.2s ease !important;
+}
+
+.modern-input.ant-input:focus::placeholder,
+.modern-input.ant-input-password:focus input::placeholder {
+  color: #d1d5db !important;
+  transform: translateX(4px) !important;
+}
+
+/* Enhanced Error state */
+.modern-input.ant-input.ant-input-status-error,
+.modern-input.ant-input-password.ant-input-status-error {
+  border-color: #f87171 !important;
+  background: rgba(254, 242, 242, 0.9) !important;
+  animation: shake 0.5s ease-in-out !important;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+.modern-input.ant-input.ant-input-status-error:focus,
+.modern-input.ant-input-password.ant-input-status-error:focus {
+  border-color: #ef4444 !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 4px rgba(239, 68, 68, 0.15) !important;
+  background: rgba(254, 242, 242, 1) !important;
+}
+
+/* Password input specific - Enhanced */
+.modern-input.ant-input-password .ant-input {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  height: auto !important;
+  font-weight: 500 !important;
+}
+
+.modern-input.ant-input-password .ant-input-suffix {
+  color: #6b7280 !important;
+  transition: all 0.2s ease !important;
+}
+
+.modern-input.ant-input-password:hover .ant-input-suffix,
+.modern-input.ant-input-password:focus .ant-input-suffix {
+  color: #3b82f6 !important;
+}
+
+/* Success state indicator */
+.modern-input.ant-input.input-success,
+.modern-input.ant-input-password.input-success {
+  border-color: #10b981 !important;
+  background: rgba(236, 253, 245, 0.8) !important;
+}
+
+.modern-input.ant-input.input-success:focus,
+.modern-input.ant-input-password.input-success:focus {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 4px rgba(16, 185, 129, 0.1) !important;
+}
+
+/* Dark mode support for inputs - Enhanced */
+.dark .modern-input.ant-input,
+.dark .modern-input.ant-input-password {
+  background: rgba(31, 41, 55, 0.8) !important;
+  border-color: #4b5563 !important;
+  color: #f3f4f6 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+.dark .modern-input.ant-input:hover,
+.dark .modern-input.ant-input-password:hover {
+  background: rgba(31, 41, 55, 0.95) !important;
+  border-color: #6b7280 !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
+}
+
+.dark .modern-input.ant-input:focus,
+.dark .modern-input.ant-input-password:focus {
+  background: rgba(31, 41, 55, 1) !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3),
+    0 4px 6px -2px rgba(0, 0, 0, 0.1), 0 0 0 4px rgba(59, 130, 246, 0.2) !important;
+}
+
+.dark .modern-input.ant-input::placeholder,
+.dark .modern-input.ant-input-password input::placeholder {
+  color: #9ca3af !important;
+}
+
+.dark .modern-input.ant-input.ant-input-status-error,
+.dark .modern-input.ant-input-password.ant-input-status-error {
+  background: rgba(127, 29, 29, 0.3) !important;
+  border-color: #f87171 !important;
+}
+
+/* Floating label styles */
+.floating-label {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: white;
+  padding: 0 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  pointer-events: none;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.floating-label.active {
+  top: 0;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: #3b82f6;
+}
+
+.floating-label.error {
+  color: #ef4444;
+}
+
+.dark .floating-label {
+  background: #1f2937;
+  color: #9ca3af;
+}
+
+.dark .floating-label.active {
+  color: #3b82f6;
+}
+
+.dark .floating-label.error {
+  color: #f87171;
+}
