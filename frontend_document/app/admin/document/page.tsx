@@ -146,7 +146,7 @@ export default function DocumentPage() {
 
     return (
         <>
-            <div className="flex flex-col md:flex-row w-full gap-6">
+            <div className="flex flex-col md:flex-row w-full">
                 {/* Bảng bên trái */}
                 <div className="flex-1 min-w-0">
                     <DataGrid<IDocumentResponse>

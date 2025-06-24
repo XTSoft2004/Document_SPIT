@@ -7,6 +7,7 @@ import { ChartLineInteractive } from "@/components/ui/Admin/Dashboard/chart-line
 import ActivityRight from "@/components/ui/Admin/Dashboard/activity-right";
 import DraggerUpload from "@/components/ui/Admin/Dashboard/dragger-upload";
 import RightSidebar, { RightSidebarMobile } from "@/components/ui/Admin/Dashboard/right-sidebar";
+import { GlobalPageLoader } from "@/components/ui/page-transition-loader";
 
 export const metadata = {
     title: "Trang chủ | Quản trị",
@@ -20,6 +21,7 @@ export default function RootLayout({
 }>) {
     return (
         <SidebarProvider>
+            <GlobalPageLoader />
             <div className="w-full h-screen flex overflow-hidden bg-gray-50 text-gray-800">
                 {/* Sidebar */}
                 <AppSidebar />

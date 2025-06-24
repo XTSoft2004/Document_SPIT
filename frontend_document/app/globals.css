@@ -86,3 +86,30 @@
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* Shimmer animation for page loading */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Dark mode styles for Antd components */
+.dark .ant-table-thead > tr > th {
+  background-color: #374151 !important;
+  color: #f3f4f6 !important;
+  border-bottom: 1px solid #4b5563 !important;
+}
+
+.dark .ant-table-tbody > tr > td {
+  background-color: #1f2937 !important;
+  color: #f3f4f6 !important;
+  border-bottom: 1px solid #374151 !important;
+}
+
+.dark .ant-table-tbody > tr:hover > td {
+  background-color: #374151 !important;
+}
