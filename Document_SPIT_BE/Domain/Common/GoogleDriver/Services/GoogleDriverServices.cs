@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Sprache;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -56,6 +57,7 @@ namespace Domain.Common.GoogleDriver.Services
                 if (jsonData["thumbnailLink"] != null)
                 {
                     string thumbnailLink = jsonData["thumbnailLink"].ToString();
+                    thumbnailLink = thumbnailLink.Replace("=s220", "=s1920");
                     using var client = new HttpClient();
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
                     var imageResponse = await client.GetAsync(thumbnailLink);
@@ -291,6 +293,87 @@ namespace Domain.Common.GoogleDriver.Services
                         };
                     }
                 }
+            }
+            return null;
+        }
+        // Trả về toan bo file/folder tu ngoai vao trong
+        public async Task<List<DriveFileItem>> GetAllDriveItems()
+        {
+            var files = new List<DriveFileItem>();
+            string? nextPageToken = null;
+
+            do
+            {
+                var url = $"https://www.googleapis.com/drive/v3/files?pageSize=1000" +
+                          $"&fields=nextPageToken, files(id,name,mimeType,parents)" +
+                          (!string.IsNullOrEmpty(nextPageToken) ? $"&pageToken={nextPageToken}" : "");
+
+                var response = await _request.GetAsync(url);
+                var content = JObject.Parse(_request.Content);
+
+                var items = JsonConvert.DeserializeObject<List<DriveFileItem>>(content["files"]?.ToString() ?? "[]");
+                if (items != null) files.AddRange(items);
+
+                nextPageToken = content["nextPageToken"]?.ToString();
+            } while (!string.IsNullOrEmpty(nextPageToken));
+
+            return files;
+        }
+        public List<TreeDocumentResponse> BuildDriveTree(List<DriveFileItem> allItems, string rootFolderId)
+        {
+            var treeMap = allItems.ToDictionary(
+                item => item.Id,
+                item => new TreeDocumentResponse
+                {
+                    Name = item.Name,
+                    FolderId = item.Id,
+                    IsFolder = item.MimeType == "application/vnd.google-apps.folder",
+                    Children = new List<TreeDocumentResponse>()
+                }
+            );
+
+            var roots = new List<TreeDocumentResponse>();
+
+            foreach (var item in allItems)
+            {
+                if (item.Parents != null && item.Parents.Count > 0)
+                    {
+                    var parentId = item.Parents[0];
+                    if (treeMap.ContainsKey(parentId))
+                        treeMap[parentId].Children.Add(treeMap[item.Id]);
+                }
+
+                if (item.Id == rootFolderId)
+                    roots.Add(treeMap[item.Id]);
+            }
+
+            return roots.Select(r => treeMap[r.FolderId!]).ToList();
+        }
+        public async Task<List<TreeDocumentResponse>> GetTreeDocument(string rootFolderId)
+        {
+            await GetAccessToken();
+            var allItems = await GetAllDriveItems();
+            return BuildDriveTree(allItems, rootFolderId);
+        }
+        public async Task<List<DriverItemResponse?>?> GetOnlyFolder(string folderId)
+        {
+            await GetAccessToken();
+            var response = await _request.GetAsync(
+                $"https://www.googleapis.com/drive/v3/files?q='{folderId}'+in+parents&fields=files(id,name,webViewLink,webContentLink,createdTime,md5Checksum,mimeType)&orderBy=createdTime"
+            );
+            var result = _request.Content;
+            var jsonData = JObject.Parse(result)?["files"];
+            if (jsonData != null)
+            {
+                var filesInfo = JsonConvert.DeserializeObject<List<DriverItemResponse>>(jsonData.ToString());
+                var folders = filesInfo
+                    .Where(file => file.IsFolder)
+                    .ToList();
+
+                foreach (var file in folders)
+                    file.parentId = folderId;
+
+                return folders;
             }
             return null;
         }

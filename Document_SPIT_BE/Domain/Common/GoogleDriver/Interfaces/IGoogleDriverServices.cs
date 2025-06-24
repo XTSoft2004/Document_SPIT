@@ -54,5 +54,16 @@ namespace Domain.Common.GoogleDriver.Interfaces
         /// <param name="parentId"></param>
         /// <returns></returns>
         Task<HttpResponse> CreateFolder(string folderName, string parentId = "");
+        /// Trả về cây tài liệu
+        /// </summary>
+        /// <param name="folderId"></param>
+        /// <returns></returns>
+        Task<List<TreeDocumentResponse>> GetTreeDocument(string folderId);
+        /// <summary>
+        /// Trả về folder của folderId
+        /// </summary>
+        /// <param name="folderId"></param>
+        /// <returns></returns>
+        Task<List<DriverItemResponse?>?> GetOnlyFolder(string folderId);
     }
 }

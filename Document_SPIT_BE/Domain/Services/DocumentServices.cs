@@ -12,6 +12,7 @@ using Domain.Model.Response.Document;
 using Domain.Model.Response.User;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
