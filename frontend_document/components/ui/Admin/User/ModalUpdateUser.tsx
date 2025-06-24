@@ -3,6 +3,7 @@ import { Modal, Button, Input, Form, message } from "antd";
 import { IUserResponse, IUserUpdate } from "@/types/user";
 import { updateUser } from "@/actions/user.action";
 import NotificationService from "../../Notification/NotificationService";
+import { mutateTable } from "@/utils/swrReload";
 
 interface ModalUpdateUserProps {
     visible: boolean;
@@ -34,14 +35,13 @@ const ModalUpdateUser: React.FC<ModalUpdateUserProps> = ({
             const userUpdate: IUserUpdate = {
                 fullname: values.fullname,
                 password: values.password || undefined, // Optional field
-            };
-
-            const response = await updateUser(form.getFieldValue("id"), userUpdate);
+            }; const response = await updateUser(form.getFieldValue("id"), userUpdate);
             if (response.ok) {
                 NotificationService.success({
                     message: "Cập nhật người dùng thành công"
-                });
-                onCancel();
+                }); onCancel();
+                // Mutate trực tiếp để có trải nghiệm mượt mà
+                mutateTable('user');
             } else {
                 NotificationService.error({
                     message: "Cập nhật người dùng thất bại"

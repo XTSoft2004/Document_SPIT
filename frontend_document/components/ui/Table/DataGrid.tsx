@@ -32,26 +32,10 @@ const DataGrid = <T extends object>({
     onSelectionChange,
 }: DataGridProps<T>) => {
     const [pageIndex, setPageIndex] = useState(1);
-    const [pageSize, setPageSize] = useState(7);
+    const [pageSize, setPageSize] = useState(6);
     const [searchText, setSearchText] = useState('');
     const [selectedKey, setSelectedKey] = useState<React.Key | null>(null);
-    const [selectedItem, setSelectedItem] = useState<T | null>(null);
-    const [internalReloadFlag, setInternalReloadFlag] = useState(0);
-
-    const triggerReload = () => {
-        setInternalReloadFlag(prev => prev + 1);
-    };
-
-    // Lắng nghe sự kiện reload từ hệ thống
-    useEffect(() => {
-        const handleReload = () => {
-            triggerReload();
-        };
-        window.addEventListener('reload-datagrid', handleReload);
-        return () => {
-            window.removeEventListener('reload-datagrid', handleReload);
-        };
-    }, []);
+    const [selectedItem, setSelectedItem] = useState<T | null>(null);    // Không cần internalReloadFlag để có thể mutate trực tiếp với key đơn giản
 
     const columnsWithSTT: TableColumnsType<T> = [
         {
@@ -64,9 +48,8 @@ const DataGrid = <T extends object>({
         },
         ...columns,
     ];
-
-    const { data, isLoading } = useSWR<IIndexResponse<T>>(
-        [nameTable, searchText, pageIndex, pageSize, internalReloadFlag] as const,
+    const { data, isLoading, mutate: mutateSWR } = useSWR<IIndexResponse<T>>(
+        [nameTable, searchText, pageIndex, pageSize] as const,
         async (args: readonly [string | undefined, string, number, number]) => {
             const [, search, page, limit] = args;
             if (fetcher) {
@@ -86,7 +69,20 @@ const DataGrid = <T extends object>({
             }
         },
         { revalidateOnFocus: false }
-    );
+    );    // Expose mutate function globally for external use
+
+    useEffect(() => {
+        if (nameTable) {
+            (window as any)[`mutate_${nameTable}`] = () => {
+                mutateSWR();
+            };
+        }
+        return () => {
+            if (nameTable) {
+                delete (window as any)[`mutate_${nameTable}`];
+            }
+        };
+    }, [nameTable, mutateSWR]);
 
     const handleSearch = (value: string) => {
         setSearchText(value);

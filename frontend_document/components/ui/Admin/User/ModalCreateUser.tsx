@@ -3,6 +3,7 @@ import { Modal, Button, Input, Form, message } from "antd";
 import { IUserCreateRequest, IUserResponse, IUserUpdate } from "@/types/user";
 import { createUser, updateUser } from "@/actions/user.action";
 import NotificationService from "../../Notification/NotificationService";
+import { mutateTable } from "@/utils/swrReload";
 
 interface ModalCreateUserProps {
     visible: boolean;
@@ -25,14 +26,13 @@ const ModalUpdateUser: React.FC<ModalCreateUserProps> = ({
                 username: values.username,
                 password: values.password || undefined, // Optional field
                 fullname: values.fullname,
-            };
-
-            const response = await createUser(userCreate);
+            }; const response = await createUser(userCreate);
             if (response.ok) {
                 NotificationService.success({
                     message: `Tài khoản ${userCreate.fullname} đã được thêm thành công`,
-                });
-                form.resetFields();
+                }); form.resetFields();
+                // Mutate trực tiếp để có trải nghiệm mượt mà
+                mutateTable('user');
             } else {
                 NotificationService.error({
                     message: response.message || "Thêm tài khoản thất bại",

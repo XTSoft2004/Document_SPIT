@@ -7,11 +7,10 @@ import NotificationService from "@/components/ui/Notification/NotificationServic
 import DataGrid from "@/components/ui/Table/DataGrid";
 import Searchbar from "@/components/ui/Table/Searchbar";
 import { IUserResponse } from "@/types/user";
-import { reloadSWR } from "@/utils/swrReload";
+import { mutateTable, reloadTable } from "@/utils/swrReload";
 import { Button, TableColumnType } from "antd";
 import { Lock, LockOpen, Pen } from "lucide-react";
-import { useEffect, useState } from "react";
-import { mutate } from "swr";
+import { useState } from "react";
 
 export default function UserPage() {
     const [selectedUser, setSelectedUser] = useState<IUserResponse>();
@@ -40,9 +39,8 @@ export default function UserPage() {
                     value={roleName || "User"}
                     onChange={async (e) => {
                         const newRole = e.target.value;
-                        const setRole = await setRoleUser(record.id, newRole);
-                        if (setRole.ok) {
-                            mutate(['user', '', 1, 10]);
+                        const setRole = await setRoleUser(record.id, newRole); if (setRole.ok) {
+                            reloadTable('user');
                             NotificationService.success({
                                 message: `Cập nhật vai trò ${newRole} thành công cho người dùng ${record.fullname}`,
                             });
@@ -51,6 +49,7 @@ export default function UserPage() {
                         NotificationService.error({
                             message: setRole.message,
                         });
+                        reloadTable('user');
                     }}
                     className={`px-3 py-1 rounded-full border 
                             ${roleName === "Admin"
@@ -66,65 +65,55 @@ export default function UserPage() {
                     </option>
                 </select>
             ),
-        },
-        {
+        }, {
             title: 'Locked',
             dataIndex: 'isLocked',
             key: 'isLocked',
             width: 150,
-            render: (islocked: boolean) => (
-                <span
-                    className={`px-2 py-1 rounded-full text-xs font-semibold
-                                        ${islocked
-                            ? "bg-red-100 text-red-600 border border-red-300"
-                            : "bg-green-100 text-green-600 border border-green-300"
-                        }`}
+            render: (islocked: boolean, record: IUserResponse) => (
+                <select
+                    value={islocked ? "locked" : "unlocked"}
+                    onChange={async (e) => {
+                        const banAccount = await banAccountId(record.id); if (banAccount.ok) {
+                            NotificationService.success({
+                                message: `Tài khoản ${record.fullname} đã ${islocked ? 'mở khoá' : 'khoá'} thành công`,
+                            });
+                            reloadTable('user');
+                            return;
+                        }
+                        NotificationService.error({
+                            message: banAccount.message,
+                        });
+                        reloadTable('user');
+                    }}
+                    className={`px-3 py-1 rounded-full border 
+                            ${islocked
+                            ? "border-[#ef4444] bg-[#fef2f2] text-[#dc2626] font-semibold"
+                            : "border-[#22c55e] bg-[#f0fdf4] text-[#16a34a] font-medium"} 
+                            text-sm min-w-[100px] text-center outline-none appearance-none cursor-pointer`}
                 >
-                    {islocked ? 'Khoá tài khoản' : 'Chưa khoá'}
-                </span>
+                    <option value="unlocked" className="text-[#16a34a] font-medium text-left">
+                        🔓 Hoạt động
+                    </option>
+                    <option value="locked" className="text-[#dc2626] font-semibold text-left">
+                        🔒 Bị khoá
+                    </option>
+                </select>
             ),
-        },
-        {
+        }, {
             title: 'Hành động',
             key: 'action',
             width: 150,
             render: (_: any, record: IUserResponse) => (
-                <span className="flex gap-2">
-                    <Button
-                        type="text"
-                        icon={<Pen style={{ color: "#2563eb" }} />}
-                        onClick={() => {
-                            setSelectedUser(record);
-                            setIsShowModalUpdate(true);
-                        }}
-                        title="Chỉnh sửa"
-                    />
-                    <Button
-                        type="text"
-                        icon={
-                            record.islocked ? (
-                                <LockOpen style={{ color: "#16a34a" }} />
-                            ) : (
-                                <Lock style={{ color: "#dc2626" }} />
-                            )
-                        }
-                        onClick={async () => {
-                            setSelectedUser(record);
-                            const banAccount = await banAccountId(record.id);
-                            if (banAccount.ok) {
-                                NotificationService.success({
-                                    message: `Tài khoản ${record.fullname} đã ${record.islocked ? 'mở khoá' : 'khoá'} thành công`,
-                                });
-                                mutate(['user', '', 1, 10]);
-                                return;
-                            }
-                            NotificationService.error({
-                                message: banAccount.message,
-                            });
-                        }}
-                        title={record.islocked ? "Mở khoá tài khoản" : "Khoá tài khoản"}
-                    />
-                </span>
+                <Button
+                    type="text"
+                    icon={<Pen style={{ color: "#2563eb" }} />}
+                    onClick={() => {
+                        setSelectedUser(record);
+                        setIsShowModalUpdate(true);
+                    }}
+                    title="Chỉnh sửa"
+                />
             ),
         }
     ];
@@ -148,14 +137,12 @@ export default function UserPage() {
                     },
                 }}
                 singleSelect={true}
-            />
-
-            <ModalUpdateUser
+            />            <ModalUpdateUser
                 visible={isShowModalUpdate}
                 user={selectedUser}
                 onCancel={() => {
                     setIsShowModalUpdate(false);
-                    reloadSWR()
+                    reloadTable('user');
                 }}
             />
 
@@ -163,7 +150,7 @@ export default function UserPage() {
                 visible={isShowModalCreate}
                 onCancel={() => {
                     setIsShowModalCreate(false);
-                    reloadSWR()
+                    reloadTable('user');
                 }}
             />
         </>

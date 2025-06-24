@@ -1,6 +1,10 @@
 'use server'
 import globalConfig from '@/app.config'
-import { IDocumentRequest, IDocumentResponse } from '@/types/document'
+import {
+  IDocumentRequest,
+  IDocumentResponse,
+  IDocumentUpdateRequest,
+} from '@/types/document'
 import { cookies, headers } from 'next/headers'
 
 import {
@@ -35,16 +39,20 @@ export const createDocument = async (
 }
 
 export const updateDocument = async (
-  formData: IDocumentRequest,
+  documentId: string,
+  formData: IDocumentUpdateRequest,
 ): Promise<IBaseResponse> => {
-  const response = await fetch(`${globalConfig.baseUrl}/document/update`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${cookies().get('accessToken')?.value || ''}`,
+  const response = await fetch(
+    `${globalConfig.baseUrl}/document/${documentId}`,
+    {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${cookies().get('accessToken')?.value || ''}`,
+      },
+      body: JSON.stringify(formData),
     },
-    body: JSON.stringify(formData),
-  })
+  )
 
   const data = await response.json()
 
