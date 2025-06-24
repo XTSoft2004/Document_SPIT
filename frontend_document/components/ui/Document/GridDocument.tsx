@@ -25,11 +25,20 @@ interface GridDocumentProps {
 export default function GridDocument({ data, content, slug, path, treeData, mobileSearchResults }: GridDocumentProps) {
     const router = useRouter();
     const url = useMemo(() => slug.join('/'), [slug]);
-    const [mode, setMode] = useState<'list' | 'preview'>('list');
     const [previewFile, setPreviewFile] = useState<{ fileName: string, folderId: string } | null>(null);
     const [loading, setLoading] = useState(false);
     const [showTree, setShowTree] = useState(true);
     const [filtered, setFiltered] = useState<IDriveItem[] | null>(null);
+    const [mode, setMode] = useState<'list' | 'preview'>('list');
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const savedMode = localStorage.getItem('doc_mode');
+            if (savedMode === 'preview' || savedMode === 'list') {
+                setMode(savedMode as 'list' | 'preview');
+            }
+        }
+    }, []);
 
     const allItems = useMemo(() => flattenData(data), [data]);
 
