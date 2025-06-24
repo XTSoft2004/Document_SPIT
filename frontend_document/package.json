@@ -30,6 +30,7 @@
     "@radix-ui/react-toggle-group": "^1.1.10",
     "@radix-ui/react-tooltip": "^1.2.7",
     "@tanstack/react-table": "^8.21.3",
+    "@ant-design/nextjs-registry": "^1.0.2",
     "antd": "^5.26.1",
     "autoprefixer": "^10.4.21",
     "class-variance-authority": "^0.7.1",

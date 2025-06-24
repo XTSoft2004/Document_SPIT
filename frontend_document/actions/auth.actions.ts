@@ -74,6 +74,11 @@ export const logoutAccount = async () => {
 
   const data = await response.json()
 
+  if (response.ok) {
+    cookies().delete('accessToken')
+    cookies().delete('refreshToken')
+  }
+
   return {
     ok: response.ok,
     ...data,

@@ -17,3 +17,25 @@ export interface IFileInfo {
   id: string
   name: string
 }
+export interface IUploadFile {
+  base64String: string
+  fileName: string
+  folderId: string
+}
+
+export interface IFolder {
+  name: string
+  folderId: string
+}
+
+export interface IDriveResponse {
+  name: string
+  folderId: string
+  isFolder: boolean
+  children: IDriveResponse[]
+}
+export interface IDriveItem {
+  name: string
+  folderId: string
+  isFolder: boolean
+}
