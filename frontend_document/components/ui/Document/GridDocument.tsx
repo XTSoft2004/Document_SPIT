@@ -32,26 +32,41 @@ export default function GridDocument({ data, content, slug, path, treeData, mobi
     const [filtered, setFiltered] = useState<IDriveItem[] | null>(null);
 
     const allItems = useMemo(() => flattenData(data), [data]);
-    const [selectedKeys, setSelectedKeys] = useState<string[]>([path.at(-1) || '']);
-    const [expandedKeys, setExpandedKeys] = useState<string[]>(path);
 
-    useEffect(() => {
-        setLoading(true);
-        const timer = setTimeout(() => setLoading(false), 300);
-        return () => clearTimeout(timer);
-    }, [url]);
-
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const saved = localStorage.getItem('doc_mode') as 'list' | 'preview' | null;
-            if (saved) setMode(saved);
+    const getCurrentFolderId = useCallback(() => {
+        if (path.length === 0) return '';
+        let current = data;
+        let folderId = '';
+        for (const pathSegment of path) {
+            const found = current.find(item => item.name === pathSegment && item.isFolder);
+            if (found) {
+                folderId = found.folderId;
+                current = found.children || [];
+            }
         }
-    }, []);
+        return folderId;
+    }, [data, path]);
+
+    const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
+    const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
+
 
     useEffect(() => {
-        setSelectedKeys([path.at(-1) || '']);
-        setExpandedKeys(path);
-    }, [path]);
+        const currentFolderId = getCurrentFolderId();
+        setSelectedKeys(currentFolderId ? [currentFolderId] : []);
+
+
+        const expandIds: string[] = [];
+        let current = data;
+        for (const pathSegment of path) {
+            const found = current.find(item => item.name === pathSegment && item.isFolder);
+            if (found) {
+                expandIds.push(found.folderId);
+                current = found.children || [];
+            }
+        }
+        setExpandedKeys(expandIds);
+    }, [path, getCurrentFolderId, data]);
 
     const handleSetMode = useCallback((m: 'list' | 'preview') => {
         setMode(m);
@@ -63,9 +78,11 @@ export default function GridDocument({ data, content, slug, path, treeData, mobi
     const handleTreeSelect = useCallback((_: React.Key[], info: any) => {
         const node = info.node;
         if (!node) return;
+
         if (node.isLeaf) {
-            setPreviewFile({ fileName: node.title, folderId: node.id });
+            setPreviewFile({ fileName: node.title, folderId: node.key });
         } else {
+
             router.push(`/document/${node.path.join('/')}`);
         }
     }, [router]);
@@ -159,7 +176,6 @@ export default function GridDocument({ data, content, slug, path, treeData, mobi
                             url={url}
                             onPreviewFile={file => setPreviewFile({ fileName: file.name, folderId: file.folderId })}
                             onFolderClick={() => setLoading(true)}
-                            loading={loading}
                         />
                     ) : (
                         <GridDocumentPreview
