@@ -8,13 +8,25 @@ namespace Domain.Model.Response.Document
 {
     public class DocumentResponse
     {
+        public long? Id { get; set; }
         public string? Name { get; set; }
         public long? TotalDownloads { get; set; } = 0;
         public long? TotalViews { get; set; } = 0;
         public string? FileId { get; set; }
+        public string? FileName { get; set; }
         public bool? IsPrivate { get; set; }
         public string? StatusDocument { get; set; }
         public long? UserId { get; set; }
         public string? FolderId { get; set; }
+        public string TypeFile
+        {
+            get
+            {
+                var extension = Path.GetExtension(FileName);
+                return string.IsNullOrEmpty(extension) ? "Unknown" : extension.TrimStart('.').ToLower();
+            }
+        }
+        public DateTime? CreatedDate { get; set; }
+        public DateTime? ModifiedDate { get; set; }
     }
 }

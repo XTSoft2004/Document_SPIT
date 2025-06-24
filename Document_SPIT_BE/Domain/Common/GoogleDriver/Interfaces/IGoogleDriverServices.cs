@@ -35,12 +35,24 @@ namespace Domain.Common.GoogleDriver.Interfaces
         /// </summary>
         /// <param name="folderId"></param>
         /// <returns></returns>
-        Task<List<DriverItemResponse?>?> GetInfoFolder(string folderId);
+        Task<List<DriverItemResponse?>?> GetInfoFolder(string folderId, bool isOnlyFolder = false);
         /// <summary>
         /// Lấy mẫu thumbnail của file
         /// </summary>
         /// <param name="fileId"></param>
         /// <returns></returns>
         Task<string> GetThumbnailBase64(string fileId);
+        /// <summary>
+        /// Lấy thông tin của Google Driver, bao gồm tên, email, quota, v.v.
+        /// </summary>
+        /// <returns></returns>
+        Task<InfoGoogleDriverResponse?> GetInfoGoogleDriver();
+        /// <summary>
+        /// Tạo một thư mục mới trong Google Drive
+        /// </summary>
+        /// <param name="folderName"></param>
+        /// <param name="parentId"></param>
+        /// <returns></returns>
+        Task<HttpResponse> CreateFolder(string folderName, string parentId = "");
     }
 }

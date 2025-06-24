@@ -18,6 +18,29 @@ namespace Document_SPIT_BE.Controllers
             _services = services;
             _documentServices = documentServices;
         }
+        [HttpGet("info")]
+        public async Task<IActionResult> GetInfoDriver()
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+            var response = await _services.GetInfoGoogleDriver();
+            if (response == null)
+                return NotFound(new { Message = "Không tìm thấy thông tin tài khoản Google Drive" });
+            
+            return Ok(response);
+        }
+        [HttpGet("create-folder")]
+        public async Task<IActionResult> CreateFolder(string folderName, string parentId = "")
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+            if (string.IsNullOrEmpty(folderName))
+                return BadRequest(new { Message = "Tên thư mục không được để trống" });
+
+            var response = await _services.CreateFolder(folderName, parentId);
+            return response.ToActionResult();
+        }
+
         [HttpGet("thumbnail/{fileId}")]
         public async Task<IActionResult> GetThumbnailBase64(string fileId)
         {
@@ -42,7 +65,7 @@ namespace Document_SPIT_BE.Controllers
             var result = await _services.GetGoogleDrivePreviewAsync(fileId);
             if (result == null)
                 return NotFound(new { Message = "Không tồn tại file, vui lòng kiểm tra lại" });
-            _documentServices.ViewFile(fileId);
+            await _documentServices.ViewFile(fileId);
 
             var (data, contentType, fileName) = result.Value;
             
@@ -65,12 +88,12 @@ namespace Document_SPIT_BE.Controllers
             return Ok(response);
         }
         [HttpGet("find/{folderId}")]
-        public async Task<IActionResult> GetInfoFolder(string folderId)
+        public async Task<IActionResult> GetInfoFolder(string folderId, bool isOnlyFolder = false)
         {
             if (!ModelState.IsValid)
                 return BadRequest(DefaultString.INVALID_MODEL);
 
-            var response = await _services.GetInfoFolder(folderId);
+            var response = await _services.GetInfoFolder(folderId, isOnlyFolder);
             return Ok(response);
         }
     }

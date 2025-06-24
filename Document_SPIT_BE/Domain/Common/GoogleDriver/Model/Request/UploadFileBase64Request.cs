@@ -9,7 +9,7 @@ namespace Domain.Common.GoogleDriver.Model.Request
     public class UploadFileBase64Request
     {
         public string? Base64String { get; set; }
-        public string FileName { get; set; } = string.Empty;
-        public string FolderId { get; set; } = string.Empty;
+        public string? FileName { get; set; }
+        public string? FolderId { get; set; }
     }
 }

@@ -17,6 +17,7 @@ namespace Domain.Entities
         public string? Name { get; set; }
         public string Md5Checksum { get; set; } = string.Empty;
         public string? FileId { get; set; }
+        public string? FileName { get; set; }
         public string? FolderId { get; set; }
         public StatusDocument_Enum? StatusDocument { get; set; }
         public bool? IsPrivate { get; set; } = false; // Mặc định là công khai
