@@ -12,13 +12,20 @@ export default async function DocumentPage({ params }: { params: { slug: string[
 
     return (
         <>
-            <Header />
-            <GridDocument
-                content={content.items}
-                slug={slug}
-                path={content.path}
-                treeData={treeData}
-            />
+            <div className="h-screen flex flex-col overflow-hidden">
+                <div className="sticky top-0 z-10 bg-white">
+                    <Header />
+                </div>
+                <div className="flex-1 overflow-auto">
+                    <GridDocument
+                        data={data}
+                        content={content.items}
+                        slug={slug}
+                        path={content.path}
+                        treeData={treeData}
+                    />
+                </div>
+            </div>
         </>
     );
 }

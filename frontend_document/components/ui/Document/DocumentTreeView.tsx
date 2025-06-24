@@ -18,18 +18,15 @@ export default function DocumentTreeView({
     onExpand,
 }: DocumentTreeViewProps) {
     return (
-        <div className="h-full bg-white rounded-xl shadow p-2 overflow-auto">
-            <DirectoryTree
-                treeData={treeData}
-                selectedKeys={selectedKeys}
-                onSelect={onSelect}
-                expandedKeys={expandedKeys}
-                onExpand={onExpand}
-                showLine={true}
-                height={600}
-                autoExpandParent={false}
-                className="custom-treeview [&_.ant-tree]:bg-transparent [&_.ant-tree]:!text-base"
-            />
-        </div>
+        <DirectoryTree
+            treeData={treeData}
+            selectedKeys={selectedKeys}
+            onSelect={onSelect}
+            expandedKeys={expandedKeys}
+            onExpand={onExpand}
+            showLine={true}
+            autoExpandParent={false}
+            className="custom-treeview [&_.ant-tree]:bg-transparent [&_.ant-tree]:!text-base"
+        />
     );
 }

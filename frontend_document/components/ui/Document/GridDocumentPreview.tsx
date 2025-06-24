@@ -23,7 +23,7 @@ export default function GridDocumentPreview({ content, url, onPreviewFile, onFol
             {folders.length > 0 && (
                 <div>
                     <div className="mb-2 font-semibold text-gray-700">Thư mục</div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
                         {folders.map(item => {
                             const path = `/document/${url}/${convertSlug(item.name)}`;
                             return (
@@ -50,7 +50,7 @@ export default function GridDocumentPreview({ content, url, onPreviewFile, onFol
             {files.length > 0 && (
                 <div>
                     <div className="mb-2 font-semibold text-gray-700">Tập tin</div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
                         {files.map(item => (
                             <div
                                 key={item.folderId}
@@ -63,18 +63,7 @@ export default function GridDocumentPreview({ content, url, onPreviewFile, onFol
                                     style={{ cursor: 'pointer' }}
                                 />
                                 {/* File name */}
-                                <div className="font-medium text-center truncate w-full mb-2">{item.name}</div>
-                                {/* Eye icon */}
-                                <button
-                                    className="absolute top-2 right-2 p-1 rounded-full bg-white shadow hover:bg-blue-100"
-                                    title="Xem nhanh"
-                                    onClick={e => {
-                                        e.stopPropagation();
-                                        onPreviewFile?.(item);
-                                    }}
-                                >
-                                    <EyeIcon className="w-5 h-5 text-gray-500 group-hover:text-blue-600" />
-                                </button>
+                                <div className="font-medium text-xs text-center truncate w-full mb-2">{item.name}</div>
                             </div>
                         ))}
                     </div>
