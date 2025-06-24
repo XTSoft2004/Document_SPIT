@@ -12,6 +12,7 @@ using Domain.Model.Response.Document;
 using Domain.Model.Response.User;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -251,6 +252,7 @@ namespace Domain.Services
                         TotalViews = d.DetaiDocument != null ? d.DetaiDocument.TotalView : 0,
                         FileId = d.FileId,
                         IsPrivate = d.IsPrivate,
+                        FileName = d.FileName,
                         StatusDocument = d.StatusDocument.HasValue ? d.StatusDocument.ToString() : null,
                         UserId = d.UserId,
                         FolderId = d.FolderId,

@@ -18,7 +18,8 @@ namespace Domain.Common.GoogleDriver.Model.Response
         public string CreatedTime { get; set; }
         //[JsonIgnore]
         public string? Md5Checksum { get; set; } // null nếu là folder
-        public bool IsFolder => string.IsNullOrEmpty(WebContentLink); // phân biệt file và thư mục
+        public bool IsFolder => (!string.IsNullOrEmpty(WebViewLink) && WebViewLink.Contains("/folders/")) || string.IsNullOrEmpty(WebContentLink); // phân biệt file và thư mục
+        public string? parentId { get; set; }
         public string TypeDocument
         {
             get

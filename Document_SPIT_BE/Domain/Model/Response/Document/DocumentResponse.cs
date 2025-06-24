@@ -17,6 +17,7 @@ namespace Domain.Model.Response.Document
         public string? StatusDocument { get; set; }
         public long? UserId { get; set; }
         public string? FolderId { get; set; }
+        public string? FileName { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime? ModifiedDate { get; set; }
     }
