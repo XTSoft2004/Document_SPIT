@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
-import Header from "@/components/ui/Document/Header";
+import { useState, useEffect } from 'react';
+import HeaderDocument from "@/components/ui/Document/Header";
+import Header from "@/layout/Header";
 import GridDocument from "@/components/ui/Document/GridDocument";
 import { IDriveResponse, IDriveItem } from "@/types/driver";
 import { ITreeNode } from "@/types/tree";
 import { flattenData } from "@/utils/flattenData";
+import Footer from '@/layout/Footer';
 
 interface DocumentPageClientProps {
     data: IDriveResponse[];
@@ -23,18 +25,33 @@ export default function DocumentPageClient({
     treeData
 }: DocumentPageClientProps) {
     const [mobileSearchResults, setMobileSearchResults] = useState<IDriveItem[] | null>(null);
+    const [isMobile, setIsMobile] = useState(false);
     const allItems = flattenData(data);
 
+    useEffect(() => {
+        const checkIsMobile = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+        checkIsMobile();
+        window.addEventListener('resize', checkIsMobile);
+        return () => window.removeEventListener('resize', checkIsMobile);
+    }, []);
+
     return (
-        <div className="h-screen flex flex-col overflow-hidden">
-            <div className="sticky top-0 z-10 bg-white shadow-sm">
-                <Header
-                    treeData={treeData}
-                    allItems={allItems}
-                    onMobileSearch={setMobileSearchResults}
-                />
+        <>
+            <div className="sticky top-0 z-10 shadow-sm">
+                {isMobile ? (
+                    <HeaderDocument
+                        treeData={treeData}
+                        allItems={allItems}
+                        onMobileSearch={setMobileSearchResults}
+                        isMobile={isMobile}
+                    />
+                ) : (
+                    <Header />
+                )}
             </div>
-            <div className="flex-1 overflow-hidden">
+            <div className="mb-3 flex-1 overflow-hidden">
                 <GridDocument
                     data={data}
                     content={content}
@@ -44,6 +61,7 @@ export default function DocumentPageClient({
                     mobileSearchResults={mobileSearchResults}
                 />
             </div>
-        </div>
+            <Footer />
+        </>
     );
 }

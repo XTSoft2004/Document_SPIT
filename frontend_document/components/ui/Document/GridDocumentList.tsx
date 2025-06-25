@@ -56,7 +56,7 @@ export default function GridDocumentList({
     };
 
     return (
-        <div className="bg-white rounded-xl w-full flex flex-col">
+        <div className="rounded-xl w-full flex flex-col">
             {sortedContent.map((item) => {
                 const path = `/document/${url}/${convertSlug(item.name)}`;
                 return (

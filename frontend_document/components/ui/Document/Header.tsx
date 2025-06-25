@@ -7,14 +7,16 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ITreeNode } from '@/types/tree';
 import { IDriveItem } from '@/types/driver';
+import MenuMobile from '../Menu/MenuMobile';
 
 interface HeaderProps {
     treeData?: ITreeNode[];
     allItems?: IDriveItem[];
     onMobileSearch?: (results: IDriveItem[] | null) => void;
+    isMobile?: boolean;
 }
 
-const Header = ({ treeData, allItems, onMobileSearch }: HeaderProps) => {
+const Header = ({ treeData, allItems, onMobileSearch, isMobile }: HeaderProps) => {
     const router = useRouter();
     const [searchQuery, setSearchQuery] = useState("");
 
@@ -32,7 +34,7 @@ const Header = ({ treeData, allItems, onMobileSearch }: HeaderProps) => {
         }
     }, [searchQuery, allItems, onMobileSearch]);
     return (
-        <header className="w-full flex flex-col bg-white shadow-lg border-b border-gray-200">
+        <header className="w-full flex flex-col">
             {/* Main header */}
             <div className="flex items-center justify-between px-4 sm:px-6 py-3">
                 {/* Left: Logo */}
@@ -48,8 +50,8 @@ const Header = ({ treeData, allItems, onMobileSearch }: HeaderProps) => {
                 </div>
 
                 {/* Only show search bar on mobile */}
-                {allItems && (
-                    <div className="flex-1 flex justify-center items-center w-full sm:hidden">
+                {allItems && isMobile && (
+                    <div className="flex-1 flex justify-center items-center w-full">
                         <div className="w-full max-w-xs">
                             <Input
                                 allowClear
@@ -68,15 +70,9 @@ const Header = ({ treeData, allItems, onMobileSearch }: HeaderProps) => {
                         </div>
                     </div>
                 )}
-
-                {/* Right: Avatar */}
-                <div className="flex-shrink-0">
-                    <Avatar
-                        shape="circle"
-                        size={40}
-                        icon={<UserOutlined className="text-gray-600" />}
-                        className="sm:w-12 sm:h-12 hover:shadow-md transition-shadow duration-200"
-                    />
+                {/* Mobile Menu - hiện ở mobile */}
+                <div className="md:hidden">
+                    <MenuMobile />
                 </div>
             </div>
         </header>
