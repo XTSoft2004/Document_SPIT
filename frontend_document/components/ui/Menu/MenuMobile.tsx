@@ -1,12 +1,12 @@
 'use client';
 import React, { useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { MenuOutlined, CloseOutlined, HomeOutlined, FolderOutlined, HeartOutlined } from '@ant-design/icons';
 import { Drawer } from 'antd';
+import NavigationLink from '@/components/ui/Navigation/NavigationLink';
 
 const MenuMobile = () => {
     const pathname = usePathname();
-    const router = useRouter();
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
     const getActiveTab = () => {
@@ -16,24 +16,8 @@ const MenuMobile = () => {
         return 'home';
     };
 
-    const handleTabChange = (tab: string) => {
+    const handleNavigationClick = () => {
         setIsDrawerOpen(false);
-        setTimeout(() => {
-            switch (tab) {
-                case 'home':
-                    router.push('/');
-                    break;
-                case 'document':
-                    router.push('/document');
-                    break;
-                case 'contribute':
-                    router.push('/contribute');
-                    break;
-                default:
-                    router.push('/');
-                    break;
-            }
-        }, 300);
     };
 
     const activeTab = getActiveTab();
@@ -105,9 +89,10 @@ const MenuMobile = () => {
                     {/* Navigation Items */}
                     <div className="space-y-3">
                         {menuItems.map((item) => (
-                            <button
+                            <NavigationLink
                                 key={item.key}
-                                onClick={() => handleTabChange(item.key)}
+                                href={item.key === 'home' ? '/' : `/${item.key}`}
+                                onClick={handleNavigationClick}
                                 className={`
                                     group relative w-full flex items-center gap-4 px-4 py-3 rounded-lg text-left transition-all duration-200 hover:scale-[1.01]
                                     ${activeTab === item.key
@@ -129,7 +114,7 @@ const MenuMobile = () => {
                                 {activeTab === item.key && (
                                     <div className="ml-auto w-2 h-2 bg-white rounded-full animate-pulse" />
                                 )}
-                            </button>
+                            </NavigationLink>
                         ))}
                     </div>
 
@@ -137,11 +122,9 @@ const MenuMobile = () => {
                     <div className="mt-6">
                         <div className="relative group">
                             <div className="absolute inset-0 duration-1000 opacity-30 transition-all bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 rounded-xl blur-lg filter group-hover:opacity-50 group-hover:duration-200" />
-                            <button
-                                onClick={() => {
-                                    setIsDrawerOpen(false);
-                                    setTimeout(() => router.push('/auth'), 300);
-                                }}
+                            <NavigationLink
+                                href="/auth"
+                                onClick={handleNavigationClick}
                                 className="group relative inline-flex items-center justify-center w-full text-base rounded-xl bg-white px-6 py-3 font-semibold text-gray-900 transition-all duration-200 hover:bg-gray-50 hover:shadow-lg hover:-translate-y-0.5 hover:shadow-gray-300/30 border border-gray-200"
                             >
                                 <span>Login</span>
@@ -149,7 +132,7 @@ const MenuMobile = () => {
                                     <path d="M0 5h7" className="transition opacity-0 group-hover:opacity-100" />
                                     <path d="M1 1l4 4-4 4" className="transition group-hover:translate-x-[3px]" />
                                 </svg>
-                            </button>
+                            </NavigationLink>
                         </div>
                     </div>
                 </div>

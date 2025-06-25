@@ -1,9 +1,5 @@
 'use client';
-import { loginAccount } from '@/actions/auth.actions';
-import { ILoginRequest } from '@/types/auth';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
 import { motion, AnimatePresence } from 'framer-motion';
 import PageRegister from './register/page';
 import RotatingText from '@/components/animations/TextAnimations/RotatingText/RotatingText';
@@ -13,7 +9,6 @@ export default function PageAuth() {
 
     const handleTabChange = (tab: string) => {
         setIsSignIn(tab === 'login');
-        console.log(`Switched to ${tab} tab`);
     }; return (
         <div className="min-h-screen flex bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
             {/* Left Section (Login Form) */}

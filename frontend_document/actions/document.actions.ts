@@ -91,9 +91,10 @@ export const getDocuments = async (
   search: string = '',
   pageNumber: number = -1,
   pageSize: number = -1,
+  records: number = -1,
 ) => {
   const response = await fetch(
-    `${globalConfig.baseUrl}/document?search=${search}&pageNumber=${pageNumber}&pageSize=${pageSize}`,
+    `${globalConfig.baseUrl}/document?search=${search}&pageNumber=${pageNumber}&pageSize=${pageSize}&records=${records}`,
     {
       method: 'GET',
       headers: {

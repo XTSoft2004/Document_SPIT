@@ -1,11 +1,24 @@
 'use client'
-import Loading from "@/components/animations/Loading";
 import Header from "@/layout/Header";
 import Footer from "@/layout/Footer";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { getDocuments } from "@/actions/document.actions";
+import { IDocumentResponse } from "@/types/document";
 
 export default function Home() {
   const router = useRouter();
+  const [doc, setDoc] = useState<IDocumentResponse[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await getDocuments('', -1, -1, 3);
+      if (response.ok) {
+        setDoc(response.data);
+      }
+    }
+    fetchData();
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
@@ -34,7 +47,7 @@ export default function Home() {
 
                 <h1 className="text-3xl md:text-5xl font-bold text-gray-900 leading-tight">
                   Document
-                  <span className="ml-4 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                  <span className="ml-4 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
                     SPIT
                   </span>
                 </h1>
@@ -69,7 +82,7 @@ export default function Home() {
 
             {/* Right Visual - Compact hơn */}
             <div className="relative">
-              <div className="relative z-10">
+              <div className="relative z-10 mb-5">
                 {/* Main Card - Nhỏ gọn hơn */}
                 <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl p-6 border border-white/20">
                   <div className="space-y-4">
@@ -87,16 +100,26 @@ export default function Home() {
 
                     {/* Document Preview - Ít item hơn */}
                     <div className="space-y-2">
-                      {[1, 2, 3].map((item) => (
-                        <div key={item} className="flex items-center gap-3 p-2 bg-gray-50 rounded-xl hover:bg-blue-50 transition-colors duration-300 group cursor-pointer" onClick={() => router.push('/document')}>
+                      {doc.map((item) => (
+                        <div key={item.id} className="flex items-center gap-3 p-2 bg-gray-50 rounded-xl hover:bg-blue-50 transition-colors duration-300 group cursor-pointer" onClick={() => router.push('/document')}>
                           <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg flex items-center justify-center">
                             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                           </div>
                           <div className="flex-1">
-                            <div className="text-sm font-semibold text-gray-900">Tài liệu {item}</div>
-                            <div className="text-xs text-gray-500">Cập nhật gần đây</div>
+                            <div className="text-sm font-semibold text-gray-900">{item.fileName}</div>
+                            <div className="text-xs text-gray-500">
+                              Vừa cập nhật lúc:
+                              <span className="ml-1">{new Date(item.modifiedDate).toLocaleString('vi-VN', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                hour12: false
+                              })}</span>
+                            </div>
                           </div>
                           <div className="w-2 h-2 bg-green-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         </div>
@@ -124,6 +147,6 @@ export default function Home() {
       </div>
       <Footer />
 
-    </div>
+    </div >
   )
 }

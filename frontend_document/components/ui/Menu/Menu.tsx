@@ -1,10 +1,11 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { Input } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { IDriveItem } from '@/types/driver';
+import NavigationLink from '@/components/ui/Navigation/NavigationLink';
 
 interface MenuProps {
   allItems?: IDriveItem[];
@@ -13,7 +14,6 @@ interface MenuProps {
 
 const Menu = ({ allItems, onMobileSearch }: MenuProps) => {
   const pathname = usePathname();
-  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
 
   const getActiveTab = () => {
@@ -21,25 +21,6 @@ const Menu = ({ allItems, onMobileSearch }: MenuProps) => {
     if (pathname.startsWith('/document')) return 'document';
     if (pathname.startsWith('/contribute')) return 'contribute';
     return 'home';
-  };
-
-  const handleTabChange = (tab: string) => {
-    setTimeout(() => {
-      switch (tab) {
-        case 'home':
-          router.push('/');
-          break;
-        case 'document':
-          router.push('/document');
-          break;
-        case 'contribute':
-          router.push('/contribute');
-          break;
-        default:
-          router.push('/');
-          break;
-      }
-    }, 500);
   };
 
   useEffect(() => {
@@ -63,20 +44,21 @@ const Menu = ({ allItems, onMobileSearch }: MenuProps) => {
       <div className="relative">
         <div className="absolute inset-0 duration-1000 opacity-30 transition-all bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 rounded-2xl blur-xl filter group-hover:opacity-40 group-hover:duration-200 scale-110" />
 
-        <StyledWrapper className="relative z-10">
+        <StyledWrapper className="relative z-10" $activeTab={activeTab}>
           <div className="menu-container group">
-            {/* Tab Navigation */}
             <div className="tab-container">
-              <input type="radio" name="tab" id="home" className="tab home--1" defaultChecked={activeTab === 'home'} />
-              <label className="tab_label" htmlFor="home" onClick={() => handleTabChange('home')}>Trang chủ</label>
-              <input type="radio" name="tab" id="document" className="tab document--2" defaultChecked={activeTab === 'document'} />
-              <label className="tab_label" htmlFor="document" onClick={() => handleTabChange('document')}>Tài liệu</label>
-              <input type="radio" name="tab" id="contribute" className="tab contribute--3" defaultChecked={activeTab === 'contribute'} />
-              <label className="tab_label" htmlFor="contribute" onClick={() => handleTabChange('contribute')}>Đóng góp</label>
+              <NavigationLink href="/" className={`tab-link ${activeTab === 'home' ? 'active' : ''}`}>
+                <label className="tab_label">Trang chủ</label>
+              </NavigationLink>
+              <NavigationLink href="/document" className={`tab-link ${activeTab === 'document' ? 'active' : ''}`}>
+                <label className="tab_label">Tài liệu</label>
+              </NavigationLink>
+              <NavigationLink href="/contribute" className={`tab-link ${activeTab === 'contribute' ? 'active' : ''}`}>
+                <label className="tab_label">Đóng góp</label>
+              </NavigationLink>
               <div className="indicator" />
             </div>
 
-            {/* Search Bar */}
             {allItems && (
               <div className="search-container">
                 <Input
@@ -97,7 +79,7 @@ const Menu = ({ allItems, onMobileSearch }: MenuProps) => {
   );
 };
 
-const StyledWrapper = styled.div`
+const StyledWrapper = styled.div<{ $activeTab: string }>`
   .menu-container {
     display: flex;
     align-items: center;
@@ -107,7 +89,6 @@ const StyledWrapper = styled.div`
   .tab-container {
     position: relative;
     display: flex;
-    flex-direction: row;
     align-items: flex-start;
     padding: 3px;
     background: #ffffff;
@@ -129,8 +110,7 @@ const StyledWrapper = styled.div`
     min-width: 200px;
   }
 
-  .search-input:hover,
-  .search-input:focus {
+  .search-input:hover, .search-input:focus {
     background: rgba(255, 255, 255, 1) !important;
     border-color: #60a5fa !important;
     box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2) !important;
@@ -164,8 +144,45 @@ const StyledWrapper = styled.div`
     opacity: 0.8;
   }
 
+  .tab-link {
+    width: 140px;
+    height: 36px;
+    position: relative;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    border-radius: 9px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(0);
+  }
+
+  .tab-link:hover {
+    scale: 1.15;
+  }
+
+  .tab-link.active {
+    transform: translateY(0px) scale(1.05);
+  }
+
+  .tab_label {
+    font-size: 0.9rem;
+    font-weight: 700;
+    font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+  }
+
+  .tab-link.active .tab_label {
+    color: #ffffff;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
   .indicator {
-    content: "";
     width: 140px;
     height: 36px;
     background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
@@ -176,93 +193,27 @@ const StyledWrapper = styled.div`
     transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     transform: translateY(0) scale(1.01);
     box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15), 0px 2px 4px rgba(0, 0, 0, 0.08);
-  }
-
-  .indicator::before {
-    content: "";
-    position: absolute;
-    inset: -2px;
-    background: linear-gradient(45deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b);
-    border-radius: 11px;
-    z-index: -1;
-    opacity: 0;
-    transition: opacity 0.4s ease;
-  }
-
-  @keyframes pulse {
-    0%, 100% {
-      transform: scale(1);
-    }
-    50% {
-      transform: scale(1.05);
-    }
-  }
-
-  .tab:checked ~ .indicator::before {
-    opacity: 1;
-  }
-
-  .tab:checked ~ .indicator {
-    animation: pulse 0.8s ease-out;
-  }
-
-  .tab {
-    width: 140px;
-    height: 36px;
-    position: absolute;
-    z-index: 99;
-    outline: none;
-    opacity: 0;
-  }
-
-  .tab_label {
-    width: 140px;
-    height: 36px;
-    position: relative;
-    z-index: 999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 0;
-    font-size: 0.9rem;
-    font-weight: 700;
-    font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-    color: #6b7280;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    transform: translateY(0);
-  }
-
-  .tab_label:hover {
-    transform: translateY(-2px);
-  }
-
-  .tab:checked + .tab_label {
-    color: #ffffff;
-    font-weight: 700;
-    transform: translateY(-2px) scale(1.05);
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  }
-
-  .home--1:checked ~ .indicator {
-    left: 5px;
-    transform: translateY(0) scale(1.03);
-    box-shadow: 0px 6px 20px rgba(59, 130, 246, 0.2), 0px 2px 6px rgba(59, 130, 246, 0.1);
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.8) 0%, rgba(29, 78, 216, 0.8) 100%);
-  }
-
-  .document--2:checked ~ .indicator {
-    left: calc(140px + 3px);
-    transform: translateY(0) scale(1.02);
-    box-shadow: 0px 6px 20px rgba(139, 92, 246, 0.2), 0px 2px 6px rgba(139, 92, 246, 0.1);
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.8) 0%, rgba(124, 58, 237, 0.8) 100%);
-  }
-
-  .contribute--3:checked ~ .indicator {
-    left: calc(140px * 2 + 2px);
-    transform: translateY(0) scale(1.02);
-    box-shadow: 0px 6px 20px rgba(236, 72, 153, 0.2), 0px 2px 6px rgba(236, 72, 153, 0.1);
-    background: linear-gradient(135deg, rgba(236, 72, 153, 0.8) 0%, rgba(219, 39, 119, 0.8) 100%);
+    ${({ $activeTab }) => {
+    if ($activeTab === 'home') return `
+        left: 5px;
+        transform: translateY(0) scale(1.03);
+        box-shadow: 0px 6px 20px rgba(59, 130, 246, 0.2), 0px 2px 6px rgba(59, 130, 246, 0.1);
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.8) 0%, rgba(29, 78, 216, 0.8) 100%);
+      `;
+    if ($activeTab === 'document') return `
+        left: calc(140px + 3px);
+        transform: translateY(0) scale(1.02);
+        box-shadow: 0px 6px 20px rgba(139, 92, 246, 0.2), 0px 2px 6px rgba(139, 92, 246, 0.1);
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.8) 0%, rgba(124, 58, 237, 0.8) 100%);
+      `;
+    if ($activeTab === 'contribute') return `
+        left: calc(140px * 2 + 2px);
+        transform: translateY(0) scale(1.02);
+        box-shadow: 0px 6px 20px rgba(236, 72, 153, 0.2), 0px 2px 6px rgba(236, 72, 153, 0.1);
+        background: linear-gradient(135deg, rgba(236, 72, 153, 0.8) 0%, rgba(219, 39, 119, 0.8) 100%);
+      `;
+    return '';
+  }}
   }
 `;
 

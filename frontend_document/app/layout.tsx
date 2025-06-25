@@ -1,7 +1,8 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { AntdRegistry } from '@ant-design/nextjs-registry'
-import Header from "@/layout/Header";
+import AppInitializer from "@/components/ui/Loading/AppInitializer";
+import PageTransitionLoader from "@/components/ui/Loading/PageTransitionLoader";
 
 export const metadata: Metadata = {
   title: "Trang chủ SPIT",
@@ -20,7 +21,10 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AntdRegistry>
-          {children}
+          <AppInitializer>
+            <PageTransitionLoader />
+            {children}
+          </AppInitializer>
         </AntdRegistry>
       </body>
     </html >

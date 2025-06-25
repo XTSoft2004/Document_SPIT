@@ -77,7 +77,7 @@ export default function PathFolder({ path }: PathFolderProps) {
                             height="1em"
                             viewBox="0 0 24 24"
                             fill="none"
-                            className="ml-2 text-gray-500 hover:text-blue-600 transition-colors inline-block"
+                            className="ml-2 mb-1 text-gray-500 hover:text-blue-600 transition-colors inline-block"
                             style={{ verticalAlign: 'middle' }}
                         >
                             <path
@@ -86,7 +86,7 @@ export default function PathFolder({ path }: PathFolderProps) {
                                 strokeWidth="2"
                                 fill="none"
                             />
-                            <rect x="8" y="2" width="8" height="4" rx="1" ry="1" stroke="currentColor" strokeWidth="2" fill="none" />
+                            <rect x="8" width="8" height="4" rx="1" ry="1" stroke="currentColor" strokeWidth="2" fill="none" />
                         </svg>
                     </span>
                 ) : (
