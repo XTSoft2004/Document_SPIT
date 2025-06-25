@@ -67,8 +67,6 @@ namespace Document_SPIT_BE.Controllers
                 return BadRequest(DefaultString.INVALID_MODEL);
 
             var documents = _services.GetDocuments(search, pageNumber, pageSize, out int totalRecords);
-            if (documents == null || !documents.Any())
-                return NotFound(new { Message = "Danh sách tài liệu trống !!!" });
 
             var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
             return Ok(ResponseArray.ResponseList(documents, totalRecords, totalPages, pageNumber, pageSize));

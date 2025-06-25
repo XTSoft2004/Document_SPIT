@@ -304,11 +304,12 @@ namespace Domain.Services
                 TotalDownloads = s.DetaiDocument != null ? s.DetaiDocument.TotalDownload : 0,
                 TotalViews = s.DetaiDocument != null ? s.DetaiDocument.TotalView : 0,
                 FileId = s.FileId,
-                FileName = s.FileName,  
+                FileName = s.FileName,
                 IsPrivate = s.IsPrivate,
                 StatusDocument = s.StatusDocument.ToString(),
                 UserId = s.UserId,
                 FolderId = s.FolderId,
+                CourseId = s.CourseId,
                 CreatedDate = s.CreatedDate,
                 ModifiedDate = s.ModifiedDate
             }).ToList();

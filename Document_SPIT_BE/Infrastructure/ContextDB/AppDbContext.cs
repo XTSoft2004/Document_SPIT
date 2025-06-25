@@ -21,6 +21,9 @@ namespace Infrastructure.ContextDB
         public DbSet<DetailDocument> DetailDocuments { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<OneTimeToken> OneTimeTokens { get; set; }
+        public DbSet<Report> Reports { get; set; }
+        public DbSet<Course> Courses { get; set; }
+        public DbSet<Department> Departments { get; set; }
 
         // DbSet cho các mối quan hệ
         public DbSet<StarDocument> StarDocuments { get; set; }

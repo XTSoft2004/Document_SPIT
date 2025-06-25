@@ -18,6 +18,7 @@ namespace Domain.Model.Response.Document
         public string? StatusDocument { get; set; }
         public long? UserId { get; set; }
         public string? FolderId { get; set; }
+        public long? CourseId { get; set; }
         public string TypeFile
         {
             get

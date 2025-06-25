@@ -33,6 +33,7 @@ namespace Server_Manager.Middleware
                 "/auth/sign-up",
                 "/auth/refresh-token",
                 "/document/view",
+                "/extension/",
                 "/server",
             };
 
