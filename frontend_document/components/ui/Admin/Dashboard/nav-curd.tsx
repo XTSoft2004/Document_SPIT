@@ -31,6 +31,16 @@ export function NavCRUD() {
             icon: Book,
         },
         {
+            name: "Quản lý khoa",
+            url: "/admin/department",
+            icon: Book,
+        },
+        {
+            name: "Quản lý môn học",
+            url: "/admin/course",
+            icon: Book,
+        },
+        {
             name: "Quản lý lịch sử",
             url: "#",
             icon: History,

@@ -1,6 +1,5 @@
 'use client';
 import { useForm } from 'react-hook-form';
-import { LockOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import { CustomTextField } from '@/components/ui/Input/CustomTextField';
 import { CircleUser, KeyRound } from 'lucide-react';
@@ -10,7 +9,7 @@ import { getOrCreateDeviceId } from '@/utils/deviceId';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import NotificationService from '@/components/ui/Notification/NotificationService';
-import { motion } from 'framer-motion'; // Thêm Framer Motion
+import { motion } from 'framer-motion';
 import ModernAuthLoading from '@/components/ui/Loading/ModernAuthLoading';
 
 export default function PageLogin() {
@@ -44,73 +43,92 @@ export default function PageLogin() {
         NotificationService.error({
             message: login.message || 'Đăng nhập thất bại',
         });
-    }; return (
+    };
+
+    return (
         <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 50 }}
             transition={{ duration: 0.4, ease: 'easeOut' }}
-            className="w-full"
-            style={{ height: 320 }} // Chiều dài cố định
+            className="w-full h-full flex flex-col justify-center"
         >
             {loading ? (
-                <ModernAuthLoading />
+                <div className="flex items-center justify-center flex-1">
+                    <ModernAuthLoading />
+                </div>
             ) : (
-                <form
-                    onSubmit={handleSubmit(onSubmit)}
-                    className="space-y-6"
-                >
-                    <div className="space-y-5">
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.1, duration: 0.3 }}
-                        >                            <CustomTextField
-                                control={control}
-                                errors={errors}
-                                name="username"
-                                placeholder="Enter your username"
-                                icon={<CircleUser size={20} className="text-gray-400" />}
-                            />
-                        </motion.div>
-
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2, duration: 0.3 }}
-                        >                            <CustomTextField
-                                control={control}
-                                errors={errors}
-                                name="password"
-                                type="password"
-                                placeholder="Enter your password"
-                                icon={<KeyRound size={20} className="text-gray-400" />}
-                            />
-                        </motion.div>
-                    </div>
-
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3, duration: 0.3 }}
-                        className="pt-2"
+                <div className="flex flex-col justify-center space-y-6">
+                    <form
+                        onSubmit={handleSubmit(onSubmit)}
+                        className="space-y-5"
                     >
-                        <motion.div
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            className="w-full"
-                        >
-                            <Button
-                                type="primary"
-                                htmlType="submit"
-                                className="w-full h-12 text-base font-semibold rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 border-none shadow-lg hover:shadow-xl transition-all duration-300"
-                                style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)' }}
+                        <div className="space-y-4">
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.1, duration: 0.3 }}
                             >
-                                Sign In
-                            </Button>
+                                <CustomTextField
+                                    control={control}
+                                    errors={errors}
+                                    name="username"
+                                    placeholder="Enter your username"
+                                    icon={<CircleUser size={18} className="text-gray-400" />}
+                                />
+                            </motion.div>
+
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.2, duration: 0.3 }}
+                            >
+                                <CustomTextField
+                                    control={control}
+                                    errors={errors}
+                                    name="password"
+                                    type="password"
+                                    placeholder="Enter your password"
+                                    icon={<KeyRound size={18} className="text-gray-400" />}
+                                />
+                            </motion.div>
+                        </div>
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3, duration: 0.3 }}
+                            className="pt-4"
+                        >
+                            <motion.div
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                className="w-full"
+                            >
+                                <Button
+                                    type="primary"
+                                    htmlType="submit"
+                                    className="w-full h-12 text-base font-semibold rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 border-none shadow-lg hover:shadow-xl transition-all duration-300"
+                                    style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)' }}
+                                >
+                                    Sign In
+                                </Button>
+                            </motion.div>
                         </motion.div>
+                    </form>
+
+                    {/* Forgot Password */}
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.4, duration: 0.3 }}
+                        className="text-center pt-4"
+                    >
+                        <a href="#" className="text-sm text-blue-600 hover:underline">
+                            Forgot your password?
+                        </a>
                     </motion.div>
-                </form>
+                </div>
             )}
         </motion.div>
     );
