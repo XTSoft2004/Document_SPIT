@@ -16,14 +16,14 @@ namespace Server_Manager.Middleware
         private readonly RequestDelegate _next;
         private readonly string _secretKey;
         private readonly ITokenServices _tokenServices;
-        //private readonly IUserServices _userServices;
-        //public JwtMiddleware(RequestDelegate next, IConfiguration config, ITokenServices tokenServices, IUserServices userServices)
-        //{
-        //    _next = next;
-        //    _secretKey = config["JwtSettings:Secret"];
-        //    _tokenServices = tokenServices;
-        //    _userServices = userServices;
-        //}
+        private readonly IUserServices _userServices;
+        public JwtMiddleware(RequestDelegate next, IConfiguration config, ITokenServices tokenServices, IUserServices userServices)
+        {
+            _next = next;
+            _secretKey = config["JwtSettings:Secret"];
+            _tokenServices = tokenServices;
+            _userServices = userServices;
+        }
 
         public async Task Invoke(HttpContext context)
         {
@@ -32,16 +32,12 @@ namespace Server_Manager.Middleware
                 "/auth/login",
                 "/auth/sign-up",
                 "/auth/refresh-token",
-                "/extension/upload",
-                "/extension/image",
-                "/extension/base64",
-                "/driver/upload",
-                "/driver/preview",
-                "/user/profile",
+                "/document/view",
                 "/server",
             };
 
-            if (bypassRoutes.Contains(context.Request.Path.Value.ToLower()))
+            var requestPath = context.Request.Path.Value?.ToLower() ?? string.Empty;
+            if (bypassRoutes.Any(route => requestPath.Contains(route)))
             {
                 await _next(context);
                 return;

@@ -39,5 +39,11 @@ namespace Document_SPIT_BE.Controllers
             var response = await _sevices!.LogoutUser();
             return response.ToActionResult();
         }
+        [HttpGet("refresh-token")]
+        public async Task<IActionResult> RefreshToken()
+        {
+            var response = await _sevices!.RefreshTokenAccount();
+            return response.ToActionResult();
+        }
     } 
 }

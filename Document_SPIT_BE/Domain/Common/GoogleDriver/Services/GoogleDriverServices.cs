@@ -78,7 +78,7 @@ namespace Domain.Common.GoogleDriver.Services
             string accessToken = await GetAccessToken();
             string mimeType = AppDictionary.GetMimeTypeDriver(uploadFileRequest.FileName);
 
-            var typeFile = uploadFileRequest.FileName.Split('.')[1];
+            var typeFile = uploadFileRequest.FileName.Split('.')[uploadFileRequest.FileName.Split('.').Length - 1];
             if (typeFile == "docx" || typeFile == "doc")
                 mimeType = "application/vnd.google-apps.document";
 

@@ -47,6 +47,7 @@ namespace Domain.Services
                     {
                         Name = item.Name,
                         FileId = item.Id,
+                        FileName = item.Name,
                         Md5Checksum = item.Md5Checksum ?? string.Empty,
                         IsPrivate = false, // Mặc định là công khai
                         StatusDocument = StatusDocument_Enum.Approved,

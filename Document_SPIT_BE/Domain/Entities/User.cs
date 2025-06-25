@@ -30,5 +30,6 @@ namespace Domain.Entities
         public ICollection<Document>? Documents { get; set; }
         public ICollection<Notification>? Notifications { get; set; }
         public ICollection<History>? Historys { get; set; }
+        public ICollection<OneTimeToken>? OneTimeTokens { get; set; }
     }
 }

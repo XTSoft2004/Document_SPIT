@@ -4,6 +4,7 @@ using Domain.Entities;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
 using Domain.Model.Request.User;
+using Domain.Model.Response.Token;
 using Domain.Model.Response.User;
 using HelperHttpClient;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
@@ -121,7 +122,7 @@ namespace Domain.Services
                 Username = s.Username,
                 Fullname = s.Fullname,
                 IsLocked = s.isLocked,
-                RoleName = s.Role != null ? s.Role.DisplayName : "Chưa phân quyền"
+                RoleName = s.Role != null ? s.Role.DisplayName : null
             }).ToList();
 
             return usersSearch;
@@ -160,5 +161,27 @@ namespace Domain.Services
                 ;
             return HttpResponse.OK(message: "Tạo người dùng thành công.");
         }
-    } 
+        public async Task<HttpResponse> GetProfileToken()
+        {
+            var userResponse = _tokenServices.GetTokenBrowser();
+            if(userResponse == null)
+                return HttpResponse.Error(message: "Không tìm thấy thông tin người dùng từ token.", HttpStatusCode.Unauthorized);
+
+            string refeshtoken = _tokenServices.GetRefreshToken(userResponse.Id);
+            var tokenRF = _tokenServices.GetInfoFromToken(refeshtoken);
+
+            var user = _user!.Find(f => f.Id == userResponse.Id);
+            return HttpResponse.OK(message: "Lấy thông tin người dùng thành công.", data: new TokenInfoResponse()
+            {
+                UserId = userResponse.Id,
+                AccessToken = _tokenServices.GetTokenFromHeader(),
+                RefreshExpiresAt = tokenRF.ExpiryDate,
+                RefreshToken = refeshtoken,
+                ExpiresAt = userResponse.ExpiryDate,
+                DeviceId = userResponse.DeviceId,
+                IsLocked = user.isLocked,
+                RoleName = _role!.Find(f => f.Id == user.RoleId)?.DisplayName ?? "",
+            });
+        }
+    }
 }

@@ -87,5 +87,28 @@ namespace Document_SPIT_BE.Controllers
             Response.Headers["Content-Disposition"] = $"inline; filename=\"{fileName}\"";
             return new FileContentResult(data, contentType);
         }
+        [HttpGet("{documentId}")]
+        public async Task<IActionResult> GetLinkViewId(long documentId)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+            var document = await _services.GetLinkView(documentId);
+          
+            return document.ToActionResult();
+        }
+        [HttpGet("view/{code}")]
+        public async Task<IActionResult> ViewDocumentByCode(string code)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+            var result = await _services.ViewOnce(code);
+            if (result == null)
+                return NotFound(new { Message = "Không tồn tại file, vui lòng kiểm tra lại" });
+
+            var (data, contentType, fileName) = result.Value;
+
+            Response.Headers["Content-Disposition"] = $"inline; filename=\"{fileName}\"";
+            return new FileContentResult(data, contentType);
+        }
     }
 }

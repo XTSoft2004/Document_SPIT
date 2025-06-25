@@ -30,9 +30,10 @@ namespace Domain.Services
         private readonly IRepositoryBase<History> _history;
         private readonly IGoogleDriverServices? _googleDriverServices;
         private readonly ITokenServices? _tokenServices;
+        private readonly IRepositoryBase<OneTimeToken>? _oneTimeToken;
         private UserTokenResponse? userMeToken;
 
-        public DocumentServices(IRepositoryBase<Document>? document, IRepositoryBase<User>? user, IGoogleDriverServices? googleDriverServices, IRepositoryBase<DetailDocument>? detailDocument, ITokenServices? tokenServices)
+        public DocumentServices(IRepositoryBase<Document>? document, IRepositoryBase<User>? user, IGoogleDriverServices? googleDriverServices, IRepositoryBase<DetailDocument>? detailDocument, ITokenServices? tokenServices, IRepositoryBase<OneTimeToken>? oneTimeToken)
         {
             _document = document;
             _user = user;
@@ -40,6 +41,7 @@ namespace Domain.Services
             _detailDocument = detailDocument;
             _tokenServices = tokenServices;
             userMeToken = _tokenServices.GetTokenBrowser();
+            _oneTimeToken = oneTimeToken;
         }
         // Tạo mơi tài liệu
         public async Task<HttpResponse> CreateAsync(DocumentCreateRequest documentRequest)
@@ -299,6 +301,8 @@ namespace Domain.Services
             {
                 Id = s.Id,
                 Name = s.Name,
+                TotalDownloads = s.DetaiDocument != null ? s.DetaiDocument.TotalDownload : 0,
+                TotalViews = s.DetaiDocument != null ? s.DetaiDocument.TotalView : 0,
                 FileId = s.FileId,
                 FileName = s.FileName,  
                 IsPrivate = s.IsPrivate,
@@ -310,6 +314,49 @@ namespace Domain.Services
             }).ToList();
 
             return documentsSearch;
+        }
+        public async Task<HttpResponse> GetLinkView(long? DocumentId)
+        {
+            var document = _document!.Find(f => f.Id == DocumentId);
+            if(document == null)
+                return HttpResponse.Error("Tài liệu không tồn tại.", System.Net.HttpStatusCode.NotFound);
+
+            var user = _user.Find(f => f.Id == userMeToken.Id);
+
+            var guid= Guid.NewGuid().ToString("N");
+            _oneTimeToken.Insert(new OneTimeToken
+            {
+                Code = guid,
+                FileId = document.FileId,
+                User = user,
+                UserId = user.Id,
+                CreatedDate = DateTime.Now
+            });
+            await UnitOfWork.CommitAsync();
+            return HttpResponse.OK(message: "Lấy link thành công.", data: new { Code = $"{guid}" });
+        }
+        public async Task<(byte[] Data, string ContentType, string FileName)?> ViewOnce(string code)
+        {
+            var oneTimeToken = _oneTimeToken!.Find(f => f.Code == code);
+            if (oneTimeToken == null)
+                return null;
+            // Kiểm tra xem token đã hết hạn hay chưa
+            if (oneTimeToken.CreatedDate.AddSeconds(30) < DateTime.Now)
+            {
+                _oneTimeToken.Delete(oneTimeToken);
+                await UnitOfWork.CommitAsync();
+                return null;
+            }
+            // Lấy thông tin tài liệu từ FileId
+            var document = _document.Find(f => f.FileId == oneTimeToken.FileId);
+            if (document == null)
+                return null;
+            // Xoá token sau khi sử dụng
+            //_oneTimeToken.Delete(oneTimeToken);
+            //await UnitOfWork.CommitAsync();
+            // Tăng số lần xem tài liệu
+            await ViewFile(document.FileId);
+            return await _googleDriverServices.GetGoogleDrivePreviewAsync(document.FileId);
         }
         public async Task<(byte[] Data, string ContentType, string FileName)?> GetPreviewByDocumetId(long DocumentId)
         {

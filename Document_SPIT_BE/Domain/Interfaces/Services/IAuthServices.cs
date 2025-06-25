@@ -27,5 +27,10 @@ namespace Domain.Interfaces.Services
         /// <param name="registerRequest"></param>
         /// <returns></returns>
         Task<HttpResponse> RegisterAsync(RegisterRequest registerRequest);
+        /// <summary>
+        /// Refresh token người dùng
+        /// </summary>
+        /// <returns></returns>
+        Task<HttpResponse> RefreshTokenAccount();
     }
 }

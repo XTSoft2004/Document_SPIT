@@ -39,7 +39,8 @@ namespace Domain.Services
             return new TokenResponse()
             {
                 AccessToken = GenerateTokenUser(user, deviceId),
-                ExpiresAt = DateTime.Now.AddDays(Convert.ToInt32(_config["JwtSettings:ExpireToken"])),
+                //ExpiresAt = DateTime.Now.AddDays(Convert.ToInt32(_config["JwtSettings:ExpireToken"])),
+                ExpiresAt = DateTime.Now.AddMinutes(Convert.ToInt32(_config["JwtSettings:ExpireToken"])),
                 RefreshToken = GenerateRefreshToken(user, deviceId),
                 RefreshExpiresAt = DateTime.Now.AddDays(Convert.ToInt32(_config["JwtSettings:ExpireRefreshToken"]))
             };
@@ -60,6 +61,7 @@ namespace Domain.Services
                 Audience = _config["JwtSettings:Audience"],
                 Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.Now.AddDays(Convert.ToInt32(_config["JwtSettings:ExpireToken"])),
+                //Expires = DateTime.Now.AddSeconds(30),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
             };
 
@@ -85,6 +87,7 @@ namespace Domain.Services
                 Audience = _config["JwtSettings:Audience"],
                 Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.Now.AddDays(Convert.ToInt32(_config["JwtSettings:ExpireRefreshToken"])),
+                //Expires = DateTime.Now.AddMinutes(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
             };
 
@@ -124,6 +127,13 @@ namespace Domain.Services
                 ExpiryDate = expiryDate,
                 DeviceId = deviceId,
             };
+        }
+        public string GetTokenFromHeader()
+        {
+            var authHeader = _HttpContextHelper!.GetHeader("Authorization");
+            if (string.IsNullOrEmpty(authHeader))
+                return string.Empty;
+            return authHeader.Replace("Bearer", "").Trim();
         }
         public UserTokenResponse? GetTokenBrowser()
         {

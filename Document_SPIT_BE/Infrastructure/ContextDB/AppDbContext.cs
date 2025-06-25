@@ -20,6 +20,7 @@ namespace Infrastructure.ContextDB
         public DbSet<History> Histories { get; set; }
         public DbSet<DetailDocument> DetailDocuments { get; set; }
         public DbSet<Role> Roles { get; set; }
+        public DbSet<OneTimeToken> OneTimeTokens { get; set; }
 
         // DbSet cho các mối quan hệ
         public DbSet<StarDocument> StarDocuments { get; set; }

@@ -55,5 +55,11 @@ namespace Domain.Interfaces.Services
         /// <param name="userRequest"></param>
         /// <returns></returns>
         Task<HttpResponse> CreateAsync(UserCreateRequest userRequest);
+        /// <summary>
+        /// Lấy thông tin người dùng từ token trong Header Authorization
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        Task<HttpResponse> GetProfileToken();
     }
 }

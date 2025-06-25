@@ -52,6 +52,18 @@ namespace Domain.Interfaces.Services
         /// <returns></returns>
         List<DocumentResponse> GetDocuments(string search, int pageNumber, int pageSize, out int totalRecords);
         /// <summary>
+        /// Lấy liên kết xem tài liệu theo IdDocument
+        /// </summary>
+        /// <param name="DocumentId"></param>
+        /// <returns></returns>
+        Task<HttpResponse> GetLinkView(long? DocumentId);
+        /// <summary>
+        /// Xem tài liệu một lần theo mã
+        /// </summary>
+        /// <param name="code"></param>
+        /// <returns></returns>
+        Task<(byte[] Data, string ContentType, string FileName)?> ViewOnce(string code);
+        /// <summary>
         /// Lấy tài liệu theo IdDocument
         /// </summary>
         /// <param name="DocumentId"></param>
