@@ -4,6 +4,9 @@ import { useState, useEffect } from "react";
 import { Button } from "antd";
 import { Tag, XCircle, RefreshCw, File, Image as ImageIcon, FileText, Download, Eye } from "lucide-react";
 import { IDocumentResponse } from "@/types/document";
+import globalConfig from "@/app.config";
+import { getCodeView } from "@/actions/document.actions";
+import NotificationService from "../../Notification/NotificationService";
 
 interface PreviewPanelProps {
     selectedItem: IDocumentResponse;
@@ -14,12 +17,28 @@ interface PreviewPanelProps {
 const PreviewPanel = ({ selectedItem, onClose, onReload }: PreviewPanelProps) => {
     const [loading, setLoading] = useState(true);
     const [imageError, setImageError] = useState(false);
-
+    const [codeView, setCodeView] = useState<string | null>(null);
     // Reset loading state khi selectedItem thay đổi
     useEffect(() => {
         setLoading(true);
         setImageError(false);
-    }, [selectedItem?.fileId]); if (!selectedItem) {
+        if (selectedItem?.fileId) {
+            fetchDocumentCode(selectedItem);
+        }
+    }, [selectedItem?.fileId]);
+
+    const fetchDocumentCode = async (document: IDocumentResponse) => {
+        const response = await getCodeView(document.id);
+        if (response.ok) {
+            setCodeView(response.data.code);
+            // NotificationService.success({
+            //     message: `Tải mã xem trước thành công | ${response.data.code || 'N/A'}`,
+            //     description: "Mã xem trước đã được tải thành công.",
+            // });
+        }
+    }
+
+    if (!selectedItem) {
         return (
             <div className="w-full md:w-[350px] h-[calc(100vh-140px)] flex items-center justify-center">
                 <div className="text-center p-8">
@@ -40,7 +59,7 @@ const PreviewPanel = ({ selectedItem, onClose, onReload }: PreviewPanelProps) =>
     const isImage = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'].includes(selectedItem.typeFile?.toLowerCase());
 
     return (
-        <div className="w-full md:w-[350px] h-[calc(100vh-140px)] animate-in fade-in slide-in-from-right-3 duration-300">
+        <div className="w-full md:w-[350px] h-[calc(100vh-140px)] animate-in fade-in slide-in-from-right-3 duration-300 ml-3">
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 h-full flex flex-col overflow-hidden transform transition-all duration-200 hover:shadow-2xl">
 
                 {/* Header */}
@@ -85,8 +104,8 @@ const PreviewPanel = ({ selectedItem, onClose, onReload }: PreviewPanelProps) =>
                     {/* File info badges */}
                     <div className="flex items-center gap-2 mt-2">
                         <span className={`px-2 py-1 text-xs font-medium rounded-full ${isImage
-                                ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                                : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
+                            ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                            : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
                             }`}>
                             {isImage ? 'Hình ảnh' : 'PDF'}
                         </span>
@@ -127,7 +146,7 @@ const PreviewPanel = ({ selectedItem, onClose, onReload }: PreviewPanelProps) =>
                             {!imageError && (
                                 <div className="h-full overflow-hidden rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600">
                                     <img
-                                        src={`http://localhost:5000/driver/preview/${selectedItem?.fileId}`}
+                                        src={`${globalConfig.baseUrl}/document/view/${codeView}`}
                                         alt="Xem trước ảnh"
                                         className={`w-full h-full object-contain transition-all duration-500 ${loading ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
                                             } group-hover:scale-105`}
@@ -159,7 +178,7 @@ const PreviewPanel = ({ selectedItem, onClose, onReload }: PreviewPanelProps) =>
                             <div className="h-full overflow-hidden rounded-xl border border-gray-200 dark:border-gray-600 bg-white">
                                 <iframe
                                     key={selectedItem.fileId + (loading ? '-loading' : '')}
-                                    src={`http://localhost:5000/driver/preview/${selectedItem?.fileId}#toolbar=0&navpanes=0&scrollbar=0`}
+                                    src={`${globalConfig.baseUrl}/document/view/${codeView}#toolbar=0&navpanes=0&scrollbar=0`}
                                     title="Xem trước PDF"
                                     width="100%"
                                     height="100%"
@@ -186,7 +205,7 @@ const PreviewPanel = ({ selectedItem, onClose, onReload }: PreviewPanelProps) =>
                         <div className="flex items-center gap-2">
                             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                             <span className="text-xs text-gray-600 dark:text-gray-300 font-medium">
-                                {loading ? 'Đang tải...' : 'Sẵn sáng'}
+                                {loading ? 'Đang tải...' : 'Sẵn sàng'}
                             </span>
                         </div>
 
@@ -201,6 +220,15 @@ const PreviewPanel = ({ selectedItem, onClose, onReload }: PreviewPanelProps) =>
                                 size="small"
                                 className="!p-1 text-gray-500 hover:text-blue-600 dark:hover:text-blue-400"
                                 icon={<Download className="w-3 h-3" />}
+                                onClick={() => {
+                                    const link = document.createElement('a');
+                                    link.href = `${globalConfig.baseUrl}/document/download/${selectedItem.fileId}`;
+                                    link.download = selectedItem.name;
+                                    link.target = '_blank';
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
+                                }}
                             />
                         </div>
                     </div>

@@ -164,6 +164,7 @@ export default function DocumentPage() {
                         }}
                         onSelectionChange={(item: IDocumentResponse | null) => {
                             setSelectedItem(item ?? undefined);
+                            reloadTable('document');
                         }}
                     />
                 </div>                {/* Preview bên phải */}

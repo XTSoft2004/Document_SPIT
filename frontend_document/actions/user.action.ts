@@ -68,13 +68,6 @@ export const updateUser = async (id: string, user: IUserUpdate) => {
 }
 
 export const setRoleUser = async (id: string, roleName: string) => {
-  if (!id || !roleName) {
-    return {
-      ok: false,
-      status: 400,
-      message: 'User ID and role name are required',
-    } as IResponse
-  }
   const response = await fetch(
     `${globalConfig.baseUrl}/user/set-role?userId=${id}&roleName=${roleName}`,
     {

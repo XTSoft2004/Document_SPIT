@@ -116,3 +116,28 @@ export const getDocuments = async (
     ...data,
   } as IIndexResponse<IDocumentResponse>
 }
+
+export const getCodeView = async (documentId: number) => {
+  const response = await fetch(
+    `${globalConfig.baseUrl}/document/${documentId}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization:
+          headers().get('Authorization') ||
+          `Bearer ${cookies().get('accessToken')?.value || ' '}`,
+      },
+      next: {
+        tags: ['document.getCodeView'],
+      },
+    },
+  )
+
+  const data = await response.json()
+  return {
+    ok: response.ok,
+    status: response.status,
+    ...data,
+  } as IShowResponse<{ code: string }>
+}

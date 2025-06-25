@@ -33,7 +33,7 @@ export default function PageLogin() {
 
         const login = await loginAccount(loginRequest);
         if (login.ok) {
-            router.push('/dashboard');
+            router.push('/admin/dashboard');
             NotificationService.success({
                 message: 'Đăng nhập thành công',
                 description: `Chào mừng bạn ${data.username} đã đăng nhập thành công!`,
