@@ -29,3 +29,16 @@ export interface IDocumentResponse {
   createdDate: date
   modifiedDate: date
 }
+
+export interface IDocumentRecentResponse {
+  id: number
+  name: string
+  fileId: string
+  fileName: string
+  username: string
+  totalDownloads: number
+  totalViews: number
+  typeFile: string
+  createdDate: date
+  modifiedDate: date
+}

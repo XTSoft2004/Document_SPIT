@@ -1,6 +1,7 @@
 'use server'
 import globalConfig from '@/app.config'
 import {
+  IDocumentRecentResponse,
   IDocumentRequest,
   IDocumentResponse,
   IDocumentUpdateRequest,
@@ -91,10 +92,9 @@ export const getDocuments = async (
   search: string = '',
   pageNumber: number = -1,
   pageSize: number = -1,
-  records: number = -1,
 ) => {
   const response = await fetch(
-    `${globalConfig.baseUrl}/document?search=${search}&pageNumber=${pageNumber}&pageSize=${pageSize}&records=${records}`,
+    `${globalConfig.baseUrl}/document?search=${search}&pageNumber=${pageNumber}&pageSize=${pageSize}`,
     {
       method: 'GET',
       headers: {
@@ -116,4 +116,30 @@ export const getDocuments = async (
     status: response.status,
     ...data,
   } as IIndexResponse<IDocumentResponse>
+}
+
+export const getRecentDocuments = async ( number: number) => {
+  const response = await fetch(
+    `${globalConfig.baseUrl}/document/recent/${number}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization:
+          headers().get('Authorization') ||
+          `Bearer ${cookies().get('accessToken')?.value || ' '}`,
+      },
+      next: {
+        tags: ['document.recent'],
+      },
+    },
+  )
+
+  const data = await response.json()
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    ...data,
+  } as IIndexResponse<IDocumentRecentResponse>
 }

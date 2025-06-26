@@ -3,16 +3,16 @@ import Header from "@/layout/Header";
 import Footer from "@/layout/Footer";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { getDocuments } from "@/actions/document.actions";
-import { IDocumentResponse } from "@/types/document";
+import { getRecentDocuments } from "@/actions/document.actions";
+import { IDocumentRecentResponse } from "@/types/document";
 
 export default function Home() {
   const router = useRouter();
-  const [doc, setDoc] = useState<IDocumentResponse[]>([]);
+  const [doc, setDoc] = useState<IDocumentRecentResponse[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await getDocuments('', -1, -1, 3);
+      const response = await getRecentDocuments(3);
       if (response.ok) {
         setDoc(response.data);
       }
@@ -110,7 +110,7 @@ export default function Home() {
                           <div className="flex-1">
                             <div className="text-sm font-semibold text-gray-900">{item.fileName}</div>
                             <div className="text-xs text-gray-500">
-                              Vừa cập nhật lúc:
+                              Cập nhật lúc:
                               <span className="ml-1">{new Date(item.modifiedDate).toLocaleString('vi-VN', {
                                 day: '2-digit',
                                 month: '2-digit',
