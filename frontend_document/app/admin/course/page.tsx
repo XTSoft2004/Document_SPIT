@@ -48,15 +48,14 @@ export default function CoursePage() {
             title: 'Khoa',
             dataIndex: 'departmentId',
             key: 'departmentId',
-            width: 150,
-            align: 'center',
+            width: 100,
             render: (departmentId: number) => {
                 const department = departments.find(dept => dept.id === departmentId);
                 const departmentName = department ? department.name : 'Không xác định';
                 return (
-                    <div className="flex items-center justify-center">
+                    <div className="flex items-center">
                         <span
-                            className="px-3 py-1 bg-gradient-to-r from-blue-50 to-indigo-50 text-indigo-700 rounded-full text-sm font-medium border border-indigo-200 max-w-32 truncate inline-block shadow-sm hover:shadow-md transition-shadow duration-200 whitespace-nowrap"
+                            className="px-3 py-1 bg-gradient-to-r from-blue-50 to-indigo-50 text-indigo-700 rounded-full text-sm font-medium border border-indigo-200 max-w-50 truncate inline-block shadow-sm hover:shadow-md transition-shadow duration-200 whitespace-nowrap"
                             title={departmentName}
                         >
                             {departmentName}

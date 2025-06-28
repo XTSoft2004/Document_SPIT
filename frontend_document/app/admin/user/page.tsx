@@ -39,7 +39,7 @@ export default function UserPage() {
                     value={roleName || "User"}
                     onChange={async (e) => {
                         const newRole = e.target.value;
-                        const setRole = await setRoleUser(record.id, newRole); if (setRole.ok) {
+                        const setRole = await setRoleUser(record.username, newRole); if (setRole.ok) {
                             reloadTable('user');
                             NotificationService.success({
                                 message: `Cập nhật vai trò ${newRole} thành công cho người dùng ${record.fullname}`,
@@ -137,7 +137,9 @@ export default function UserPage() {
                     },
                 }}
                 singleSelect={true}
-            />            <ModalUpdateUser
+            />
+
+            <ModalUpdateUser
                 visible={isShowModalUpdate}
                 user={selectedUser}
                 onCancel={() => {

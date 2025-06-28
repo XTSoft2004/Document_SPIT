@@ -11,17 +11,35 @@ import NotificationService from "../../Notification/NotificationService";
 interface PreviewPanelProps {
     selectedItem: IDocumentResponse;
     onClose: () => void;
-    onReload: () => void;
+    className?: string; // Thêm className cho customization
+    showCloseButton?: boolean; // Option để ẩn/hiện nút close
 }
 
-const PreviewPanel = ({ selectedItem, onClose, onReload }: PreviewPanelProps) => {
+const PreviewPanel = ({
+    selectedItem,
+    onClose,
+    className = "",
+    showCloseButton = true
+}: PreviewPanelProps) => {
     const [loading, setLoading] = useState(true);
     const [imageError, setImageError] = useState(false);
     const [codeView, setCodeView] = useState<string | null>(null);
-    // Reset loading state khi selectedItem thay đổi
+
+    // Reset loading state khi selectedItem hoặc codeView thay đổi
     useEffect(() => {
         setLoading(true);
         setImageError(false);
+    }, [codeView]);
+
+    useEffect(() => {
+        console.log("Document: ", selectedItem);
+        console.log("Codeview: ", codeView);
+    }, [])
+
+    // Reset loading state khi selectedItem thay đổi
+    useEffect(() => {
+        setLoading(true);
+        setImageError(true);
         if (selectedItem?.fileId) {
             fetchDocumentCode(selectedItem);
         }
@@ -35,12 +53,25 @@ const PreviewPanel = ({ selectedItem, onClose, onReload }: PreviewPanelProps) =>
             //     message: `Tải mã xem trước thành công | ${response.data.code || 'N/A'}`,
             //     description: "Mã xem trước đã được tải thành công.",
             // });
+            return;
+        }
+        // NotificationService.error({
+        //     message: response.message || "Không thể tải mã xem trước",
+        //     description: "Vui lòng thử lại sau.",
+        // });
+        setImageError(true);
+    }
+
+    const reloadPreview = async () => {
+        setLoading(true);
+        if (selectedItem) {
+            await fetchDocumentCode(selectedItem);
         }
     }
 
     if (!selectedItem) {
         return (
-            <div className="w-full md:w-[350px] h-[calc(100vh-140px)] flex items-center justify-center">
+            <div className={`w-full h-[100%] flex items-center justify-center ${className}`}>
                 <div className="text-center p-8">
                     <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-700 dark:to-gray-600 rounded-2xl flex items-center justify-center">
                         <Eye className="w-10 h-10 text-blue-500 dark:text-blue-400" />
@@ -59,7 +90,7 @@ const PreviewPanel = ({ selectedItem, onClose, onReload }: PreviewPanelProps) =>
     const isImage = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'].includes(selectedItem.typeFile?.toLowerCase());
 
     return (
-        <div className="w-full md:w-[350px] h-[calc(100vh-140px)] animate-in fade-in slide-in-from-right-3 duration-300 ml-3">
+        <div className={`w-full h-[100%] animate-in fade-in slide-in-from-right-3 duration-300 ${className}`}>
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 h-full flex flex-col overflow-hidden transform transition-all duration-200 hover:shadow-2xl">
 
                 {/* Header */}
@@ -77,28 +108,40 @@ const PreviewPanel = ({ selectedItem, onClose, onReload }: PreviewPanelProps) =>
                                 <h4 className="font-semibold text-gray-800 dark:text-gray-100 text-sm">
                                     Xem trước
                                 </h4>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[160px]">
+                                <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[120px] sm:max-w-[160px] lg:max-w-[200px]">
                                     {selectedItem.name}
                                 </p>
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-1">
+                        {showCloseButton && (
+                            <div className="flex items-center gap-1">
+                                <Button
+                                    type="text"
+                                    size="small"
+                                    onClick={reloadPreview}
+                                    className="!p-2 hover:bg-white/60 dark:hover:bg-gray-700/60 rounded-lg transition-colors"
+                                    icon={<RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />}
+                                />
+                                <Button
+                                    type="text"
+                                    size="small"
+                                    onClick={onClose}
+                                    className="!p-2 hover:bg-white/60 dark:hover:bg-gray-700/60 rounded-lg transition-colors text-gray-500"
+                                    icon={<XCircle className="w-4 h-4" />}
+                                />
+                            </div>
+                        )}
+
+                        {!showCloseButton && (
                             <Button
                                 type="text"
                                 size="small"
-                                onClick={onReload}
+                                onClick={reloadPreview}
                                 className="!p-2 hover:bg-white/60 dark:hover:bg-gray-700/60 rounded-lg transition-colors"
                                 icon={<RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />}
                             />
-                            <Button
-                                type="text"
-                                size="small"
-                                onClick={onClose}
-                                className="!p-2 hover:bg-white/60 dark:hover:bg-gray-700/60 rounded-lg transition-colors text-gray-500"
-                                icon={<XCircle className="w-4 h-4" />}
-                            />
-                        </div>
+                        )}
                     </div>
 
                     {/* File info badges */}
@@ -116,15 +159,15 @@ const PreviewPanel = ({ selectedItem, onClose, onReload }: PreviewPanelProps) =>
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 p-4 relative">
+                <div className="flex-1 p-2 sm:p-4 relative min-h-0"> {/* min-h-0 để flexbox hoạt động đúng */}
                     {isImage ? (
                         <div className="relative h-full group">
                             {/* Loading state */}
                             {loading && (
                                 <div className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-700 rounded-xl">
-                                    <div className="flex flex-col items-center gap-3">
-                                        <div className="w-10 h-10 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                                        <span className="text-sm text-gray-600 dark:text-gray-300 font-medium">Đang tải hình ảnh...</span>
+                                    <div className="flex flex-col items-center gap-2 sm:gap-3">
+                                        <div className="w-8 h-8 sm:w-10 sm:h-10 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                                        <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 font-medium">Đang tải hình ảnh...</span>
                                     </div>
                                 </div>
                             )}
@@ -133,10 +176,10 @@ const PreviewPanel = ({ selectedItem, onClose, onReload }: PreviewPanelProps) =>
                             {imageError && (
                                 <div className="h-full flex items-center justify-center bg-gray-50 dark:bg-gray-700 rounded-xl">
                                     <div className="text-center">
-                                        <div className="w-16 h-16 mx-auto mb-3 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
-                                            <ImageIcon className="w-8 h-8 text-red-500 dark:text-red-400" />
+                                        <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-2 sm:mb-3 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+                                            <ImageIcon className="w-6 h-6 sm:w-8 sm:h-8 text-red-500 dark:text-red-400" />
                                         </div>
-                                        <p className="text-sm text-gray-600 dark:text-gray-300 font-medium mb-1">Không thể tải hình ảnh</p>
+                                        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 font-medium mb-1">Không thể tải hình ảnh</p>
                                         <p className="text-xs text-gray-500 dark:text-gray-400">Vui lòng thử lại sau</p>
                                     </div>
                                 </div>
@@ -146,15 +189,15 @@ const PreviewPanel = ({ selectedItem, onClose, onReload }: PreviewPanelProps) =>
                             {!imageError && (
                                 <div className="h-full overflow-hidden rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600">
                                     <img
-                                        src={`${globalConfig.baseUrl}/document/view/${codeView}`}
+                                        src={codeView ? `${globalConfig.baseUrl}/document/view/${codeView}` : ''}
                                         alt="Xem trước ảnh"
-                                        className={`w-full h-full object-contain transition-all duration-500 ${loading ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
-                                            } group-hover:scale-105`}
+                                        className={`w-full h-full object-contain transition-all duration-500 ${loading ? 'opacity-0 scale-95' : 'opacity-100 scale-100'} group-hover:scale-105`}
                                         onLoad={() => setLoading(false)}
                                         onError={() => {
                                             setLoading(false);
                                             setImageError(true);
                                         }}
+                                        key={codeView}
                                     />
 
                                     {/* Image overlay */}
@@ -167,23 +210,23 @@ const PreviewPanel = ({ selectedItem, onClose, onReload }: PreviewPanelProps) =>
                             {/* Loading state */}
                             {loading && (
                                 <div className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-700 rounded-xl z-10">
-                                    <div className="flex flex-col items-center gap-3">
-                                        <div className="w-10 h-10 border-3 border-red-500 border-t-transparent rounded-full animate-spin"></div>
-                                        <span className="text-sm text-gray-600 dark:text-gray-300 font-medium">Đang tải PDF...</span>
+                                    <div className="flex flex-col items-center gap-2 sm:gap-3">
+                                        <div className="w-8 h-8 sm:w-10 sm:h-10 border-3 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+                                        <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 font-medium">Đang tải PDF...</span>
                                     </div>
                                 </div>
                             )}
 
                             {/* PDF iframe */}
-                            <div className="h-full overflow-hidden rounded-xl border border-gray-200 dark:border-gray-600 bg-white">
+                            <div className="h-full overflow-hidden rounded-xl border border-gray-200 dark:border-gray-600 bg-white flex flex-col">
                                 <iframe
-                                    key={selectedItem.fileId + (loading ? '-loading' : '')}
-                                    src={`${globalConfig.baseUrl}/document/view/${codeView}#toolbar=0&navpanes=0&scrollbar=0`}
+                                    key={codeView + (loading ? '-loading' : '')}
+                                    src={codeView ? `${globalConfig.baseUrl}/document/view/${codeView}#toolbar=0&navpanes=0&scrollbar=0` : ''}
                                     title="Xem trước PDF"
                                     width="100%"
                                     height="100%"
-                                    className={`border-0 transition-opacity duration-500 ${loading ? 'opacity-0' : 'opacity-100'
-                                        }`}
+                                    className={`flex-1 border-0 transition-opacity duration-500 ${loading ? 'opacity-0' : 'opacity-100'}`}
+                                    style={{ minHeight: 0 }}
                                     onLoad={() => setLoading(false)}
                                 />
                             </div>
@@ -200,7 +243,7 @@ const PreviewPanel = ({ selectedItem, onClose, onReload }: PreviewPanelProps) =>
                 </div>
 
                 {/* Footer */}
-                <div className="px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-600">
+                <div className="px-2 sm:px-4 py-2 sm:py-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-600">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
@@ -211,7 +254,7 @@ const PreviewPanel = ({ selectedItem, onClose, onReload }: PreviewPanelProps) =>
 
                         <div className="flex items-center gap-2">
                             {selectedItem.totalViews && (
-                                <span className="text-xs text-gray-500 dark:text-gray-400">
+                                <span className="text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">
                                     {selectedItem.totalViews} lượt xem
                                 </span>
                             )}

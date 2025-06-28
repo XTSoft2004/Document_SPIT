@@ -14,8 +14,10 @@ const { Text } = Typography;
 
 interface ModalSelectFolderProps {
     open: boolean;
+    folderIdCurrent?: string;
     onClose: () => void;
     onSelectFolder: (folderId: IFileInfo, breadcrumb: string) => void;
+    defaultFolderId?: string; // Thêm prop để có folder mặc định
 }
 
 const getIcon = (isFolder: boolean, typeDocument: string) => {
@@ -33,11 +35,31 @@ const getIcon = (isFolder: boolean, typeDocument: string) => {
     }
 };
 
-const ModalSelectFolder: React.FC<ModalSelectFolderProps> = ({ open, onClose, onSelectFolder }) => {
-    const [currentFolderId, setCurrentFolderId] = useState('1YNGtw_N86pgMmY6uYA4MEbZAzgGH7kSS');
-    const [path, setPath] = useState<IFileInfo[]>([
+const ModalSelectFolder: React.FC<ModalSelectFolderProps> = ({ 
+    open, 
+    folderIdCurrent, 
+    onClose, 
+    onSelectFolder, 
+    defaultFolderId 
+}) => {
+    // Lấy folder ID với fallback
+    const getFolderId = () => {
+        return folderIdCurrent || defaultFolderId || '';
+    };
+
+    // Khởi tạo với lazy initialization
+    const [currentFolderId, setCurrentFolderId] = useState(() => getFolderId());
+
+    // Cập nhật currentFolderId khi folderIdCurrent thay đổi
+    useEffect(() => {
+        const newFolderId = getFolderId();
+        setCurrentFolderId(newFolderId);
+    }, [folderIdCurrent, defaultFolderId]);
+
+    // Khởi tạo path với lazy initialization
+    const [path, setPath] = useState<IFileInfo[]>(() => [
         {
-            id: '1YNGtw_N86pgMmY6uYA4MEbZAzgGH7kSS',
+            id: getFolderId(),
             name: 'Home',
         },
     ]);
@@ -57,10 +79,11 @@ const ModalSelectFolder: React.FC<ModalSelectFolderProps> = ({ open, onClose, on
     // Khôi phục trạng thái khi mở modal
     useEffect(() => {
         if (open) {
-            setCurrentFolderId('1YNGtw_N86pgMmY6uYA4MEbZAzgGH7kSS');
+            const folderId = getFolderId();
+            setCurrentFolderId(folderId);
             setPath([
                 {
-                    id: '1YNGtw_N86pgMmY6uYA4MEbZAzgGH7kSS',
+                    id: folderId,
                     name: 'Home',
                 },
             ]);
@@ -68,8 +91,10 @@ const ModalSelectFolder: React.FC<ModalSelectFolderProps> = ({ open, onClose, on
             setError(null);
             setNewFolderName('');
             setCreatingFolder(false);
+            setIsCreatingFolder(false);
+            setFolderNameError(null);
         }
-    }, [open]);
+    }, [open, folderIdCurrent, defaultFolderId]);
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -77,6 +102,8 @@ const ModalSelectFolder: React.FC<ModalSelectFolderProps> = ({ open, onClose, on
     const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
     const [creatingFolder, setCreatingFolder] = useState(false);
     const [newFolderName, setNewFolderName] = useState('');
+    const [isCreatingFolder, setIsCreatingFolder] = useState(false);
+    const [folderNameError, setFolderNameError] = useState<string | null>(null);
 
     useEffect(() => {
         fetchFolder();
@@ -98,27 +125,55 @@ const ModalSelectFolder: React.FC<ModalSelectFolderProps> = ({ open, onClose, on
     };
 
     const handleCreateFolder = async () => {
-        if (!newFolderName.trim()) return;
+        if (!newFolderName.trim() || isCreatingFolder) return;
 
-        NotificationService.loading({
-            message: `Đang tao thư mục "${newFolderName}"...`,
-        });
-        // Giả lập API tạo folder mới
-        const createResponse = await createFolder(newFolderName, currentFolderId);
-        if (!createResponse.ok) {
-            NotificationService.error({
-                message: createResponse.message || 'Tạo thư mục thất bại, vui lòng thử lại sau.',
-            });
-            return;
+        // Reset error
+        setFolderNameError(null);
+
+        // Kiểm tra tên folder có trùng lặp không
+        const isDuplicate = items.some(item => 
+            item.name.toLowerCase() === newFolderName.trim().toLowerCase()
+        );
+        
+        if (isDuplicate) {
+            setFolderNameError('Tên thư mục đã tồn tại');
+            return false;
         }
 
-        fetchFolder(); // Tải lại danh sách thư mục sau khi tạo mới
-        NotificationService.success({
-            message: `Thư mục "${newFolderName}" đã được tạo thành công.`,
-        });
-        // setItems(prev => [...prev, newFolder]);
-        setNewFolderName('');
-        setCreatingFolder(false);
+        // Kiểm tra currentFolderId có hợp lệ không
+        if (!currentFolderId) {
+            setFolderNameError('Không xác định được thư mục hiện tại');
+            return false;
+        }
+
+        setIsCreatingFolder(true);
+        try {
+            // Tạo folder mới
+            const createResponse = await createFolder(newFolderName, currentFolderId);
+            
+            if (!createResponse.ok) {
+                setFolderNameError(createResponse.message || 'Tạo thư mục thất bại');
+                return false;
+            }
+
+            // Tải lại danh sách thư mục sau khi tạo mới
+            await fetchFolder();
+            
+            NotificationService.success({
+                message: `Thư mục "${newFolderName}" đã được tạo thành công.`,
+            });
+            
+            // Reset state sau khi tạo thành công
+            setNewFolderName('');
+            setCreatingFolder(false);
+            return true;
+        } catch (error) {
+            console.error('Error creating folder:', error);
+            setFolderNameError('Có lỗi xảy ra khi tạo thư mục');
+            return false;
+        } finally {
+            setIsCreatingFolder(false);
+        }
     }; const skeletonCards = isMobile ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {Array.from({ length: 8 }, (_, index) => (
@@ -192,8 +247,11 @@ const ModalSelectFolder: React.FC<ModalSelectFolderProps> = ({ open, onClose, on
         }}>
             <Button
                 type="dashed"
-                onClick={() => setCreatingFolder(true)}
+                onClick={() => {
+                    setCreatingFolder(true);
+                }}
                 style={isMobile ? { width: '100%' } : {}}
+                disabled={creatingFolder}
             >
                 + Tạo thư mục mới
             </Button>
@@ -207,111 +265,201 @@ const ModalSelectFolder: React.FC<ModalSelectFolderProps> = ({ open, onClose, on
                 {isMobile && 'Tải lại thư mục'}
             </Button>
         </div>            <div style={{ maxHeight: isMobile ? 300 : 400, overflowY: 'auto', overflowX: 'hidden' }}>
-            <List
-                grid={isMobile ? { gutter: 8, column: 1 } : { gutter: 16, column: 5 }}
-                dataSource={loading ? [] : items}
-                renderItem={(folder) => (
-                    <List.Item>
-                        <Button
-                            type={selectedFolderId === folder.id ? "primary" : "text"}
+                {/* Form tạo folder - hiển thị ở đầu khi đang tạo */}
+                {creatingFolder && (
+                    <div style={{ marginBottom: 16 }}>
+                        <div
                             style={{
                                 width: '100%',
-                                height: isMobile ? 56 : 48,
+                                height: 'auto',
                                 display: 'flex',
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                justifyContent: 'flex-start',
-                                border: selectedFolderId === folder.id ? '2px solid #1890ff' : '1px solid #f0f0f0',
+                                flexDirection: 'column',
+                                border: '1px dashed #1890ff',
                                 borderRadius: isMobile ? 8 : 10,
-                                background: selectedFolderId === folder.id ? '#e6f7ff' : '#fafafa',
-                                cursor: 'pointer',
                                 padding: isMobile ? '12px 16px' : 12,
-                                gap: isMobile ? 12 : 10,
-                            }} onClick={() => setSelectedFolderId(folder.id)}
-                            onDoubleClick={() => {
-                                if (folder.isFolder) {
-                                    setPath(prev => [...prev, { id: folder.id, name: folder.name }]);
-                                    setCurrentFolderId(folder.id);
-                                    setSelectedFolderId(null);
-                                }
+                                gap: 8,
+                                background: '#f0f5ff',
                             }}
                         >
-                            {getIcon(folder.isFolder, folder.typeDocument)}                                <Text style={{
-                                fontSize: isMobile ? 16 : 14,
-                                textAlign: 'left',
-                                whiteSpace: 'nowrap',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                flex: 1
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: isMobile ? 12 : 10,
                             }}>
-                                {folder.name}
-                            </Text>
-                            {isMobile && folder.isFolder && (
-                                <Button
-                                    type="text"
-                                    size="small"
+                                <FolderFilled style={{ color: '#1890ff', fontSize: isMobile ? 20 : 16 }} />
+                                <input
+                                    autoFocus
                                     style={{
-                                        fontSize: 16,
-                                        color: '#1890ff',
-                                        padding: '4px 8px',
-                                        height: 'auto',
-                                        minWidth: 'auto'
+                                        flex: 1,
+                                        border: 'none',
+                                        outline: 'none',
+                                        background: 'transparent',
+                                        fontSize: isMobile ? 16 : 14,
                                     }}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setPath(prev => [...prev, { id: folder.id, name: folder.name }]);
-                                        setCurrentFolderId(folder.id);
-                                        setSelectedFolderId(null);
+                                    placeholder="Nhập tên thư mục..."
+                                    value={newFolderName}
+                                    onChange={(e) => {
+                                        setNewFolderName(e.target.value);
+                                        setFolderNameError(null); // Clear error when typing
+                                    }}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && !isCreatingFolder) {
+                                            handleCreateFolder();
+                                        } else if (e.key === 'Escape' && !isCreatingFolder) {
+                                            setCreatingFolder(false);
+                                            setNewFolderName('');
+                                            setFolderNameError(null);
+                                        }
+                                    }}
+                                />
+                            </div>
+                            {folderNameError && (
+                                <div style={{
+                                    color: '#ff4d4f',
+                                    fontSize: 12,
+                                    marginTop: 4,
+                                    marginLeft: isMobile ? 32 : 26
+                                }}>
+                                    {folderNameError}
+                                </div>
+                            )}
+                            <div style={{
+                                display: 'flex',
+                                justifyContent: 'flex-end',
+                                gap: 8,
+                                marginTop: 8,
+                                paddingTop: 8,
+                                borderTop: '1px solid #f0f0f0'
+                            }}>
+                                <Button
+                                    size="small"
+                                    onClick={() => {
+                                        setCreatingFolder(false);
+                                        setNewFolderName('');
+                                        setFolderNameError(null);
+                                    }}
+                                    disabled={isCreatingFolder}
+                                    style={{
+                                        borderRadius: 6,
+                                        minWidth: 60
                                     }}
                                 >
-                                    →
+                                    Hủy
                                 </Button>
-                            )}
-                        </Button>
-                    </List.Item>
-                )}
-            >                    {creatingFolder && (
-                <List.Item>
-                    <div
-                        style={{
-                            width: '100%',
-                            height: isMobile ? 56 : 48,
-                            display: 'flex',
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            border: '1px dashed #1890ff',
-                            borderRadius: isMobile ? 8 : 10,
-                            padding: isMobile ? '12px 16px' : 12,
-                            gap: isMobile ? 12 : 10,
-                            background: '#f0f5ff',
-                        }}
-                    >
-                        <FolderFilled style={{ color: '#1890ff', fontSize: isMobile ? 20 : 16 }} />
-                        <input
-                            autoFocus
-                            style={{
-                                flex: 1,
-                                border: 'none',
-                                outline: 'none',
-                                background: 'transparent',
-                                fontSize: isMobile ? 16 : 14,
-                            }}
-                            placeholder="Nhập tên thư mục..."
-                            value={newFolderName}
-                            onChange={(e) => setNewFolderName(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                    handleCreateFolder();
-                                    setCreatingFolder(false);
-                                }
-                            }}
-                        />
+                                <Button
+                                    size="small"
+                                    type="primary"
+                                    disabled={!newFolderName.trim() || isCreatingFolder}
+                                    loading={isCreatingFolder}
+                                    onClick={handleCreateFolder}
+                                    style={{
+                                        borderRadius: 6,
+                                        minWidth: 60,
+                                        boxShadow: '0 2px 4px rgba(24, 144, 255, 0.2)'
+                                    }}
+                                >
+                                    Tạo
+                                </Button>
+                            </div>
+                        </div>
                     </div>
-                </List.Item>
-            )}
-                {loading && skeletonCards}
-            </List>
-        </div>
+                )}
+
+                {/* Nội dung folder */}
+                {loading ? (
+                    <List
+                        grid={isMobile ? { gutter: 8, column: 1 } : { gutter: 16, column: 5 }}
+                        dataSource={[]}
+                        renderItem={() => null}
+                    >
+                        {skeletonCards}
+                    </List>
+                ) : items.length === 0 ? (
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        height: 200,
+                        color: '#8c8c8c'
+                    }}>
+                        <FolderFilled style={{ fontSize: 48, marginBottom: 16, color: '#d9d9d9' }} />
+                        <Text style={{ fontSize: 16, color: '#8c8c8c' }}>
+                            Không có tài liệu nào
+                        </Text>
+                        <Text style={{ fontSize: 14, color: '#bfbfbf', marginTop: 8 }}>
+                            Thư mục này đang trống
+                        </Text>
+                    </div>
+                ) : (
+                    <List
+                        grid={isMobile ? { gutter: 8, column: 1 } : { gutter: 16, column: 5 }}
+                        dataSource={items}
+                        renderItem={(folder) => (
+                            <List.Item>
+                                <Button
+                                    type={selectedFolderId === folder.id ? "primary" : "text"}
+                                    style={{
+                                        width: '100%',
+                                        height: isMobile ? 56 : 48,
+                                        display: 'flex',
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                        justifyContent: 'flex-start',
+                                        border: selectedFolderId === folder.id ? '2px solid #1890ff' : '1px solid #f0f0f0',
+                                        borderRadius: isMobile ? 8 : 10,
+                                        background: selectedFolderId === folder.id ? '#e6f7ff' : '#fafafa',
+                                        cursor: 'pointer',
+                                        padding: isMobile ? '12px 16px' : 12,
+                                        gap: isMobile ? 12 : 10,
+                                    }} 
+                                    onClick={() => setSelectedFolderId(folder.id)}
+                                    onDoubleClick={() => {
+                                        if (folder.isFolder) {
+                                            setPath(prev => [...prev, { id: folder.id, name: folder.name }]);
+                                            setCurrentFolderId(folder.id);
+                                            setSelectedFolderId(null);
+                                        }
+                                    }}
+                                >
+                                    {getIcon(folder.isFolder, folder.typeDocument)}
+                                    <Text style={{
+                                        fontSize: isMobile ? 16 : 14,
+                                        textAlign: 'left',
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        flex: 1
+                                    }}>
+                                        {folder.name}
+                                    </Text>
+                                    {isMobile && folder.isFolder && (
+                                        <Button
+                                            type="text"
+                                            size="small"
+                                            style={{
+                                                fontSize: 16,
+                                                color: '#1890ff',
+                                                padding: '4px 8px',
+                                                height: 'auto',
+                                                minWidth: 'auto'
+                                            }}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setPath(prev => [...prev, { id: folder.id, name: folder.name }]);
+                                                setCurrentFolderId(folder.id);
+                                                setSelectedFolderId(null);
+                                            }}
+                                        >
+                                            →
+                                        </Button>
+                                    )}
+                                </Button>
+                            </List.Item>
+                        )}
+                    />
+                )}
+            </div>
     </Modal>
     );
 };

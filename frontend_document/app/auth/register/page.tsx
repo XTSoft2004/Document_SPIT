@@ -121,8 +121,8 @@ export default function PageRegister() {
                                 <Button
                                     type="primary"
                                     htmlType="submit"
-                                    className="w-full h-12 text-base font-semibold rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 border-none shadow-lg hover:shadow-xl transition-all duration-300"
-                                    style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%)' }}
+                                    className="w-full h-12 text-base font-semibold rounded-[12px] bg-gradient-to-r from-purple-600 to-blue-600 border-none shadow-md hover:shadow-lg transition-all duration-300"
+                                    style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%)', fontSize: 18, height: 48, borderRadius: '16px' }}
                                 >
                                     Create Account
                                 </Button>

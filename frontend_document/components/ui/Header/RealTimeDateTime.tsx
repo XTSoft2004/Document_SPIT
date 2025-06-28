@@ -33,14 +33,8 @@ export default function RealTimeDateTime() {
     const second = dateTime.getSeconds().toString().padStart(2, '0');
 
     return (
-        <div
-            className="text-sm text-gray-700 font-medium px-2 py-1 bg-gray-100 rounded-md shadow-sm"
-            style={{ width: 270, minWidth: 270, maxWidth: 270 }}
-        // Ẩn trên mobile (md trở lên mới hiện)
-        // Tailwind: hidden trên mobile, md:block trở lên
-        // Nếu không dùng Tailwind, dùng style display: none/block với media query
-        >
-            <span className="hidden md:inline">
+        <div className="text-sm text-gray-700 font-medium px-3 py-2 bg-gray-100 rounded-lg shadow-sm transition-all duration-200 hover:bg-gray-200">
+            <span className="hidden md:inline whitespace-nowrap">
                 {`${weekday}, ${day} ${month}, ${year} - ${hour}:${minute}:${second}`}
             </span>
         </div>

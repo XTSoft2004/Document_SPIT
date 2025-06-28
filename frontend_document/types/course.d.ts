@@ -8,7 +8,6 @@ export interface ICourseResponse {
   id: number
   name: string
   code: string
-  folderId_Contribute: string
-  folderId_Base: string
+  folderId: string
   departmentId: string
 }

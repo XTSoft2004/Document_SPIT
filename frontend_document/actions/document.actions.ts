@@ -1,8 +1,10 @@
 'use server'
 import globalConfig from '@/app.config'
 import {
+  IDocumentPendingRequest,
   IDocumentRequest,
   IDocumentResponse,
+  IDocumentReviewRequest,
   IDocumentUpdateRequest,
 } from '@/types/document'
 import { cookies, headers } from 'next/headers'
@@ -17,7 +19,7 @@ import {
 import { revalidateTag } from 'next/cache'
 
 export const createDocument = async (
-  formData: IDocumentRequest,
+  formData: IDocumentPendingRequest,
 ): Promise<IBaseResponse> => {
   const response = await fetch(`${globalConfig.baseUrl}/document/create`, {
     method: 'POST',
@@ -28,6 +30,31 @@ export const createDocument = async (
     body: JSON.stringify(formData),
   })
 
+  const data = await response.json()
+  revalidateTag('document.index')
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    ...data,
+  } as IBaseResponse
+}
+
+export const reviewDocument = async (
+  documentId: string,
+  formData: IDocumentReviewRequest,
+): Promise<IBaseResponse> => {
+  const response = await fetch(
+    `${globalConfig.baseUrl}/document/review/${documentId}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${cookies().get('accessToken')?.value || ''}`,
+      },
+      body: JSON.stringify(formData),
+    },
+  )
   const data = await response.json()
   revalidateTag('document.index')
 
@@ -91,9 +118,10 @@ export const getDocuments = async (
   search: string = '',
   pageNumber: number = -1,
   pageSize: number = -1,
+  statusDocument: string = '',
 ) => {
   const response = await fetch(
-    `${globalConfig.baseUrl}/document?search=${search}&pageNumber=${pageNumber}&pageSize=${pageSize}`,
+    `${globalConfig.baseUrl}/document?search=${search}&pageNumber=${pageNumber}&pageSize=${pageSize}&statusDocument=${statusDocument}`,
     {
       method: 'GET',
       headers: {

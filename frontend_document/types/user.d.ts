@@ -1,6 +1,6 @@
 export interface IUserResponse {
   id: string
-  name: string
+  username: string
   fullname: string
   islocked: boolean
   roleName: string

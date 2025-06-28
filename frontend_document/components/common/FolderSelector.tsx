@@ -6,9 +6,10 @@ import ModalSelectFolder from "../ui/Admin/Dashboard/Modal/ModalSelectFolder";
 
 interface FolderSelectorProps {
     onSelect: (folder: IFileInfo, breadcrumb: string) => void;
+    folderIdCurrent?: string
 }
 
-const FolderSelector: React.FC<FolderSelectorProps> = ({ onSelect }) => {
+const FolderSelector: React.FC<FolderSelectorProps> = ({ onSelect, folderIdCurrent }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selected, setSelected] = useState<IFileInfo | null>(null);
     const [breadcrumb, setBreadcrumb] = useState<string>("");
@@ -27,6 +28,7 @@ const FolderSelector: React.FC<FolderSelectorProps> = ({ onSelect }) => {
                     onSelect(folder, bc);
                     setIsModalOpen(false);
                 }}
+                folderIdCurrent={folderIdCurrent}
             />
             <div className="flex items-center mt-2">
                 <FolderFilled className="text-xl" style={{ color: "#faad14" }} />

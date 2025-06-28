@@ -57,7 +57,7 @@ export const updateUser = async (id: string, user: IUserUpdate) => {
   })
 
   const data = (await response.json()) as IBaseResponse
-
+  console.log('updateUser', data)
   revalidateTag('user.index')
 
   return {
@@ -67,9 +67,9 @@ export const updateUser = async (id: string, user: IUserUpdate) => {
   } as IResponse
 }
 
-export const setRoleUser = async (id: string, roleName: string) => {
+export const setRoleUser = async (username: string, roleName: string) => {
   const response = await fetch(
-    `${globalConfig.baseUrl}/user/set-role?userId=${id}&roleName=${roleName}`,
+    `${globalConfig.baseUrl}/user/set-role?username=${username}&roleName=${roleName}`,
     {
       method: 'POST',
       headers: {

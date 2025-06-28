@@ -101,15 +101,15 @@ export default function PageLogin() {
                             className="pt-4"
                         >
                             <motion.div
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
+                                whileHover={{ scale: 1.03 }}
+                                whileTap={{ scale: 0.97 }}
                                 className="w-full"
                             >
                                 <Button
                                     type="primary"
                                     htmlType="submit"
-                                    className="w-full h-12 text-base font-semibold rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 border-none shadow-lg hover:shadow-xl transition-all duration-300"
-                                    style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)' }}
+                                    className="w-full h-14 text-lg font-semibold rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 border-none shadow-md hover:shadow-lg transition-all duration-300"
+                                    style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)', fontSize: '18px', height: '56px', borderRadius: '16px' }}
                                 >
                                     Sign In
                                 </Button>
