@@ -25,8 +25,10 @@ namespace Infrastructure.ContextDB
 
             // Tạo và trả về AppDbContext
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
+            //optionsBuilder.UseLazyLoadingProxies().UseSqlServer(connectionString);
+            // Sử dụng lazy loading proxies và SQL Server
+            //optionsBuilder.UseLazyLoadingProxies();
             optionsBuilder.UseSqlServer(connectionString);
-
             return new AppDbContext(optionsBuilder.Options);
         }
     }

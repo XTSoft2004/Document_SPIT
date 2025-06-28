@@ -13,5 +13,6 @@ namespace Domain.Model.Response.User
         public string? Username { get; set; }
         public DateTime ExpiryDate { get; set; }
         public string? DeviceId { get; set; }
+        public string? RoleName { get; set; }
     }
 }

@@ -21,7 +21,7 @@ namespace Infrastructure.ContextDB.Repositories
         }
 
         protected AppDbContext DbContext { get; }
-
+        
         public IQueryable<T> All()
         {
             return _dbSet.AsQueryable();
@@ -128,7 +128,20 @@ namespace Infrastructure.ContextDB.Repositories
             }
             return _dbSet.Where(expression).Include(includeTable).FirstOrDefaultAsync();
         }
+        public Task<T> FindAsync(Expression<Func<T, bool>> expression, List<string>? includeTables = null)
+        {
+            IQueryable<T> query = _dbSet;
 
+            if (includeTables != null && includeTables.Any())
+            {
+                foreach (var table in includeTables)
+                {
+                    query = query.Include(table);
+                }
+            }
+
+            return query.Where(expression).FirstOrDefaultAsync();
+        }
         public void Insert(T entity)
         {
             if (typeof(T).GetInterfaces().Contains(typeof(IAuditEntity)))

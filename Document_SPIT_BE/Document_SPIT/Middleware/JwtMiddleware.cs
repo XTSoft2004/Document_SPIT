@@ -30,6 +30,7 @@ namespace Server_Manager.Middleware
             var bypassRoutes = new[]
             {
                 "/auth/login",
+                "/auth/register",
                 "/auth/sign-up",
                 "/auth/refresh-token",
                 "/document/view",
@@ -78,7 +79,7 @@ namespace Server_Manager.Middleware
 
                 await _next(context);
 
-                if (context.Response.StatusCode == (int)HttpStatusCode.Unauthorized)
+                if (context.Response.StatusCode == (int)StatusCodes.Status403Forbidden)
                 {
                     context.Response.StatusCode = StatusCodes.Status403Forbidden;
                     await context.Response.WriteAsJsonAsync(new { Message = "Bạn không có quyền truy cập tài nguyên này!" });

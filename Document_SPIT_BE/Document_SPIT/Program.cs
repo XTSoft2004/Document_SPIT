@@ -105,7 +105,6 @@ builder.Services.AddAuthorization(); // Bật Authorization
 builder.Services.AddControllers(); // Thêm Controller
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IGoogleDriverServices, GoogleDriverSevices>();
 builder.Services.AddScoped(typeof(IRepositoryBase<>), typeof(RepositoryBase<>));

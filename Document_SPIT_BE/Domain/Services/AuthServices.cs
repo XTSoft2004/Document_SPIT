@@ -61,6 +61,7 @@ namespace Domain.Services
                 });
                 await UnitOfWork.CommitAsync();
 
+                await _userServices.SetRole(registerRequest.Username.Trim(), "User");
                 return HttpResponse.OK(message: "Đăng ký thành công.");
             }
 
@@ -89,7 +90,7 @@ namespace Domain.Services
                     long userId = dataJson["id"]?.ToObject<long>() ?? 0;
                     bool isLocked = dataJson["isLocked"]?.ToObject<bool>() ?? false;
 
-                    user = _user!.Find(f => f.Username == username.Trim());
+                    user = await _user!.FindAsync(f => f.Username == username.Trim(), "Role");
                     if(user == null)
                     {
                         await RegisterAsync(new RegisterRequest()
@@ -106,7 +107,7 @@ namespace Domain.Services
 
             if(user == null)
             {
-                user = _user!.Find(f => f.Username == loginRequest.Username.Trim() && f.Password == loginRequest.Password.Trim());
+                user = await _user!.FindAsync(f => f.Username == loginRequest.Username.Trim() && f.Password == loginRequest.Password.Trim(), "Role");
                 if (user == null)
                     return HttpResponse.Error(message: "Thông tin đăng nhập không hợp lệ.", HttpStatusCode.BadRequest);
             }
@@ -118,6 +119,7 @@ namespace Domain.Services
                 Id = user.Id,
                 Username = user.Username,
                 Fullname = user.Fullname,
+                RoleName = user.Role.DisplayName
             }, loginRequest.DeviceId!);
 
             // Nếu người dùng mới thì tạo mới Refresh Token, ngược lại thì cập nhật Refresh Token

@@ -17,7 +17,7 @@ namespace Document_SPIT_BE.Controllers
         {
             _services = sevices;
         }
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpPost("set-role")]
         public async Task<IActionResult> SetRole(string username, string roleName)
         {

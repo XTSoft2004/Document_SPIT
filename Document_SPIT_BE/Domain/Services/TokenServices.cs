@@ -36,14 +36,14 @@ namespace Domain.Services
         }
         public TokenResponse GenerateToken(UserResponse user, string deviceId)
         {
-            return new TokenResponse()
+            var token = new TokenResponse()
             {
                 AccessToken = GenerateTokenUser(user, deviceId),
-                //ExpiresAt = DateTime.Now.AddDays(Convert.ToInt32(_config["JwtSettings:ExpireToken"])),
                 ExpiresAt = DateTime.Now.AddMinutes(Convert.ToInt32(_config["JwtSettings:ExpireToken"])),
                 RefreshToken = GenerateRefreshToken(user, deviceId),
                 RefreshExpiresAt = DateTime.Now.AddDays(Convert.ToInt32(_config["JwtSettings:ExpireRefreshToken"]))
-            };
+            }; ;
+            return token;
         }
         public string GenerateTokenUser(UserResponse user, string deviceId)
         {
@@ -52,6 +52,7 @@ namespace Domain.Services
             {
                 new Claim("userName", user.Username),
                 new Claim("userId", user.Id.ToString()),
+                new Claim(ClaimTypes.Role, user.RoleName),
                 new Claim("deviceId", deviceId ?? string.Empty),
             };
 
@@ -78,6 +79,7 @@ namespace Domain.Services
             {
                 new Claim("userName", user.Username),
                 new Claim("userId", user.Id.ToString()),
+                new Claim(ClaimTypes.Role, user.RoleName),
                 new Claim("deviceId", deviceId ?? string.Empty),
             };
 
@@ -112,6 +114,7 @@ namespace Domain.Services
             var claims = jwtToken.Claims;
             var IdValue = claims.FirstOrDefault(c => c.Type == "userId")?.Value;
             var username = claims.FirstOrDefault(c => c.Type == "userName")?.Value;
+            var role = claims.FirstOrDefault(c => c.Type == "role")?.Value;
             var deviceId = claims.FirstOrDefault(c => c.Type == "deviceId")?.Value;
             var expiryDateUnix = claims.FirstOrDefault(c => c.Type == "exp")?.Value;
             var expiryDate = expiryDateUnix != null
@@ -126,6 +129,7 @@ namespace Domain.Services
                 Username = username,
                 ExpiryDate = expiryDate,
                 DeviceId = deviceId,
+                RoleName = role
             };
         }
         public string GetTokenFromHeader()

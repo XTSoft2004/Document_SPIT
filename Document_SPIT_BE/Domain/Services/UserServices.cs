@@ -1,4 +1,5 @@
 ﻿using Domain.Base.Services;
+using Domain.Common;
 using Domain.Common.Http;
 using Domain.Entities;
 using Domain.Interfaces.Repositories;
@@ -39,6 +40,8 @@ namespace Domain.Services
             var user = _user!.Find(f => f.Id == idUser);
             if (user == null)
                 return HttpResponse.Error(message: "Người dùng không tồn tại.", HttpStatusCode.NotFound);
+            else if(userMeToken.RoleName != "Admin" && userMeToken.Id != idUser)
+                return HttpResponse.Error(message: "Bạn không có quyền cập nhật thông tin người dùng này.", HttpStatusCode.Forbidden);
 
             user.Fullname = userRequest.Fullname ?? user.Fullname;
             user.Password = !string.IsNullOrEmpty(userRequest.Password) ? userRequest.Password : user.Password;
@@ -52,7 +55,7 @@ namespace Domain.Services
             if (userMeToken == null)
                 return HttpResponse.Error(message: "Không tìm thấy thông tin người dùng.", HttpStatusCode.Unauthorized);
 
-            var user = _user!.Find(f => f.Id == userMeToken.Id);
+            var user = await _user!.FindAsync(f => f.Id == userMeToken.Id, "Role");
             if (user == null)
                 return HttpResponse.Error(message: "Người dùng không tồn tại.", HttpStatusCode.NotFound);
 
@@ -61,6 +64,7 @@ namespace Domain.Services
                 Id = user?.Id,
                 Username = user?.Username,
                 Fullname = user?.Fullname,
+                RoleName = user.Role != null ? user.Role.DisplayName : string.Empty
             });
         }
         public async Task<HttpResponse> SetRole(string? username, string roleName)

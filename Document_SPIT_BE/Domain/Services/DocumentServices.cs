@@ -181,15 +181,18 @@ namespace Domain.Services
                 return HttpResponse.Error("Người dùng không tồn tại.", System.Net.HttpStatusCode.NotFound);
 
             // Thay đổi môn học tài liệu
-            var course = _course!.Find(f => f.Id == documentRequest.courseId);
-            if (course == null)
-                return HttpResponse.Error("Khóa học không tồn tại.", System.Net.HttpStatusCode.NotFound);
-
-            if(course.Id != document.CourseId)
+            if(documentRequest.courseId != null)
             {
-                // Nếu khóa học khác thì cập nhật lại khóa học
-                document.Course = course;
-                document.CourseId = course.Id;
+                var course = _course!.Find(f => f.Id == documentRequest.courseId);
+                if (course == null)
+                    return HttpResponse.Error("Khóa học không tồn tại.", System.Net.HttpStatusCode.NotFound);
+
+                if (course.Id != document.CourseId)
+                {
+                    // Nếu khóa học khác thì cập nhật lại khóa học
+                    document.Course = course;
+                    document.CourseId = course.Id;
+                }
             }
 
             // Khi thêm file mới thì upload lại file mới
@@ -232,7 +235,7 @@ namespace Domain.Services
             }
 
             // Khi thấy thư mục khác thì cắt file sang thư mục mới
-            if (documentRequest.FolderId != document.FolderId)
+            if (documentRequest.FolderId != null && documentRequest.FolderId != document.FolderId)
             {
                 // Kiểm tra xem thư mục có tồn tại không
                 if (await _googleDriverServices.GetInfoFolder(documentRequest.FolderId) == null)
@@ -317,43 +320,56 @@ namespace Domain.Services
         }
         public List<DocumentResponse> GetDocuments(string search, int pageNumber, int pageSize, out int totalRecords, string statusDocument = "")
         {
-            var query = _document!.All();
+            // Start with queryable including navigation properties
+            var query = _document!.All()
+                .Include(d => d.User)
+                .Include(d => d.Course)
+                .AsQueryable();
+
             if (!string.IsNullOrEmpty(search))
             {
                 string searchLower = search.ToLower();
 
                 #region Tìm kiếm trạng thái tài liệu
                 var enumStatusExist = EnumExtensions.GetAllDisplayNames<StatusDocument_Enum>()
-                    .Where(w => w.Contains(searchLower))
-                    .FirstOrDefault();
-                var enumStatus = EnumExtensions.GetEnumFromDisplayName<StatusDocument_Enum>(enumStatusExist);
+                    .FirstOrDefault(w => w != null && w.ToLower().Contains(searchLower));
+                StatusDocument_Enum? enumStatus = null;
+                if (!string.IsNullOrEmpty(enumStatusExist))
+                {
+                    enumStatus = EnumExtensions.GetEnumFromDisplayName<StatusDocument_Enum>(enumStatusExist);
+                }
                 #endregion
 
                 query = query.Where(d =>
-                    d.Name.ToLower().Contains(searchLower) ||
+                    (d.Name != null && d.Name.ToLower().Contains(searchLower)) ||
                     (d.User != null && d.User.Fullname != null && d.User.Fullname.ToLower().Contains(searchLower)) ||
-                    (d.StatusDocument != null && d.StatusDocument.ToString().ToLower().Contains(searchLower)) ||
-                    (d.StatusDocument != null && d.StatusDocument == enumStatus)
+                    (d.StatusDocument != null && d.StatusDocument.ToString() != null && d.StatusDocument.ToString()!.ToLower().Contains(searchLower)) ||
+                    (d.StatusDocument != null && enumStatus != null && d.StatusDocument == enumStatus)
                 );
             }
 
             if (!string.IsNullOrEmpty(statusDocument))
-                query = query.Where(d => !string.IsNullOrEmpty(statusDocument) && 
-                    d.StatusDocument.ToString().ToLower() == statusDocument.ToLower());
-       
+                query = query.Where(d =>
+                    d.StatusDocument != null &&
+                    d.StatusDocument.ToString() != null &&
+                    d.StatusDocument.ToString()!.ToLower() == statusDocument.ToLower()
+                );
+
             // Đếm số bản ghi trước khi phân trang
             totalRecords = query.Count();
-            // Sắp xếp theo ID
-            query = query.OrderByDescending(d => d.ModifiedDate);
+
+            // Sắp xếp theo ModifiedDate
+            var orderedQuery = query.OrderByDescending(d => d.ModifiedDate);
+
             if (pageNumber != -1 && pageSize != -1)
             {
-                query = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+                orderedQuery = (IOrderedQueryable<Document>)orderedQuery.Skip((pageNumber - 1) * pageSize).Take(pageSize);
             }
 
-            var users = _user.All().ToList();
+            var users = _user!.All().ToList();
 
             // Chuyển đổi sang danh sách DocumentResponse
-            var documentsSearch = query
+            var documentsSearch = orderedQuery
                 .AsEnumerable()
                 .Select(s => new DocumentResponse()
                 {
@@ -364,10 +380,11 @@ namespace Domain.Services
                     FileId = s.FileId,
                     FileName = s.FileName,
                     IsPrivate = s.IsPrivate,
-                    StatusDocument = s.StatusDocument.ToString(),
-                    FullNameUser = users.FirstOrDefault(w => w.Id == s.UserId).Fullname,
+                    StatusDocument = s.StatusDocument?.ToString(),
+                    FullNameUser = s.User != null ? s.User.Fullname : string.Empty,
                     FolderId = s.FolderId,
                     CourseId = s.CourseId,
+                    CourseName = s.Course != null ? s.Course.Name : string.Empty,
                     CreatedDate = s.CreatedDate,
                     ModifiedDate = s.ModifiedDate
                 }).ToList();
