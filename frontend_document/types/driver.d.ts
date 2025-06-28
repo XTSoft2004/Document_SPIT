@@ -30,12 +30,16 @@ export interface IFolder {
 
 export interface IDriveResponse {
   name: string
+  totalDownloads?: number
+  totalViews?: number
   folderId: string
   isFolder: boolean
   children: IDriveResponse[]
 }
 export interface IDriveItem {
   name: string
+  totalDownloads?: number
+  totalViews?: number
   folderId: string
   isFolder: boolean
 }

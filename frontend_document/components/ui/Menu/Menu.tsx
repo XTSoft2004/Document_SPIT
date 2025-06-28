@@ -20,6 +20,7 @@ const Menu = ({ allItems, onMobileSearch }: MenuProps) => {
     if (pathname === '/') return 'home';
     if (pathname.startsWith('/document')) return 'document';
     if (pathname.startsWith('/contribute')) return 'contribute';
+    if (pathname.startsWith('/ranking')) return 'ranking';
     return 'home';
   };
 
@@ -55,6 +56,9 @@ const Menu = ({ allItems, onMobileSearch }: MenuProps) => {
               </NavigationLink>
               <NavigationLink href="/contribute" className={`tab-link ${activeTab === 'contribute' ? 'active' : ''}`}>
                 <label className="tab_label">Đóng góp</label>
+              </NavigationLink>
+              <NavigationLink href="/ranking" className={`tab-link ${activeTab === 'ranking' ? 'active' : ''}`}>
+                <label className="tab_label">Bảng xếp hạng</label>
               </NavigationLink>
               <div className="indicator" />
             </div>
@@ -211,6 +215,12 @@ const StyledWrapper = styled.div<{ $activeTab: string }>`
         transform: translateY(0) scale(1.02);
         box-shadow: 0px 6px 20px rgba(236, 72, 153, 0.2), 0px 2px 6px rgba(236, 72, 153, 0.1);
         background: linear-gradient(135deg, rgba(236, 72, 153, 0.8) 0%, rgba(219, 39, 119, 0.8) 100%);
+      `;
+    if ($activeTab === 'ranking') return `
+        left: calc(140px * 3 + 1px);
+        transform: translateY(0) scale(1.02);
+        box-shadow: 0px 6px 20px rgba(251, 191, 36, 0.2), 0px 2px 6px rgba(251, 191, 36, 0.1);
+        background: linear-gradient(135deg, rgba(251, 191, 36, 0.8) 0%, rgba(245, 158, 11, 0.8) 100%);
       `;
     return '';
   }}
