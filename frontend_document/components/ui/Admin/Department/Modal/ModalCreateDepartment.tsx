@@ -69,6 +69,8 @@ const ModalCreateDepartment: React.FC<ModalCreateDepartmentProps> = ({
             <Form
                 form={form}
                 layout="vertical"
+                size="small"
+                className="space-y-3"
                 onFinish={handleSubmit}
                 onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
@@ -80,17 +82,19 @@ const ModalCreateDepartment: React.FC<ModalCreateDepartmentProps> = ({
                 <Form.Item
                     label="Mã phòng ban:"
                     name="code"
+                    className="mb-3"
                     rules={[{ required: true, message: "Vui lòng nhập mã phòng ban!" }]}
                 >
-                    <Input placeholder="Nhập mã phòng ban" />
+                    <Input placeholder="Nhập mã phòng ban" size="small" />
                 </Form.Item>
 
                 <Form.Item
                     label="Tên phòng ban:"
                     name="name"
+                    className="mb-3"
                     rules={[{ required: true, message: "Vui lòng nhập tên phòng ban!" }]}
                 >
-                    <Input placeholder="Nhập tên phòng ban" />
+                    <Input placeholder="Nhập tên phòng ban" size="small" />
                 </Form.Item>
             </Form>
         </Modal>

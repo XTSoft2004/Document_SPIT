@@ -84,11 +84,11 @@ export default function ModalPendingDocument({
             if (newFileList.length > 0 && newFileList[0].originFileObj) {
                 const file = newFileList[0];
 
-                // Auto fill tên file
-                if (!form.getFieldValue('name')) {
-                    const fileName = file.name.replace(/\.[^/.]+$/, "");
-                    form.setFieldsValue({ name: fileName });
-                }
+                // // Auto fill tên file
+                // if (!form.getFieldValue('name')) {
+                //     const fileName = file.name.replace(/\.[^/.]+$/, "");
+                //     form.setFieldsValue({ name: fileName });
+                // }
 
                 // Generate preview
                 handleFilePreview(file, setPreviewSrc, setPreviewType, () => {
@@ -120,7 +120,7 @@ export default function ModalPendingDocument({
 
             console.log('Submitting document:', values);
             console.log('FileList:', fileList);
-            
+
             setLoading(true);
 
             // Lấy file từ fileList state thay vì form values
@@ -144,7 +144,6 @@ export default function ModalPendingDocument({
                 courseId: values.courseId.toString(),
             };
 
-            console.log('Document data:', documentPending);
 
             const response = await createDocument(documentPending);
             if (response.ok) {
@@ -160,9 +159,13 @@ export default function ModalPendingDocument({
                 });
             }
 
-        } catch (error) {
-            console.error('Error uploading document:', error);
-            message.error('Có lỗi xảy ra khi upload tài liệu');
+        } catch (error: any) {
+            if (error?.errorFields) {
+                // Form validation errors
+                NotificationService.error({
+                    message: 'Vui lòng điền đầy đủ thông tin bắt buộc'
+                });
+            }
         } finally {
             setLoading(false);
         }
@@ -187,9 +190,16 @@ export default function ModalPendingDocument({
             title="Upload tài liệu mới"
             open={visible}
             onCancel={handleCancel}
-            width={1200}
+            width={1000} // Giảm width từ 1200 xuống 1000
+            style={{ top: 10 }} // Đẩy modal lên trên
             footer={[
-                <Button key="cancel" onClick={handleCancel} disabled={loading}>
+                <Button
+                    key="cancel"
+                    onClick={handleCancel}
+                    disabled={loading}
+                    size="middle"
+                    className="bg-gray-100 text-gray-700 hover:bg-gray-200 border-none rounded-md"
+                >
                     Hủy
                 </Button>,
                 <Button
@@ -198,29 +208,31 @@ export default function ModalPendingDocument({
                     onClick={handleSubmit}
                     loading={loading}
                     disabled={fileList.length === 0}
+                    size="middle"
+                    className="bg-blue-500 text-white hover:bg-blue-600 border-none rounded-md"
                 >
                     Upload tài liệu
                 </Button>,
             ]}
         >
-            <div className="flex gap-6 h-[600px]">
+            <div className="flex gap-4"> {/* Giảm height từ 600px xuống 480px */}
                 {/* Form bên trái */}
-                <div className="flex-1 overflow-y-auto">
+                <div className="flex-1 overflow-y-auto pr-2">
                     <Form
                         form={form}
                         layout="vertical"
-                        requiredMark={false}
+                        size="small" // Giảm kích thước form
                     >
                         {/* Upload Area */}
-                        <Form.Item label="Chọn file tài liệu">
-                            <Dragger {...uploadProps} className="mb-4">
+                        <Form.Item>
+                            <Dragger {...uploadProps} className="mb-3" style={{ minHeight: 50 }}> {/* Giảm chiều cao */}
                                 <p className="ant-upload-drag-icon">
-                                    <InboxOutlined className="text-4xl text-blue-500" />
+                                    <InboxOutlined className="text-3xl text-blue-500" /> {/* Giảm icon size */}
                                 </p>
-                                <p className="ant-upload-text text-lg font-medium">
+                                <p className="ant-upload-text text-base font-medium"> {/* Giảm text size */}
                                     Kéo thả file vào đây hoặc click để chọn
                                 </p>
-                                <p className="ant-upload-hint text-gray-500">
+                                <p className="ant-upload-hint text-gray-500 text-sm"> {/* Giảm hint size */}
                                     Hỗ trợ PDF, Word, Excel, PowerPoint, hình ảnh. Tối đa 50MB.
                                 </p>
                             </Dragger>
@@ -236,7 +248,7 @@ export default function ModalPendingDocument({
                         >
                             <Input
                                 placeholder="Nhập tên tài liệu"
-                                size="large"
+                                size="large" // Giảm size input
                             />
                         </Form.Item>
 
@@ -248,7 +260,7 @@ export default function ModalPendingDocument({
                             <Select
                                 showSearch
                                 placeholder="Chọn môn học"
-                                size="large"
+                                size="large" // Giảm size select
                                 optionFilterProp="children"
                                 filterOption={(input, option) =>
                                     (`${option?.label ?? ''}`).toLowerCase().includes(input.toLowerCase())
@@ -260,22 +272,22 @@ export default function ModalPendingDocument({
                             />
                         </Form.Item>
 
-                        <div className="bg-blue-50 p-4 rounded-lg">
-                            <p className="text-sm text-blue-700 mb-2">
+                        <div className="bg-blue-50 p-3 rounded-lg"> {/* Giảm padding */}
+                            <p className="text-xs text-blue-700 mb-1"> {/* Giảm text size */}
                                 <strong>📋 Hướng dẫn upload:</strong>
                             </p>
-                            <ul className="text-sm text-blue-600 space-y-1">
-                                <li>• Chọn file tài liệu từ máy tính của bạn</li>
-                                <li>• Điền tên tài liệu rõ ràng, dễ hiểu</li>
+                            <ul className="text-xs text-blue-600 space-y-0.5"> {/* Giảm text size và spacing */}
+                                <li>• Chọn file từ máy tính</li>
+                                <li>• Điền tên tài liệu rõ ràng</li>
                                 <li>• Chọn môn học phù hợp</li>
-                                <li>• Tài liệu sẽ được gửi đến admin để duyệt</li>
+                                <li>• Tài liệu sẽ được gửi để duyệt</li>
                             </ul>
                         </div>
                     </Form>
                 </div>
 
                 {/* Preview bên phải */}
-                <div className="w-[400px] border-l border-gray-200 pl-6">
+                <div className="w-[350px] border-l border-gray-200 pl-4"> {/* Giảm width và padding */}
                     <div className="h-full">
                         {previewSrc && previewType !== "unsupported" ? (
                             <FilePreview
@@ -285,14 +297,14 @@ export default function ModalPendingDocument({
                             />
                         ) : (
                             <div className="h-full flex items-center justify-center bg-gray-50 rounded-lg">
-                                <div className="text-center p-8">
-                                    <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl flex items-center justify-center">
-                                        <InboxOutlined className="text-2xl text-blue-500" />
+                                <div className="text-center p-4"> {/* Giảm padding */}
+                                    <div className="w-12 h-12 mx-auto mb-3 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl flex items-center justify-center"> {/* Giảm size icon */}
+                                        <InboxOutlined className="text-xl text-blue-500" /> {/* Giảm text size */}
                                     </div>
-                                    <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                                    <h3 className="text-base font-semibold text-gray-700 mb-1"> {/* Giảm text size */}
                                         Xem trước file
                                     </h3>
-                                    <p className="text-sm text-gray-500">
+                                    <p className="text-xs text-gray-500"> {/* Giảm text size */}
                                         Chọn file để xem trước nội dung
                                     </p>
                                 </div>

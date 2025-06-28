@@ -48,7 +48,7 @@ export const updateUser = async (id: string, user: IUserUpdate) => {
       'Content-Type': 'application/json',
       Authorization:
         headers().get('Authorization') ||
-        `Bearer ${cookies().get('accessToken')?.value || ' '}`,
+        `Bearer ${cookies().get('accessToken')?.value || ''}`,
     },
     body: JSON.stringify(user),
     next: {
@@ -57,7 +57,6 @@ export const updateUser = async (id: string, user: IUserUpdate) => {
   })
 
   const data = (await response.json()) as IBaseResponse
-  console.log('updateUser', data)
   revalidateTag('user.index')
 
   return {

@@ -58,12 +58,12 @@ export default function PageLogin() {
                     <ModernAuthLoading />
                 </div>
             ) : (
-                <div className="flex flex-col justify-center space-y-6">
+                <div className="flex flex-col justify-center space-y-4">
                     <form
                         onSubmit={handleSubmit(onSubmit)}
-                        className="space-y-5"
+                        className="space-y-4"
                     >
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -98,7 +98,7 @@ export default function PageLogin() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3, duration: 0.3 }}
-                            className="pt-4"
+                            className="pt-2"
                         >
                             <motion.div
                                 whileHover={{ scale: 1.03 }}
@@ -108,8 +108,8 @@ export default function PageLogin() {
                                 <Button
                                     type="primary"
                                     htmlType="submit"
-                                    className="w-full h-14 text-lg font-semibold rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 border-none shadow-md hover:shadow-lg transition-all duration-300"
-                                    style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)', fontSize: '18px', height: '56px', borderRadius: '16px' }}
+                                    className="w-full h-12 text-base font-semibold rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 border-none shadow-md hover:shadow-lg transition-all duration-300"
+                                    style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)', fontSize: '16px', height: '48px', borderRadius: '16px' }}
                                 >
                                     Sign In
                                 </Button>
@@ -122,7 +122,7 @@ export default function PageLogin() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.4, duration: 0.3 }}
-                        className="text-center pt-4"
+                        className="text-center pt-2"
                     >
                         <a href="#" className="text-sm text-blue-600 hover:underline">
                             Forgot your password?

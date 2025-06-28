@@ -10,7 +10,7 @@ import HeroSection from '@/components/ui/Auth/HeroSection';
 // Animation variants for better performance
 const containerVariants = {
     hidden: { opacity: 0 },
-    visible: { 
+    visible: {
         opacity: 1,
         transition: { duration: 0.6, staggerChildren: 0.1 }
     }
@@ -35,46 +35,46 @@ export default function PageAuth() {
     }, []);
 
     return (
-        <div className="min-h-screen flex flex-col lg:flex-row bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 overflow-x-hidden">
+        <div className="h-screen flex flex-col lg:flex-row bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 overflow-hidden">
             {/* Left Section - Auth Form */}
-            <motion.div 
-                className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-6 lg:p-8 xl:p-12 relative order-2 lg:order-1 min-h-screen lg:min-h-0"
+            <motion.div
+                className="w-full lg:w-1/2 flex items-center justify-center p-3 sm:p-4 lg:p-6 xl:p-8 relative order-2 lg:order-1 h-full"
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
             >
                 {/* Background Pattern - Optimized */}
                 <div className="absolute inset-0 opacity-5 pointer-events-none">
-                    <div 
+                    <div
                         className="absolute inset-0"
                         style={{
                             backgroundImage: `radial-gradient(circle, #3b82f6 1px, transparent 1px)`,
                             backgroundSize: '30px 30px'
-                        }} 
+                        }}
                     />
                 </div>
 
                 <div className="w-full max-w-sm sm:max-w-md lg:max-w-lg relative z-10">
                     {/* Header Section - Improved spacing */}
-                    <motion.div className="text-center mb-4 sm:mb-6 lg:mb-8" variants={itemVariants}>
-                        <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-3 mb-4 sm:mb-6">
+                    <motion.div className="text-center mb-2 sm:mb-4 lg:mb-6" variants={itemVariants}>
+                        <div className="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-3 mb-3 sm:mb-4">
                             <div className="relative flex-shrink-0">
                                 <Image
                                     src="/logo/logo-500x500.png"
                                     alt="SPIT Document"
-                                    width={40}
-                                    height={40}
-                                    className="sm:w-12 sm:h-12 rounded-xl shadow-lg"
+                                    width={32}
+                                    height={32}
+                                    className="sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl shadow-lg"
                                     priority
                                 />
-                                <div className="absolute -top-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-green-400 rounded-full border-2 border-white animate-pulse" />
+                                <div className="absolute -top-1 -right-1 w-2 h-2 sm:w-3 sm:h-3 lg:w-4 lg:h-4 bg-green-400 rounded-full border-2 border-white animate-pulse" />
                             </div>
 
                             <div className="text-center sm:text-left">
-                                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                                <h1 className="text-base sm:text-lg lg:text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                                     SPIT Document
                                 </h1>
-                                <div className="h-4 sm:h-5 lg:h-6 overflow-hidden">
+                                <div className="h-3 sm:h-4 lg:h-5 overflow-hidden">
                                     <RotatingText
                                         texts={['Technology', 'Fast', 'Easy to use', 'Efficient']}
                                         mainClassName="text-xs sm:text-sm text-gray-500 font-medium"
@@ -92,7 +92,7 @@ export default function PageAuth() {
                         </div>
 
                         <div>
-                            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2 text-gray-800">
+                            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-1 sm:mb-2 text-gray-800">
                                 {isSignIn ? 'Welcome Back!' : 'Create Account'}
                             </h2>
                             <p className="text-gray-600 text-xs sm:text-sm lg:text-base">
@@ -106,7 +106,7 @@ export default function PageAuth() {
 
                     {/* Tab Buttons - Improved responsive */}
                     <motion.div
-                        className="flex mb-4 sm:mb-6 space-x-1 bg-gray-100/80 backdrop-blur-sm p-1 sm:p-1.5 rounded-xl sm:rounded-2xl justify-center relative shadow-inner"
+                        className="flex mb-3 sm:mb-4 space-x-1 bg-gray-100/80 backdrop-blur-sm p-1 sm:p-1.5 rounded-xl sm:rounded-2xl justify-center relative shadow-inner"
                         variants={itemVariants}
                     >
                         <motion.div
@@ -132,11 +132,11 @@ export default function PageAuth() {
                     </motion.div>
 
                     {/* Form Container - Optimized height */}
-                    <motion.div 
+                    <motion.div
                         className="flex items-center justify-center"
                         variants={itemVariants}
                     >
-                        <div className="w-full bg-white/50 backdrop-blur-sm rounded-xl sm:rounded-2xl lg:rounded-3xl p-4 sm:p-6 lg:p-8 shadow-xl border border-white/20">
+                        <div className="w-full bg-white/50 backdrop-blur-sm rounded-xl sm:rounded-2xl lg:rounded-3xl p-3 sm:p-4 lg:p-6 shadow-xl border border-white/20">
                             <AnimatePresence mode="wait">
                                 <motion.div
                                     key={isSignIn ? 'signIn' : 'signUp'}
@@ -159,7 +159,9 @@ export default function PageAuth() {
             </motion.div>
 
             {/* Right Section - Student Document Management System */}
-            <HeroSection />
+            <div className="hidden lg:flex lg:w-1/2 h-full order-1 lg:order-2 relative overflow-hidden">
+                <HeroSection />
+            </div>
         </div>
     );
 }

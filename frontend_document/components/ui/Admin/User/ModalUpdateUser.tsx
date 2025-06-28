@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Modal, Button, Input, Form, message } from "antd";
+import { Modal, Button, Input, Form, message, notification } from "antd";
 import { IUserResponse, IUserUpdate } from "@/types/user";
 import { updateUser } from "@/actions/user.action";
 import NotificationService from "../../Notification/NotificationService";
@@ -46,7 +46,8 @@ const ModalUpdateUser: React.FC<ModalUpdateUserProps> = ({
                 onCancel();
                 // Mutate trực tiếp để có trải nghiệm mượt mà
                 mutateTable('user');
-            } else {
+            }
+            else {
                 NotificationService.error({
                     message: "Cập nhật người dùng thất bại"
                 });

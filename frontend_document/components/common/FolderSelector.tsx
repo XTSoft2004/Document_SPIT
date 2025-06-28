@@ -5,21 +5,23 @@ import { IFileInfo } from "@/types/driver";
 import ModalSelectFolder from "../ui/Admin/Dashboard/Modal/ModalSelectFolder";
 
 interface FolderSelectorProps {
+    title?: string;
     onSelect: (folder: IFileInfo, breadcrumb: string) => void;
     folderIdCurrent?: string
 }
 
-const FolderSelector: React.FC<FolderSelectorProps> = ({ onSelect, folderIdCurrent }) => {
+const FolderSelector: React.FC<FolderSelectorProps> = ({ title = "Chọn thư mục", onSelect, folderIdCurrent }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selected, setSelected] = useState<IFileInfo | null>(null);
     const [breadcrumb, setBreadcrumb] = useState<string>("");
 
     return (
         <>
-            <Button type="primary" onClick={() => setIsModalOpen(true)} block>
+            <Button type="primary" onClick={() => setIsModalOpen(true)} block size="middle">
                 Chọn thư mục
             </Button>
             <ModalSelectFolder
+                title={title}
                 open={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onSelectFolder={(folder: IFileInfo, bc: string) => {

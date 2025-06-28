@@ -26,7 +26,8 @@ export interface IDocumentResponse {
   statusDocument: string
   fullNameUser: string
   folderId: string
-  courseId: string
+  courseId: number
+  courseName: string
   typeFile: string
   createdDate: date
   modifiedDate: date

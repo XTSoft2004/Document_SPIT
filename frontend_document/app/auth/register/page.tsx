@@ -56,12 +56,12 @@ export default function PageRegister() {
                     <ModernAuthLoading />
                 </div>
             ) : (
-                <div className="flex flex-col justify-center space-y-6">
+                <div className="flex flex-col justify-center space-y-4">
                     <form
                         onSubmit={handleSubmit(onSubmit)}
-                        className="space-y-4"
+                        className="space-y-3"
                     >
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -111,7 +111,7 @@ export default function PageRegister() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.4, duration: 0.3 }}
-                            className="pt-4"
+                            className="pt-2"
                         >
                             <motion.div
                                 whileHover={{ scale: 1.02 }}
@@ -121,8 +121,8 @@ export default function PageRegister() {
                                 <Button
                                     type="primary"
                                     htmlType="submit"
-                                    className="w-full h-12 text-base font-semibold rounded-[12px] bg-gradient-to-r from-purple-600 to-blue-600 border-none shadow-md hover:shadow-lg transition-all duration-300"
-                                    style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%)', fontSize: 18, height: 48, borderRadius: '16px' }}
+                                    className="w-full h-12 text-base font-semibold rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 border-none shadow-md hover:shadow-lg transition-all duration-300"
+                                    style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%)', fontSize: 16, height: 48, borderRadius: '16px' }}
                                 >
                                     Create Account
                                 </Button>
@@ -135,7 +135,7 @@ export default function PageRegister() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.5, duration: 0.3 }}
-                        className="text-center text-xs text-gray-500 pt-2"
+                        className="text-center text-xs text-gray-500 pt-1"
                     >
                         <p className="leading-relaxed">
                             By creating an account, you agree to our{' '}

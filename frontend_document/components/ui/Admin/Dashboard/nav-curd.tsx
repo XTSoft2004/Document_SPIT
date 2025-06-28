@@ -52,8 +52,8 @@ export function NavCRUD() {
                     icon: AirVent,
                 },
                 {
-                    name: "Tài liệu đã duyệt",
-                    url: "/admin/document/approved",
+                    name: "Tài liệu đã từ chối",
+                    url: "/admin/document/rejected",
                     icon: ChartColumnStacked,
                 },
             ]

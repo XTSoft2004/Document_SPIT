@@ -99,7 +99,7 @@ const DataGrid = <T extends object>({
 
     return (
         <>
-            <div className="flex flex-col md:flex-row justify-between items-stretch gap-2 mb-2">
+            <div className="flex flex-col md:flex-row justify-between items-stretch gap-2">
                 {btnAddInfo && (
                     <div className="w-full md:w-auto flex items-center gap-2">
                         <Button className="w-full md:w-auto flex items-center gap-2" onClick={btnAddInfo?.onClick}>
@@ -113,33 +113,35 @@ const DataGrid = <T extends object>({
                 </div>
             </div>
 
-            <Table<T>
-                columns={columnsWithSTT}
-                dataSource={data?.data || []}
-                loading={isLoading}
-                rowKey={rowKey as string}
-                pagination={false}
-                rowSelection={
-                    singleSelect
-                        ? undefined
-                        : {
-                            type: 'checkbox',
-                            ...rowSelection,
-                        }
-                }
-                onRow={(record) => ({
-                    onClick: () => handleRowClick(record),
-                })}
-                rowClassName={(record) => {
-                    const key = record[rowKey];
-                    return singleSelect && key === selectedKey
-                        ? 'bg-blue-100 dark:bg-[#1e3a8a33]'
-                        : '';
-                }}
-                bordered
-                scroll={{ x: 'max-content' }}
-                className="min-w-full"
-            />
+            <div style={{ width: '100%', overflowX: 'auto' }}>
+                <Table<T>
+                    columns={columnsWithSTT}
+                    dataSource={data?.data || []}
+                    loading={isLoading}
+                    rowKey={rowKey as string}
+                    pagination={false}
+                    rowSelection={
+                        singleSelect
+                            ? undefined
+                            : {
+                                type: 'checkbox',
+                                ...rowSelection,
+                            }
+                    }
+                    onRow={(record) => ({
+                        onClick: () => handleRowClick(record),
+                    })}
+                    rowClassName={(record) => {
+                        const key = record[rowKey];
+                        return singleSelect && key === selectedKey
+                            ? 'bg-blue-100 dark:bg-[#1e3a8a33]'
+                            : '';
+                    }}
+                    bordered
+                    scroll={{ x: 'max-content' }}
+                    className="min-w-full"
+                />
+            </div>
 
             <div className="flex mt-5 items-center justify-between sm:justify-end">
                 <Pagination
