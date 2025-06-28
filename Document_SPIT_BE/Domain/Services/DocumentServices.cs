@@ -59,7 +59,7 @@ namespace Domain.Services
             string base64Check = documentRequest.base64String.Split(',').Length == 2 ? documentRequest.base64String.Split(',')[1] : string.Empty;
             if (string.IsNullOrEmpty(base64Check))
                 return HttpResponse.Error("Base64 không hợp lệ, vui lòng kiểm tra lại.", System.Net.HttpStatusCode.BadRequest);
-     
+
             // Kiểm tra thông tin tài liệu
             if (AppExtension.IsBase64String(base64Check) == false)
                 return HttpResponse.Error("Base64 không hợp lệ, vui lòng kiểm tra lại.", System.Net.HttpStatusCode.BadRequest);
@@ -135,19 +135,19 @@ namespace Domain.Services
             if (document == null)
                 return HttpResponse.Error("Tài liệu không tồn tại.", System.Net.HttpStatusCode.NotFound);
 
-            StatusDocument_Enum? enumStatusDocument = null;   
+            StatusDocument_Enum? enumStatusDocument = null;
             if (documentRequest.StatusDocument != null)
             {
                 enumStatusDocument = EnumExtensions.GetEnumValueFromDisplayName<StatusDocument_Enum>(documentRequest.StatusDocument);
                 if (enumStatusDocument == null)
                     return HttpResponse.Error("Trạng thái điểm danh không hợp lệ.", System.Net.HttpStatusCode.BadRequest);
             }
-            
+
             var user = _user!.Find(f => f.Id == userMeToken.Id);
             if (user == null)
                 return HttpResponse.Error("Người dùng không tồn tại.", System.Net.HttpStatusCode.BadRequest);
 
-            if(!string.IsNullOrEmpty(documentRequest.FolderId?.Trim()) &&
+            if (!string.IsNullOrEmpty(documentRequest.FolderId?.Trim()) &&
                 !string.IsNullOrEmpty(documentRequest.Base64String) &&
                 !string.IsNullOrEmpty(documentRequest.FileName))
             {
@@ -236,7 +236,7 @@ namespace Domain.Services
                 return;
 
             var itemReacted = _detailDocument.Find(f => f.Id == document.Id);
-            if(itemReacted == null)
+            if (itemReacted == null)
                 return;
 
             itemReacted.TotalView += 1;
@@ -259,7 +259,7 @@ namespace Domain.Services
 
             var result = await _googleDriverServices.GetGoogleDrivePreviewAsync(document.FileId);
             if (result == null)
-                return (null,null,null);
+                return (null, null, null);
 
             var (data, contentType, fileName) = result.Value;
             return (data, contentType, fileName);
@@ -300,7 +300,9 @@ namespace Domain.Services
                 Id = s.Id,
                 Name = s.Name,
                 FileId = s.FileId,
-                FileName = s.FileName,  
+                FileName = s.FileName,
+                TotalDownloads = s.DetaiDocument.TotalDownload,
+                TotalViews = s.DetaiDocument.TotalView,
                 IsPrivate = s.IsPrivate,
                 StatusDocument = s.StatusDocument.ToString(),
                 UserId = s.UserId,
@@ -313,12 +315,41 @@ namespace Domain.Services
         }
         public async Task<(byte[] Data, string ContentType, string FileName)?> GetPreviewByDocumetId(long DocumentId)
         {
-            var document = _document!.Find(f => f.Id == DocumentId);    
+            var document = _document!.Find(f => f.Id == DocumentId);
             if (document == null)
                 return (null, null, null);
 
             await ViewFile(document.FileId);
             return await _googleDriverServices.GetGoogleDrivePreviewAsync(document.FileId);
+        }
+        public async Task<HttpResponse> GetRecentDocuments(int number)
+        {
+            var documents = _document!.All()
+                .Where(d => d.IsPrivate == false)
+                .OrderByDescending(d => d.ModifiedDate)
+                .Take(number)
+                .ToList();
+
+            var responseList = documents.Select(s => new DocumentRecentResponse
+            {
+                Id = s.Id,
+                Name = s.Name,
+                FileId = s.FileId,
+                FileName = s.FileName,
+                TotalDownloads = s.DetaiDocument?.TotalDownload ?? 0,
+                TotalViews = s.DetaiDocument?.TotalView ?? 0,
+                CreatedDate = s.CreatedDate,
+                ModifiedDate = s.ModifiedDate
+            }).ToList();
+
+            foreach (var doc in responseList)
+            {
+                var userId = documents.First(d => d.Id == doc.Id).UserId;
+                var user = _user.Find(f => f.Id == userId);
+                doc.Fullname = user?.Fullname ?? "Không rõ";
+            }
+
+            return HttpResponse.OK(data: responseList, message: "Lấy danh sách tài liệu gần đây thành công.");
         }
     }
 }

@@ -8,7 +8,7 @@ namespace Domain.Model.Response.Statistical
 {
     public class RankingResponse
     {
-        public long? UserId { get; set; }
+        public string? Fullname { get; set; }
         public long? TotalUpload { get; set; }
     }
 }

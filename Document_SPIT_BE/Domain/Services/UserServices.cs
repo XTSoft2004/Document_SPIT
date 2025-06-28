@@ -4,6 +4,7 @@ using Domain.Entities;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
 using Domain.Model.Request.User;
+using Domain.Model.Response.Statistical;
 using Domain.Model.Response.User;
 using HelperHttpClient;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
@@ -23,15 +24,19 @@ namespace Domain.Services
         private readonly IRepositoryBase<User>? _user;
         private readonly IRepositoryBase<Role>? _role;
         private readonly IRepositoryBase<History>? _history;
+        private readonly IRepositoryBase<StarDocument>? _startDocument;
+        private readonly IRepositoryBase<Document>? _document;
         private readonly ITokenServices _tokenServices;
         private UserTokenResponse? userMeToken;
-        public UserServices(IRepositoryBase<User>? user, IRepositoryBase<Role>? role, ITokenServices tokenServices, IRepositoryBase<History>? history)
+        public UserServices(IRepositoryBase<User>? user, IRepositoryBase<Role>? role, ITokenServices tokenServices, IRepositoryBase<History>? history, IRepositoryBase<StarDocument>? startDocument, IRepositoryBase<Document>? document)
         {
             _user = user;
             _role = role;
             _history = history;
             _tokenServices = tokenServices;
             userMeToken = _tokenServices.GetTokenBrowser();
+            _startDocument = startDocument;
+            _document = document;
         }
         public async Task<HttpResponse> UpdateAsync(long idUser, UserRequest userRequest)
         {
@@ -159,6 +164,65 @@ namespace Domain.Services
             await UnitOfWork.CommitAsync()
                 ;
             return HttpResponse.OK(message: "Tạo người dùng thành công.");
+        }
+        public async Task<HttpResponse> getStars()
+        {
+            // Lấy danh sách sao của người dùng
+            var stars = _startDocument.All()
+                .Where(s => s.UserId == userMeToken.Id)
+                .Select(s => s.DocumentId)
+                .ToArray();
+
+            return HttpResponse.OK(
+                message: "Lấy danh sách sao thành công.",
+                data: stars
+            );
+        }
+        public async Task<HttpResponse> ChangeStatusStar(long documentId)
+        {
+            // Kiểm tra xem người dùng đã đánh sao cho tài liệu này ha  y chưa
+            var f = _startDocument.Find(f => f.UserId == userMeToken.Id && f.DocumentId == documentId);
+            // Nếu đã đánh sao thì xóa sao
+            if (f != null)
+            {
+                _startDocument.Delete(f);
+                await UnitOfWork.CommitAsync();
+            }
+            // nếu chưa thì thêm sao
+            else
+            {
+                var star = new StarDocument
+                {
+                    UserId = userMeToken.Id,
+                    DocumentId = documentId
+                };
+
+                _startDocument.Insert(star);
+                await UnitOfWork.CommitAsync();
+            }
+
+            return HttpResponse.OK(message: "Cập nhật trạng thái sao thành công.");
+        }
+
+        public async Task<HttpResponse> GetRecentUpload()
+        {
+            // Lấy danh sách 10 tài liệu đã tải lên gần đây của người dùng
+            var recentUploads = _document.All()
+                .Where(d => d.UserId == userMeToken.Id)
+                .OrderByDescending(d => d.ModifiedDate)
+                .Take(10)
+                .Select(d => new RecentUploadResponse
+                {
+                    Id = d.Id,
+                    Name = d.Name,
+                    ModifiedDate = d.ModifiedDate
+                })
+                .ToList();
+
+            return HttpResponse.OK(
+                data: recentUploads,
+                message: "Lấy danh sách tài liệu đã tải lên gần đây thành công."
+            );
         }
     } 
 }
