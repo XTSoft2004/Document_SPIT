@@ -99,7 +99,7 @@ namespace Domain.Services
                             Fullname = Fullname.Trim()
                         });
 
-                        await _userServices.SetRole(userId, "Admin");
+                        await _userServices.SetRole(username, "Admin");
                     }
                 }
             }

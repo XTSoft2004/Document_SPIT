@@ -25,6 +25,7 @@ namespace Domain.Services
     public class DocumentServices : BaseService, IDocumentServices
     {
         private readonly IRepositoryBase<Document>? _document;
+        private readonly IRepositoryBase<Course>? _course;
         private readonly IRepositoryBase<DetailDocument>? _detailDocument;
         private readonly IRepositoryBase<User>? _user;
         private readonly IRepositoryBase<History> _history;
@@ -33,7 +34,7 @@ namespace Domain.Services
         private readonly IRepositoryBase<OneTimeToken>? _oneTimeToken;
         private UserTokenResponse? userMeToken;
 
-        public DocumentServices(IRepositoryBase<Document>? document, IRepositoryBase<User>? user, IGoogleDriverServices? googleDriverServices, IRepositoryBase<DetailDocument>? detailDocument, ITokenServices? tokenServices, IRepositoryBase<OneTimeToken>? oneTimeToken)
+        public DocumentServices(IRepositoryBase<Document>? document, IRepositoryBase<User>? user, IGoogleDriverServices? googleDriverServices, IRepositoryBase<DetailDocument>? detailDocument, ITokenServices? tokenServices, IRepositoryBase<OneTimeToken>? oneTimeToken, IRepositoryBase<Course>? course)
         {
             _document = document;
             _user = user;
@@ -42,26 +43,21 @@ namespace Domain.Services
             _tokenServices = tokenServices;
             userMeToken = _tokenServices.GetTokenBrowser();
             _oneTimeToken = oneTimeToken;
+            _course = course;
+            var envPath = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.Parent.FullName, ".env");
+            DotNetEnv.Env.Load(envPath);
         }
-        // Tạo mơi tài liệu
-        public async Task<HttpResponse> CreateAsync(DocumentCreateRequest documentRequest)
-        {
-            //// Kiểm tra loại tài liệu đã tồn tại hay chưa
-            //if (!EnumExtensions.IsValidDisplayName(documentRequest.StatusDocument, typeof(StatusDocument_Enum)))
-            //    return HttpResponse.Error("Trạng thái điểm danh không hợp lệ.", System.Net.HttpStatusCode.BadRequest);
 
-            // Kiểm tra người dùng có tồn tại hay không
+        public async Task<HttpResponse> CreatePending(DocumentPendingRequest documentCreatePending)
+        {
             var user = _user!.Find(f => f.Id == userMeToken.Id);
             if (user == null)
                 return HttpResponse.Error("Người dùng không tồn tại.", System.Net.HttpStatusCode.BadRequest);
 
-            if (await _googleDriverServices.GetInfoFolder(documentRequest.folderId) == null)
-                return HttpResponse.Error("Thư mục không tồn tại hoặc không hợp lệ.", System.Net.HttpStatusCode.BadRequest);
-
-            string base64Check = documentRequest.base64String.Split(',').Length == 2 ? documentRequest.base64String.Split(',')[1] : string.Empty;
+            string base64Check = documentCreatePending.base64String.Split(',').Length == 2 ? documentCreatePending.base64String.Split(',')[1] : string.Empty;
             if (string.IsNullOrEmpty(base64Check))
                 return HttpResponse.Error("Base64 không hợp lệ, vui lòng kiểm tra lại.", System.Net.HttpStatusCode.BadRequest);
-     
+
             // Kiểm tra thông tin tài liệu
             if (AppExtension.IsBase64String(base64Check) == false)
                 return HttpResponse.Error("Base64 không hợp lệ, vui lòng kiểm tra lại.", System.Net.HttpStatusCode.BadRequest);
@@ -71,23 +67,29 @@ namespace Domain.Services
             if (_document.Find(f => f.Md5Checksum == md5Hash) != null)
                 return HttpResponse.Error("Tài liệu đã tồn tại.", System.Net.HttpStatusCode.Conflict);
 
+            var course = _course!.Find(f => f.Id == documentCreatePending.courseId);
+            if (course == null)
+                return HttpResponse.Error("Khóa học không tồn tại.", System.Net.HttpStatusCode.BadRequest);
+
+
+            string nameFile = $"{Guid.NewGuid():N}{System.IO.Path.GetExtension(documentCreatePending.fileName ?? string.Empty)}";
             // Tải lên tài liệu lên Google Drive
+            string FOLDER_PENDING = Environment.GetEnvironmentVariable("FOLDER_PENDING");
             UploadFileResponse FileId = await _googleDriverServices.UploadFile(new UploadFileBase64Request
             {
                 Base64String = base64Check,
-                FileName = documentRequest.fileName?.Trim() ?? "Không rõ",
-                FolderId = documentRequest.folderId?.Trim()
+                FileName = nameFile,
+                FolderId = FOLDER_PENDING
             });
             if (FileId == null || string.IsNullOrEmpty(FileId.id))
                 return HttpResponse.Error("Tải lên tài liệu thất bại.", System.Net.HttpStatusCode.InternalServerError);
 
-
             // Tạo mới tài liệu
             var documentCreate = new Document
             {
-                Name = documentRequest.name?.Trim(),
+                Name = documentCreatePending.name?.Trim(),
                 FileId = FileId.id,
-                FileName = documentRequest.fileName?.Trim() ?? "Không rõ",
+                FileName = nameFile ?? "Không rõ",
                 Md5Checksum = md5Hash,
                 IsPrivate = false,
                 StatusDocument = StatusDocument_Enum.Pending,
@@ -96,39 +98,68 @@ namespace Domain.Services
                 UserId = userMeToken.Id ?? 0,
                 User = user,
 
-                FolderId = documentRequest.folderId?.Trim(),
+                Course = course,
+                CourseId = course.Id,
+
+                FolderId = FOLDER_PENDING,
                 CreatedDate = DateTime.Now,
                 ModifiedDate = DateTime.Now
             };
             _document.Insert(documentCreate);
             await UnitOfWork.CommitAsync();
+            var listDocument = _document.All().ToList();
 
-            // Tạo mới chi tiết tài liệu
-            var detailDocument = new DetailDocument
+            return HttpResponse.OK(message: "Tạo tài liệu thành công, đang chờ xét duyệt.");
+        }
+        public async Task<HttpResponse> ReviewAsync(long? Id, DocumentReviewRequest documentRequest)
+        {
+            var user = _user!.Find(f => f.Id == userMeToken.Id);
+            if (user == null)
+                return HttpResponse.Error("Người dùng không tồn tại.", System.Net.HttpStatusCode.BadRequest);
+
+            if (await _googleDriverServices.GetInfoFolder(documentRequest.folderId) == null)
+                return HttpResponse.Error("Thư mục không tồn tại hoặc không hợp lệ.", System.Net.HttpStatusCode.BadRequest);
+
+            var documentPending = _document!.Find(f => f.Id == Id);
+            if (documentPending == null)
+                return HttpResponse.Error("Tài liệu không tồn tại.", System.Net.HttpStatusCode.NotFound);
+
+            var course = _course!.Find(f => f.Id == documentRequest.courseId);
+            if (course == null)
+                return HttpResponse.Error("Khóa học không tồn tại.", System.Net.HttpStatusCode.BadRequest);
+
+            documentPending.Name = documentRequest.name?.Trim() ?? documentPending.Name;
+            documentPending.Course = course;
+            documentPending.CourseId = course.Id;
+            documentPending.StatusDocument = EnumExtensions.GetEnumValueFromDisplayName<StatusDocument_Enum>(documentRequest.statusDocument) ?? documentPending.StatusDocument;
+            _document.Update(documentPending);
+            await UnitOfWork.CommitAsync(); 
+
+            if(documentPending.StatusDocument == StatusDocument_Enum.Approved)
             {
-                DocumentId = documentCreate.Id,
-                Document = documentCreate,
-                CreatedDate = DateTime.Now
-            };
-            _detailDocument?.Insert(detailDocument);
-            await UnitOfWork.CommitAsync();
+                await _googleDriverServices.CutFile(documentPending.FileId, documentRequest.folderId?.Trim(), documentPending.FolderId);
+                documentPending.FolderId = documentRequest.folderId?.Trim() ?? documentPending.FolderId;
+                // Sao chép file từ thư mục Pending sang thư mục đã duyệt
+                //await _googleDriverServices.CopyFile(fileId: documentPending.FileId, documentPending.FolderId);
+                // Tạo mới chi tiết tài liệu
+                var detailDocument = new DetailDocument
+                {
+                    DocumentId = documentPending.Id,
+                    Document = documentPending,
+                    CreatedDate = DateTime.Now
+                };
+                _detailDocument?.Insert(detailDocument);
+                await UnitOfWork.CommitAsync();
 
-            // Cập nhật tài liệu với chi tiết tài liệu
-            documentCreate.DetaiDocument = detailDocument;
-            documentCreate.DetaiDocumentId = detailDocument.Id;
-            _detailDocument.Update(detailDocument);
-            await UnitOfWork.CommitAsync();
+                // Cập nhật tài liệu với chi tiết tài liệu
+                documentPending.DetaiDocument = detailDocument;
+                documentPending.DetaiDocumentId = detailDocument.Id;
+                _detailDocument.Update(detailDocument);
+                await UnitOfWork.CommitAsync();
+                return HttpResponse.OK(message: "Duyệt tài liệu thành công.");
+            }
 
-            // Cập nhật lịch sử của User
-            var history = new UserHistoryResponse
-            {
-                Title = "Tạo tài liệu mới",
-                function_status = Function_Enum.Create_Document,
-                UserId = documentCreate.UserId,
-                Fullname = _user.Find(f => f.Id == documentCreate.UserId)?.Fullname,
-            };
-
-            return HttpResponse.OK(message: "Tạo tài liệu thành công.");
+            return HttpResponse.OK(message: "Đánh giá tài liệu đã xong.");
         }
         // Cập nhật tài liệu theo IdDocument
         public async Task<HttpResponse> UpdateAsync(long IdDocument, DocumentRequest documentRequest)
@@ -147,12 +178,27 @@ namespace Domain.Services
             
             var user = _user!.Find(f => f.Id == userMeToken.Id);
             if (user == null)
-                return HttpResponse.Error("Người dùng không tồn tại.", System.Net.HttpStatusCode.BadRequest);
+                return HttpResponse.Error("Người dùng không tồn tại.", System.Net.HttpStatusCode.NotFound);
 
-            if(!string.IsNullOrEmpty(documentRequest.FolderId?.Trim()) &&
+            // Thay đổi môn học tài liệu
+            var course = _course!.Find(f => f.Id == documentRequest.courseId);
+            if (course == null)
+                return HttpResponse.Error("Khóa học không tồn tại.", System.Net.HttpStatusCode.NotFound);
+
+            if(course.Id != document.CourseId)
+            {
+                // Nếu khóa học khác thì cập nhật lại khóa học
+                document.Course = course;
+                document.CourseId = course.Id;
+            }
+
+            // Khi thêm file mới thì upload lại file mới
+            if (!string.IsNullOrEmpty(documentRequest.FolderId?.Trim()) &&
                 !string.IsNullOrEmpty(documentRequest.Base64String) &&
                 !string.IsNullOrEmpty(documentRequest.FileName))
             {
+                await _googleDriverServices.DeleteFile(document.FileId);
+
                 if (await _googleDriverServices.GetInfoFolder(documentRequest.FolderId) == null)
                     return HttpResponse.Error("Thư mục không tồn tại hoặc không hợp lệ.", System.Net.HttpStatusCode.BadRequest);
 
@@ -185,6 +231,18 @@ namespace Domain.Services
                 document.FolderId = documentRequest.FolderId?.Trim() ?? document.FolderId;
             }
 
+            // Khi thấy thư mục khác thì cắt file sang thư mục mới
+            if (documentRequest.FolderId != document.FolderId)
+            {
+                // Kiểm tra xem thư mục có tồn tại không
+                if (await _googleDriverServices.GetInfoFolder(documentRequest.FolderId) == null)
+                    return HttpResponse.Error("Thư mục không tồn tại hoặc không hợp lệ.", System.Net.HttpStatusCode.BadRequest);
+                // Cắt file từ thư mục cũ sang thư mục mới
+                await _googleDriverServices.CutFile(document.FileId, documentRequest.FolderId, document.FolderId);
+                document.FolderId = documentRequest.FolderId;
+            }
+
+
             document.Name = documentRequest.Name?.Trim() ?? document.Name;
             document.IsPrivate = documentRequest.IsPrivate ?? document.IsPrivate;
             document.StatusDocument = enumStatusDocument ?? document.StatusDocument;
@@ -198,15 +256,6 @@ namespace Domain.Services
 
             _document.Update(document);
             await UnitOfWork.CommitAsync();
-
-            // Cập nhật lịch sử của User
-            var history = new UserHistoryResponse
-            {
-                Title = "Cập nhật tài liệu",
-                function_status = Function_Enum.Update_Document,
-                UserId = document.UserId,
-                Fullname = _user.Find(f => f.Id == document.UserId)?.Fullname,
-            };
 
             return HttpResponse.OK(message: "Cập nhật tài liệu thành công.");
         }
@@ -266,7 +315,7 @@ namespace Domain.Services
             var (data, contentType, fileName) = result.Value;
             return (data, contentType, fileName);
         }
-        public List<DocumentResponse> GetDocuments(string search, int pageNumber, int pageSize, out int totalRecords)
+        public List<DocumentResponse> GetDocuments(string search, int pageNumber, int pageSize, out int totalRecords, string statusDocument = "")
         {
             var query = _document!.All();
             if (!string.IsNullOrEmpty(search))
@@ -287,6 +336,11 @@ namespace Domain.Services
                     (d.StatusDocument != null && d.StatusDocument == enumStatus)
                 );
             }
+
+            if (!string.IsNullOrEmpty(statusDocument))
+                query = query.Where(d => !string.IsNullOrEmpty(statusDocument) && 
+                    d.StatusDocument.ToString().ToLower() == statusDocument.ToLower());
+       
             // Đếm số bản ghi trước khi phân trang
             totalRecords = query.Count();
             // Sắp xếp theo ID
@@ -296,23 +350,27 @@ namespace Domain.Services
                 query = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
             }
 
+            var users = _user.All().ToList();
+
             // Chuyển đổi sang danh sách DocumentResponse
-            var documentsSearch = query.Select(s => new DocumentResponse()
-            {
-                Id = s.Id,
-                Name = s.Name,
-                TotalDownloads = s.DetaiDocument != null ? s.DetaiDocument.TotalDownload : 0,
-                TotalViews = s.DetaiDocument != null ? s.DetaiDocument.TotalView : 0,
-                FileId = s.FileId,
-                FileName = s.FileName,
-                IsPrivate = s.IsPrivate,
-                StatusDocument = s.StatusDocument.ToString(),
-                UserId = s.UserId,
-                FolderId = s.FolderId,
-                CourseId = s.CourseId,
-                CreatedDate = s.CreatedDate,
-                ModifiedDate = s.ModifiedDate
-            }).ToList();
+            var documentsSearch = query
+                .AsEnumerable()
+                .Select(s => new DocumentResponse()
+                {
+                    Id = s.Id,
+                    Name = s.Name,
+                    TotalDownloads = s.DetaiDocument != null ? s.DetaiDocument.TotalDownload : 0,
+                    TotalViews = s.DetaiDocument != null ? s.DetaiDocument.TotalView : 0,
+                    FileId = s.FileId,
+                    FileName = s.FileName,
+                    IsPrivate = s.IsPrivate,
+                    StatusDocument = s.StatusDocument.ToString(),
+                    FullNameUser = users.FirstOrDefault(w => w.Id == s.UserId).Fullname,
+                    FolderId = s.FolderId,
+                    CourseId = s.CourseId,
+                    CreatedDate = s.CreatedDate,
+                    ModifiedDate = s.ModifiedDate
+                }).ToList();
 
             return documentsSearch;
         }
@@ -321,6 +379,10 @@ namespace Domain.Services
             var document = _document!.Find(f => f.Id == DocumentId);
             if(document == null)
                 return HttpResponse.Error("Tài liệu không tồn tại.", System.Net.HttpStatusCode.NotFound);
+
+            var documentDriver = await _googleDriverServices.GetInfoById(document.FileId);
+            if(documentDriver == null)
+                return HttpResponse.Error("Thư mục tài liệu không tồn tại hoặc không hợp lệ.", System.Net.HttpStatusCode.NotFound); 
 
             var user = _user.Find(f => f.Id == userMeToken.Id);
 

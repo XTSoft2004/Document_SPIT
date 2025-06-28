@@ -63,9 +63,9 @@ namespace Domain.Services
                 Fullname = user?.Fullname,
             });
         }
-        public async Task<HttpResponse> SetRole(long? userId, string roleName)
+        public async Task<HttpResponse> SetRole(string? username, string roleName)
         {
-            var user = _user!.Find(f => f.Id == userId);
+            var user = _user!.Find(f => f.Username.Contains(username));
             if (user == null)
                 return HttpResponse.OK(message: "Người dùng không tồn tại.");
 

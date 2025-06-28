@@ -21,14 +21,24 @@ namespace Document_SPIT_BE.Controllers
         }
 
         [HttpPost("create")]
-        public async Task<IActionResult> CreateAsync(DocumentCreateRequest documentRequest)
+        public async Task<IActionResult> CreateAsync(DocumentPendingRequest documentPending)
         {
             if (!ModelState.IsValid)
                 return BadRequest(DefaultString.INVALID_MODEL);
 
-            var response = await _services.CreateAsync(documentRequest);
+            var response = await _services.CreatePending(documentPending);
             return response.ToActionResult();
         }
+        [HttpPost("review/{IdDocument}")]
+        public async Task<IActionResult> ReviewAsync(long? IdDocument, DocumentReviewRequest documentReview)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+
+            var response = await _services.ReviewAsync(IdDocument, documentReview);
+            return response.ToActionResult();
+        }
+
         [HttpPatch("{IdDocument}")]
         public async Task<IActionResult> UpdateAsync(long IdDocument, DocumentRequest documentRequest)
         {
@@ -61,12 +71,12 @@ namespace Document_SPIT_BE.Controllers
             return new FileContentResult(data, contentType);
         }
         [HttpGet]
-        public async Task<IActionResult> GetDocuments(string search = "", int pageNumber = -1, int pageSize = -1)
+        public async Task<IActionResult> GetDocuments(string search = "", int pageNumber = -1, int pageSize = -1, string statusDocument = "")
         {
             if (!ModelState.IsValid)
                 return BadRequest(DefaultString.INVALID_MODEL);
 
-            var documents = _services.GetDocuments(search, pageNumber, pageSize, out int totalRecords);
+            var documents = _services.GetDocuments(search, pageNumber, pageSize, out int totalRecords, statusDocument);
 
             var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
             return Ok(ResponseArray.ResponseList(documents, totalRecords, totalPages, pageNumber, pageSize));

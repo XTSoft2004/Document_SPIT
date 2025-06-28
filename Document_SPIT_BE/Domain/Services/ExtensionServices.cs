@@ -5,9 +5,12 @@ using Domain.Common.GoogleDriver.Model.Response;
 using Domain.Entities;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
+using Domain.Model.Request.Course;
+using Domain.Model.Request.Department;
 using Domain.Model.Request.Document;
 using HelperHttpClient;
 using HtmlAgilityPack;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +29,10 @@ namespace Domain.Services
         private readonly IRepositoryBase<Document> _document;
         private readonly IRepositoryBase<Department> _department;
         private readonly IRepositoryBase<Course> _course;
-        public ExtensionServices(IGoogleDriverServices googleDriverServices, IDocumentServices documentServices, IRepositoryBase<User> user, IRepositoryBase<Document> document, IRepositoryBase<DetailDocument> detailDocument, IRepositoryBase<Department> department, IRepositoryBase<Course> course)
+
+        private readonly ICourseServices _courseServices;
+        private readonly IDepartmentServices _departmentServices;
+        public ExtensionServices(IGoogleDriverServices googleDriverServices, IDocumentServices documentServices, IRepositoryBase<User> user, IRepositoryBase<Document> document, IRepositoryBase<DetailDocument> detailDocument, IRepositoryBase<Department> department, IRepositoryBase<Course> course, ICourseServices courseServices, IDepartmentServices departmentServices)
         {
             _googleDriverServices = googleDriverServices;
             _documentServices = documentServices;
@@ -35,11 +41,14 @@ namespace Domain.Services
             _detailDocument = detailDocument;
             _department = department;
             _course = course;
+            _courseServices = courseServices;
+            _departmentServices = departmentServices;
         }
 
         public async Task LoadFolderDriver(string folderId)
         {
             var userAdmin = _user.Find(f => f.Username == "admin"); 
+            var course = _course.Find(f => f.Id == 1);
             List<DriverItemResponse?> itemsInfo = await _googleDriverServices.GetInfoFolder(folderId);
             foreach (DriverItemResponse item in itemsInfo)
             {
@@ -61,6 +70,8 @@ namespace Domain.Services
                         UserId = userAdmin?.Id ?? 0, // Gán người dùng admin
                         User = userAdmin,
                         FolderId = folderId,
+                        Course = course,
+                        CourseId = course?.Id,
                         CreatedDate = DateTime.Now
                     };
                     _document.Insert(documentCreate);
@@ -106,7 +117,7 @@ namespace Domain.Services
             RequestHttpClient _request = new RequestHttpClient();
             _request.SetCookie(cookie, "/", "student.husc.edu.vn");
 
-            string[] courseId = File.ReadAllLines("D:\\Learn_HUSC\\CSharp\\Document_SPIT\\Document_SPIT_BE\\Document_SPIT_BE\\CourseList.txt");
+            string[] courseId = File.ReadAllLines("G:\\Learn_HUSC\\Project_CaNhan\\Document_SPIT\\Document_SPIT_BE\\Document_SPIT_BE\\CourseList.txt");
             foreach(var course in courseId)
             {
                 var response = await _request.GetAsync($"https://student.husc.edu.vn/Subject/Details/{course}/");
@@ -122,36 +133,27 @@ namespace Domain.Services
                         var trinhDoDaoTao = WebUtility.HtmlDecode(trinhdodaotao.InnerText.Trim());
                         Console.WriteLine($"Trình độ đào tạo của khóa học {course}: {trinhDoDaoTao}");
                         // Cập nhật trình độ đào tạo cho khóa học
-                        var department = _department.Find(f => f.Name == trinhDoDaoTao);
-                        if(department == null)
+                        await _departmentServices.CreateAsync(new DepartmentCreateRequest
                         {
-                            Console.WriteLine($"Chưa tìm thấy trình độ đào tạo, tạo mới: {trinhdodaotao}");
-                            department = new Department
-                            {
-                                Code = course.Trim(),
-                                Name = trinhDoDaoTao,
-                                CreatedDate = DateTime.Now
-                            };
-                            _department.Insert(department);
-                            await UnitOfWork.CommitAsync();
-                        }
+                            Name = trinhDoDaoTao,
+                            Code = trinhDoDaoTao.Replace(" ", "_").ToUpper(),
+                        });
                         var tenMon = htmlDoc.DocumentNode.SelectSingleNode("/html/body/div[2]/div[2]/div/div/div/fieldset[1]/div[1]/div/p");
                         if(tenMon != null)
                         {
+                            var department = _department.Find(f => f.Name == trinhDoDaoTao);
+
                             var tenMonHoc = WebUtility.HtmlDecode(tenMon.InnerText.Trim());
                             var courseNew = _course.Find(f => f.Code == course.Trim());
                             if (courseNew == null)
                             {
                                 Console.WriteLine($"Thêm môn {tenMonHoc} vào cơ sở dữ liệu");
-                                courseNew = new Course
+                                await _courseServices.CreateAsync(new CourseCreateRequest
                                 {
                                     Code = course.Trim(),
                                     Name = tenMonHoc,
-                                    DepartmentId = department.Id,
-                                    Department = department,
-                                    CreatedDate = DateTime.Now
-                                };
-                                _course.Insert(courseNew);
+                                    DepartmentId = department.Id
+                                });
                                 await UnitOfWork.CommitAsync();
                             }
                             else

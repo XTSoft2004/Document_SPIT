@@ -17,11 +17,11 @@ namespace Document_SPIT_BE.Controllers
         {
             _services = sevices;
         }
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpPost("set-role")]
-        public async Task<IActionResult> SetRole(long userId, string roleName)
+        public async Task<IActionResult> SetRole(string username, string roleName)
         {
-            var response = await _services!.SetRole(userId, roleName);
+            var response = await _services!.SetRole(username, roleName);
             return response.ToActionResult();
         }
         [HttpGet("me")]

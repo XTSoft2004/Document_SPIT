@@ -1,4 +1,6 @@
 ﻿using Domain.Base.Services;
+using Domain.Common.GoogleDriver.Interfaces;
+using Domain.Common.GoogleDriver.Model.Response;
 using Domain.Common.Http;
 using Domain.Entities;
 using Domain.Interfaces.Repositories;
@@ -18,11 +20,12 @@ namespace Domain.Services
     {
         private readonly IRepositoryBase<Course> _course;
         private readonly IRepositoryBase<Department> _department;
-
-        public CourseServices(IRepositoryBase<Course> course, IRepositoryBase<Department> department)
+        private readonly IGoogleDriverServices _googleDriverServices;
+        public CourseServices(IRepositoryBase<Course> course, IRepositoryBase<Department> department, IGoogleDriverServices googleDriverServices)
         {
             _course = course;
             _department = department;
+            _googleDriverServices = googleDriverServices;
         }
 
         public async Task<HttpResponse> CreateAsync(CourseCreateRequest request)
@@ -43,6 +46,14 @@ namespace Domain.Services
             };
             _course.Insert(course);
             await UnitOfWork.CommitAsync();
+
+            string FOLDER_DOCUMENT = Environment.GetEnvironmentVariable("FOLDER_DOCUMENT");
+            var folderDepartment = await _googleDriverServices.CreateFolder(course.Name, department.FolderId);
+            if (folderDepartment.Data is DriverItemResponse folderData)
+                course.FolderId = folderData.Id;
+            _course.Update(course);
+            await UnitOfWork.CommitAsync();
+
             return HttpResponse.OK(message: "Tạo học phần thành công.");
         }
 
@@ -53,8 +64,7 @@ namespace Domain.Services
                 return HttpResponse.Error(message: "Học phần không tồn tại.");
             course.Code = request.Code ?? course.Code;
             course.Name = request.Name ?? course.Name;
-            course.FolderId_Contribute = request.FolderId_Contribute ?? course.FolderId_Contribute;
-            course.FolderId_Base = request.FolderId_Base ?? course.FolderId_Base;
+            course.FolderId = request.FolderId ?? course.FolderId;
             if (request.DepartmentId.HasValue)
             {
                 var department = _department.Find(f => f.Id == request.DepartmentId.Value);
@@ -105,8 +115,7 @@ namespace Domain.Services
                 Id = c.Id,
                 Code = c.Code,
                 Name = c.Name,
-                FolderId_Contribute = c.FolderId_Contribute,
-                FolderId_Base = c.FolderId_Base,
+                FolderId = c.FolderId,
                 DepartmentId = c.DepartmentId,
             }).ToList();    
 

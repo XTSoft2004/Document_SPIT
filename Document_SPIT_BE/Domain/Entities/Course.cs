@@ -13,8 +13,7 @@ namespace Domain.Entities
         public string? Code { get; set; }
 
         public string? Name { get; set; }
-        public string? FolderId_Contribute { get; set; }
-        public string? FolderId_Base { get; set; }
+        public string? FolderId { get; set; }
 
         public long? DepartmentId { get; set; }
         [ForeignKey(nameof(DepartmentId))]
@@ -22,4 +21,4 @@ namespace Domain.Entities
 
         public ICollection<Document>? Documents { get; set; }
     }
-}
+} 

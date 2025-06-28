@@ -16,7 +16,7 @@ namespace Domain.Interfaces.Services
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        Task<HttpResponse> SetRole(long? userId, string roleName);
+        Task<HttpResponse> SetRole(string username, string roleName);
         /// <summary>
         /// Lấy thông của người dùng hiện tại
         /// </summary>

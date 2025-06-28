@@ -11,8 +11,7 @@ namespace Domain.Model.Response.Course
         public long? Id { get; set; }
         public string? Code { get; set; }
         public string? Name { get; set; }
-        public string? FolderId_Contribute { get; set; }
-        public string? FolderId_Base { get; set; }
+        public string? FolderId { get; set; }
         public long? DepartmentId { get; set; }
     }
 }

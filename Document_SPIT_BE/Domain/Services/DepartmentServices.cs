@@ -1,5 +1,7 @@
 ﻿using Domain.Base.Services;
 using Domain.Common;
+using Domain.Common.GoogleDriver.Interfaces;
+using Domain.Common.GoogleDriver.Model.Response;
 using Domain.Common.Http;
 using Domain.Entities;
 using Domain.Interfaces.Repositories;
@@ -17,10 +19,13 @@ namespace Domain.Services
     public class DepartmentServices : BaseService, IDepartmentServices
     {
         private readonly IRepositoryBase<Department> _department;
-
-        public DepartmentServices(IRepositoryBase<Department> department)
+        private readonly IGoogleDriverServices _googleDriverServices;
+        public DepartmentServices(IRepositoryBase<Department> department, IGoogleDriverServices googleDriverServices)
         {
             _department = department;
+            _googleDriverServices = googleDriverServices;
+            var envPath = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.Parent.FullName, ".env");
+            DotNetEnv.Env.Load(envPath);
         }
         public async Task<HttpResponse> CreateAsync(DepartmentCreateRequest request)
         {
@@ -34,6 +39,14 @@ namespace Domain.Services
                 Name = request.Name,
             };
             _department.Insert(department);
+            await UnitOfWork.CommitAsync();
+
+            // Tạo thư mục trên Google Drive nếu có FolderId
+            string FOLDER_DOCUMENT = Environment.GetEnvironmentVariable("FOLDER_DOCUMENT");
+            var folderDepartment = await _googleDriverServices.CreateFolder(department.Name, FOLDER_DOCUMENT);
+            if (folderDepartment.Data is DriverItemResponse folderData)
+                department.FolderId = folderData.Id;
+            _department.Update(department);
             await UnitOfWork.CommitAsync();
 
             return HttpResponse.OK(message: "Tạo khoa thành công.");
