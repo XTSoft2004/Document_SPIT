@@ -82,5 +82,23 @@ namespace Document_SPIT_BE.Controllers
             var response = await _services!.GetProfileToken();
             return response.ToActionResult();
         }
+        [HttpGet("stars")]
+        public async Task<IActionResult> GetStars()
+        {
+            var response = await _services!.getStars();
+            return response.ToActionResult();
+        }
+        [HttpPost("change-status-star/{documentId}")]
+        public async Task<IActionResult> ChangeStatusStar(long documentId)
+        {
+            var response = await _services!.ChangeStatusStar(documentId);
+            return response.ToActionResult();
+        }
+        [HttpGet("recent-upload")]
+        public async Task<IActionResult> GetRecentUpload()
+        {
+            var response = await _services!.GetRecentUpload();
+            return response.ToActionResult();
+        }
     }
 }

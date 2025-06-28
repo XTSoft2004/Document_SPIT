@@ -101,7 +101,6 @@ namespace Document_SPIT_BE.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(DefaultString.INVALID_MODEL);
             var document = await _services.GetLinkView(documentId);
-          
             return document.ToActionResult();
         }
         [HttpGet("view/{code}")]
@@ -117,6 +116,13 @@ namespace Document_SPIT_BE.Controllers
 
             Response.Headers["Content-Disposition"] = $"inline; filename=\"{fileName}\"";
             return new FileContentResult(data, contentType);
+        [HttpGet("recent/{number}")]
+        public async Task<IActionResult> GetRecentDocuments(int number)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+            var response = await _services.GetRecentDocuments(number);
+            return response.ToActionResult();
         }
     }
 }
