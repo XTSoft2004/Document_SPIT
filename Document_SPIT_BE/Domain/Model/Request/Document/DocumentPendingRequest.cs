@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace Domain.Model.Request.Document
 {
-    public class DocumentCreateRequest
+    public class DocumentPendingRequest
     {
         public string? name { get; set; }
         public string? fileName { get; set; }
         public string? base64String { get; set; }
-        public string? folderId { get; set; }
+        public long? courseId { get; set; }
     }
 }

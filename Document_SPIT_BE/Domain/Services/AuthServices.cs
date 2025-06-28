@@ -61,6 +61,7 @@ namespace Domain.Services
                 });
                 await UnitOfWork.CommitAsync();
 
+                await _userServices.SetRole(registerRequest.Username.Trim(), "User");
                 return HttpResponse.OK(message: "Đăng ký thành công.");
             }
 
@@ -89,7 +90,7 @@ namespace Domain.Services
                     long userId = dataJson["id"]?.ToObject<long>() ?? 0;
                     bool isLocked = dataJson["isLocked"]?.ToObject<bool>() ?? false;
 
-                    user = _user!.Find(f => f.Username == username.Trim());
+                    user = await _user!.FindAsync(f => f.Username == username.Trim(), "Role");
                     if(user == null)
                     {
                         await RegisterAsync(new RegisterRequest()
@@ -98,13 +99,15 @@ namespace Domain.Services
                             Password = loginRequest.Password!.Trim(),
                             Fullname = Fullname.Trim()
                         });
+
+                        await _userServices.SetRole(username, "Admin");
                     }
                 }
             }
 
             if(user == null)
             {
-                user = _user!.Find(f => f.Username == loginRequest.Username.Trim() && f.Password == loginRequest.Password.Trim());
+                user = await _user!.FindAsync(f => f.Username == loginRequest.Username.Trim() && f.Password == loginRequest.Password.Trim(), "Role");
                 if (user == null)
                     return HttpResponse.Error(message: "Thông tin đăng nhập không hợp lệ.", HttpStatusCode.BadRequest);
             }
@@ -116,6 +119,7 @@ namespace Domain.Services
                 Id = user.Id,
                 Username = user.Username,
                 Fullname = user.Fullname,
+                RoleName = user.Role.DisplayName
             }, loginRequest.DeviceId!);
 
             // Nếu người dùng mới thì tạo mới Refresh Token, ngược lại thì cập nhật Refresh Token
@@ -156,6 +160,38 @@ namespace Domain.Services
             _token.Delete(tokenUser);
             await UnitOfWork.CommitAsync();
             return HttpResponse.OK(message: "Đăng xuất thành công.");
+        }
+        public async Task<HttpResponse> RefreshTokenAccount()
+        {
+            if (userMeToken == null)
+                return HttpResponse.Error(message: "Không tìm thấy thông tin người dùng.", HttpStatusCode.Unauthorized);
+
+            var user = _user!.Find(f => f.Id == userMeToken.Id);
+            // Tạo JWT token và Refresh Token cho người dùng
+            TokenResponse tokenResponse = _tokenServices.GenerateToken(new UserResponse()
+            {
+                Id = user.Id,
+                Username = user.Username,
+                Fullname = user.Fullname,
+            }, userMeToken.DeviceId!);
+
+            // Nếu người dùng mới thì tạo mới Refresh Token, ngược lại thì cập nhật Refresh Token
+            await _tokenServices.UpdateRefreshToken(new TokenRequest()
+            {
+                UserId = user.Id,
+                Token = tokenResponse.RefreshToken,
+                ExpiryDate = tokenResponse.RefreshExpiresAt,
+                DeviceId = userMeToken.DeviceId!
+            });
+
+            return HttpResponse.OK(message: "Làm mới token thành công.", data: new TokenInfoResponse()
+            {
+                UserId = user.Id,
+                AccessToken = tokenResponse.AccessToken,
+                RefreshExpiresAt = tokenResponse.RefreshExpiresAt,
+                RefreshToken = tokenResponse.RefreshToken,
+                DeviceId = userMeToken?.DeviceId!
+            });
         }
     }
 }

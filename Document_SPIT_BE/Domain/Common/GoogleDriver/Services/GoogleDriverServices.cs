@@ -78,7 +78,7 @@ namespace Domain.Common.GoogleDriver.Services
             string accessToken = await GetAccessToken();
             string mimeType = AppDictionary.GetMimeTypeDriver(uploadFileRequest.FileName);
 
-            var typeFile = uploadFileRequest.FileName.Split('.')[1];
+            var typeFile = uploadFileRequest.FileName.Split('.')[uploadFileRequest.FileName.Split('.').Length - 1];
             if (typeFile == "docx" || typeFile == "doc")
                 mimeType = "application/vnd.google-apps.document";
 
@@ -125,25 +125,56 @@ namespace Domain.Common.GoogleDriver.Services
                 return null;
             }
         }
-        private async Task CopyConvertDocs(UploadFileResponse uploadFileResponse)
+        public async Task<DriveFileItem?> GetInfo(string fileId)
         {
             await GetAccessToken();
-            var jsonData = new Dictionary<string, string>
-            {
-                { "name", uploadFileResponse.name },
-                { "mimeType", "application/vnd.google-apps.document" } // Chuyển đổi sang Google Docs
-            };
-            var response = await _request.PostAsync($"https://www.googleapis.com/drive/v3/files/{uploadFileResponse.id}/copy", jsonData);
+            var response = await _request.GetAsync($"https://www.googleapis.com/drive/v3/files/{fileId}?fields=id,name,mimeType,parents");
             if (response.IsSuccessStatusCode)
             {
-                Console.WriteLine("✅ Copy file thành công!");
-                //var response_DELETE = await _request.DeleteAsync($"https://www.googleapis.com/drive/v3/files/${uploadFileResponse.id}");
+                var result = _request.Content;
+                var fileInfo = JsonConvert.DeserializeObject<DriveFileItem>(result);
+                return fileInfo;
             }
-            else
+            return null;
+        }
+        public async Task<DriveFileItem?> CopyFile(string fileId, string folderId)
+        {
+            await GetAccessToken();
+            var infoFile = await GetInfo(fileId);
+            var jsonData = new
             {
-                Console.WriteLine("❌ Lỗi khi copy file:");
-                Console.WriteLine(await response.Content.ReadAsStringAsync());
+                name = infoFile?.Name,
+                mimeType = infoFile?.MimeType,
+            };
+            var response = await _request.PostAsync($"https://www.googleapis.com/drive/v3/files/{fileId}/copy?fields=id,name,mimeType,parents", jsonData);
+            if (response.IsSuccessStatusCode)
+            {
+                var result = _request.Content;
+                var fileInfo = JsonConvert.DeserializeObject<DriveFileItem>(result);
+                return fileInfo;
             }
+            return null;
+        }
+        public async Task<bool> CutFile(string fileId, string folderNewId, string folderOldId)
+        {
+            await GetAccessToken();
+            var response = await _request.PatchAsync($"https://www.googleapis.com/drive/v3/files/{fileId}?addParents={folderNewId}&removeParents={folderOldId}&fields=id,name,mimeType,parents", null);
+            if (response.IsSuccessStatusCode)
+            {
+                var result = _request.Content;
+                return true;    
+            }
+            return false;
+        }
+        public async Task<bool> DeleteFile(string fileId)
+        {
+            await GetAccessToken();
+            var response = await _request.DeleteAsync($"https://www.googleapis.com/drive/v3/files/{fileId}");
+            if (response.IsSuccessStatusCode)
+            {
+                return true;
+            }
+            return false;
         }
         public async Task<string> GetAccessToken()
         {
@@ -184,7 +215,7 @@ namespace Domain.Common.GoogleDriver.Services
                 return null;
             }
         }
-        private async Task<FileInfoResponse?> GetInfoById(string id)
+        public async Task<FileInfoResponse?> GetInfoById(string id)
         {
             await GetAccessToken();
             var response = await _request.GetAsync($"https://www.googleapis.com/drive/v3/files/{id}?fields=id,name,mimeType,webContentLink,webViewLink,thumbnailLink");
@@ -235,7 +266,7 @@ namespace Domain.Common.GoogleDriver.Services
         public async Task<List<DriverItemResponse?>?> GetInfoFolder(string folderId, bool isOnlyFolder = false)
         {
             await GetAccessToken();
-            var response = await _request.GetAsync($"https://www.googleapis.com/drive/v3/files?q='{folderId}'+in+parents&fields=files(id,name,webViewLink,webContentLink,createdTime,md5Checksum)&orderBy=createdTime");
+            var response = await _request.GetAsync($"https://www.googleapis.com/drive/v3/files?q='{folderId}'+in+parents+and+trashed=false&fields=files(id,name,webViewLink,webContentLink,createdTime,md5Checksum)&orderBy=createdTime");
             if (response.IsSuccessStatusCode)
             {
                 var result = _request.Content;
@@ -255,8 +286,9 @@ namespace Domain.Common.GoogleDriver.Services
         public async Task<HttpResponse> CreateFolder(string folderName, string parentId = "")
         {
             var listFolder = await GetInfoFolder(parentId, true);
-            if (listFolder != null && listFolder.Any(f => f?.Name == folderName && f?.IsFolder == true))
-                return HttpResponse.Error("Thư mục đã tồn tại trong Google Drive.");
+            var existingFolder = listFolder?.FirstOrDefault(f => f?.Name == folderName && f?.IsFolder == true);
+            if (existingFolder != null)
+                return HttpResponse.OK(message: "Thư mục đã tồn tại trong Google Drive.", data: existingFolder);
 
             var jsonData = new
             {
@@ -267,7 +299,13 @@ namespace Domain.Common.GoogleDriver.Services
 
             var response = await _request.PostAsync($"https://www.googleapis.com/drive/v3/files", jsonData);
             if (response.IsSuccessStatusCode)
-                return HttpResponse.OK("Tạo thư mục thành công.");
+            {
+                var jsonResult = JObject.Parse(_request.Content);
+                return HttpResponse.OK(message: "Tạo thư mục thành công.", data: new DriverItemResponse()
+                {
+                    Id = jsonResult["id"]?.ToString() ?? string.Empty,
+                });
+            }
 
             return HttpResponse.Error("Lỗi khi tạo thư mục trong Google Drive.");
         }

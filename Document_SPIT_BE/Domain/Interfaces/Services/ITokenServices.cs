@@ -59,5 +59,10 @@ namespace Domain.Interfaces.Services
         /// </summary>
         /// <returns></returns>
         UserTokenResponse? GetTokenBrowser();
+        /// <summary>
+        /// Lấy token từ Header Authorization
+        /// </summary>
+        /// <returns></returns>
+        string GetTokenFromHeader();
     }
 }

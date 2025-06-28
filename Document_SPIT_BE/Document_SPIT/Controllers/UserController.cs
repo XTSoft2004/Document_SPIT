@@ -1,12 +1,14 @@
 ﻿using Domain.Common.Http;
 using Domain.Interfaces.Services;
 using Domain.Model.Request.User;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Document_SPIT_BE.Controllers
 {
     [Route("user")]
     [ApiController]
+    [Authorize]
     public class UserController : Controller
     {
         private readonly IUserServices? _services;
@@ -15,11 +17,11 @@ namespace Document_SPIT_BE.Controllers
         {
             _services = sevices;
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost("set-role")]
-        public async Task<IActionResult> SetRole(long userId, string roleName)
+        public async Task<IActionResult> SetRole(string username, string roleName)
         {
-            var response = await _services!.SetRole(userId, roleName);
+            var response = await _services!.SetRole(username, roleName);
             return response.ToActionResult();
         }
         [HttpGet("me")]
@@ -47,6 +49,7 @@ namespace Document_SPIT_BE.Controllers
 
             return Ok(ResponseArray.ResponseList(users, totalRecords, totalPages, pageNumber, pageSize));
         }
+        [Authorize(Roles = "Admin")]
         [HttpPatch("{Id}")]
         public async Task<IActionResult> UpdateAsync(long Id, UserRequest userRequest)
         {
@@ -56,12 +59,14 @@ namespace Document_SPIT_BE.Controllers
             var response = await _services!.UpdateAsync(Id, userRequest);
             return response.ToActionResult();
         }
+        [Authorize(Roles = "Admin")]
         [HttpGet("ban-account/{userId}")]
         public async Task<IActionResult> BanAccount(long userId)
         {
             var response = await _services!.BanAccount(userId);
             return response.ToActionResult();
         }
+        [Authorize(Roles = "Admin")]
         [HttpPost("create")]
         public async Task<IActionResult> CreateAsync(UserCreateRequest userRequest)
         {
@@ -70,7 +75,12 @@ namespace Document_SPIT_BE.Controllers
 
             var response = await _services!.CreateAsync(userRequest);
             return response.ToActionResult();
-
+        }
+        [HttpGet("profile")]
+        public async Task<IActionResult> GetProfile()
+        {
+            var response = await _services!.GetProfileToken();
+            return response.ToActionResult();
         }
     }
 }

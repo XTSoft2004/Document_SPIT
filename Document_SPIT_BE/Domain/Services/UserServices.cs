@@ -1,9 +1,11 @@
 ﻿using Domain.Base.Services;
+using Domain.Common;
 using Domain.Common.Http;
 using Domain.Entities;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
 using Domain.Model.Request.User;
+using Domain.Model.Response.Token;
 using Domain.Model.Response.User;
 using HelperHttpClient;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
@@ -38,6 +40,8 @@ namespace Domain.Services
             var user = _user!.Find(f => f.Id == idUser);
             if (user == null)
                 return HttpResponse.Error(message: "Người dùng không tồn tại.", HttpStatusCode.NotFound);
+            else if(userMeToken.RoleName != "Admin" && userMeToken.Id != idUser)
+                return HttpResponse.Error(message: "Bạn không có quyền cập nhật thông tin người dùng này.", HttpStatusCode.Forbidden);
 
             user.Fullname = userRequest.Fullname ?? user.Fullname;
             user.Password = !string.IsNullOrEmpty(userRequest.Password) ? userRequest.Password : user.Password;
@@ -51,7 +55,7 @@ namespace Domain.Services
             if (userMeToken == null)
                 return HttpResponse.Error(message: "Không tìm thấy thông tin người dùng.", HttpStatusCode.Unauthorized);
 
-            var user = _user!.Find(f => f.Id == userMeToken.Id);
+            var user = await _user!.FindAsync(f => f.Id == userMeToken.Id, "Role");
             if (user == null)
                 return HttpResponse.Error(message: "Người dùng không tồn tại.", HttpStatusCode.NotFound);
 
@@ -60,11 +64,12 @@ namespace Domain.Services
                 Id = user?.Id,
                 Username = user?.Username,
                 Fullname = user?.Fullname,
+                RoleName = user.Role != null ? user.Role.DisplayName : string.Empty
             });
         }
-        public async Task<HttpResponse> SetRole(long? userId, string roleName)
+        public async Task<HttpResponse> SetRole(string? username, string roleName)
         {
-            var user = _user!.Find(f => f.Id == userId);
+            var user = _user!.Find(f => f.Username.Contains(username));
             if (user == null)
                 return HttpResponse.OK(message: "Người dùng không tồn tại.");
 
@@ -121,7 +126,7 @@ namespace Domain.Services
                 Username = s.Username,
                 Fullname = s.Fullname,
                 IsLocked = s.isLocked,
-                RoleName = s.Role != null ? s.Role.DisplayName : "Chưa phân quyền"
+                RoleName = s.Role != null ? s.Role.DisplayName : null
             }).ToList();
 
             return usersSearch;
@@ -160,5 +165,27 @@ namespace Domain.Services
                 ;
             return HttpResponse.OK(message: "Tạo người dùng thành công.");
         }
-    } 
+        public async Task<HttpResponse> GetProfileToken()
+        {
+            var userResponse = _tokenServices.GetTokenBrowser();
+            if(userResponse == null)
+                return HttpResponse.Error(message: "Không tìm thấy thông tin người dùng từ token.", HttpStatusCode.Unauthorized);
+
+            string refeshtoken = _tokenServices.GetRefreshToken(userResponse.Id);
+            var tokenRF = _tokenServices.GetInfoFromToken(refeshtoken);
+
+            var user = _user!.Find(f => f.Id == userResponse.Id);
+            return HttpResponse.OK(message: "Lấy thông tin người dùng thành công.", data: new TokenInfoResponse()
+            {
+                UserId = userResponse.Id,
+                AccessToken = _tokenServices.GetTokenFromHeader(),
+                RefreshExpiresAt = tokenRF.ExpiryDate,
+                RefreshToken = refeshtoken,
+                ExpiresAt = userResponse.ExpiryDate,
+                DeviceId = userResponse.DeviceId,
+                IsLocked = user.isLocked,
+                RoleName = _role!.Find(f => f.Id == user.RoleId)?.DisplayName ?? "",
+            });
+        }
+    }
 }

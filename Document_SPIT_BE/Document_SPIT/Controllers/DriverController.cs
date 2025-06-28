@@ -70,7 +70,6 @@ namespace Document_SPIT_BE.Controllers
             var (data, contentType, fileName) = result.Value;
             
             Response.Headers["Content-Disposition"] = $"inline; filename=\"{fileName}\"";
-            Response.Headers["Content-Disposition"] = $"inline;";
             return new FileContentResult(data, contentType);
         }
         [HttpPost("upload")]

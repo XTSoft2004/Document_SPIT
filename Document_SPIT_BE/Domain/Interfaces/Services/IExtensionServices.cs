@@ -10,5 +10,6 @@ namespace Domain.Interfaces.Services
     {
         Task LoadFolderDriver(string folderId);
         Task LoadModifiedDate();
+        Task LoadDepartmentDocument();
     }
 }

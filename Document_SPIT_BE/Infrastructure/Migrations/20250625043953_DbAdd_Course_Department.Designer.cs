@@ -4,6 +4,7 @@ using Infrastructure.ContextDB;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250625043953_DbAdd_Course_Department")]
+    partial class DbAdd_Course_Department
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -75,7 +78,13 @@ namespace Infrastructure.Migrations
                     b.Property<long?>("DepartmentId")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("FolderId")
+                    b.Property<long?>("DocumentId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("FolderId_Base")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FolderId_Contribute")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ModifiedBy")
@@ -90,6 +99,8 @@ namespace Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("DepartmentId");
+
+                    b.HasIndex("DocumentId");
 
                     b.ToTable("Courses");
                 });
@@ -172,9 +183,6 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<long?>("CourseId")
-                        .HasColumnType("bigint");
-
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
 
@@ -218,8 +226,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CourseId");
 
                     b.HasIndex("DetaiDocumentId");
 
@@ -606,7 +612,13 @@ namespace Infrastructure.Migrations
                         .WithMany("Courses")
                         .HasForeignKey("DepartmentId");
 
+                    b.HasOne("Domain.Entities.Document", "Document")
+                        .WithMany("Courses")
+                        .HasForeignKey("DocumentId");
+
                     b.Navigation("Department");
+
+                    b.Navigation("Document");
                 });
 
             modelBuilder.Entity("Domain.Entities.DetailDocument", b =>
@@ -620,10 +632,6 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Document", b =>
                 {
-                    b.HasOne("Domain.Entities.Course", "Course")
-                        .WithMany("Documents")
-                        .HasForeignKey("CourseId");
-
                     b.HasOne("Domain.Entities.DetailDocument", "DetaiDocument")
                         .WithMany()
                         .HasForeignKey("DetaiDocumentId");
@@ -631,8 +639,6 @@ namespace Infrastructure.Migrations
                     b.HasOne("Domain.Entities.User", "User")
                         .WithMany("Documents")
                         .HasForeignKey("UserId");
-
-                    b.Navigation("Course");
 
                     b.Navigation("DetaiDocument");
 
@@ -740,11 +746,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("DocumentCategories");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Course", b =>
-                {
-                    b.Navigation("Documents");
-                });
-
             modelBuilder.Entity("Domain.Entities.Department", b =>
                 {
                     b.Navigation("Courses");
@@ -752,6 +753,8 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Document", b =>
                 {
+                    b.Navigation("Courses");
+
                     b.Navigation("DocumentCategories");
 
                     b.Navigation("Reports");

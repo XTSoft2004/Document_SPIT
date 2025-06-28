@@ -21,14 +21,24 @@ namespace Document_SPIT_BE.Controllers
         }
 
         [HttpPost("create")]
-        public async Task<IActionResult> CreateAsync(DocumentCreateRequest documentRequest)
+        public async Task<IActionResult> CreateAsync(DocumentPendingRequest documentPending)
         {
             if (!ModelState.IsValid)
                 return BadRequest(DefaultString.INVALID_MODEL);
 
-            var response = await _services.CreateAsync(documentRequest);
+            var response = await _services.CreatePending(documentPending);
             return response.ToActionResult();
         }
+        [HttpPost("review/{IdDocument}")]
+        public async Task<IActionResult> ReviewAsync(long? IdDocument, DocumentReviewRequest documentReview)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+
+            var response = await _services.ReviewAsync(IdDocument, documentReview);
+            return response.ToActionResult();
+        }
+
         [HttpPatch("{IdDocument}")]
         public async Task<IActionResult> UpdateAsync(long IdDocument, DocumentRequest documentRequest)
         {
@@ -61,14 +71,12 @@ namespace Document_SPIT_BE.Controllers
             return new FileContentResult(data, contentType);
         }
         [HttpGet]
-        public async Task<IActionResult> GetDocuments(string search = "", int pageNumber = -1, int pageSize = -1)
+        public async Task<IActionResult> GetDocuments(string search = "", int pageNumber = -1, int pageSize = -1, string statusDocument = "")
         {
             if (!ModelState.IsValid)
                 return BadRequest(DefaultString.INVALID_MODEL);
 
-            var documents = _services.GetDocuments(search, pageNumber, pageSize, out int totalRecords);
-            if (documents == null || !documents.Any())
-                return NotFound(new { Message = "Danh sách tài liệu trống !!!" });
+            var documents = _services.GetDocuments(search, pageNumber, pageSize, out int totalRecords, statusDocument);
 
             var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
             return Ok(ResponseArray.ResponseList(documents, totalRecords, totalPages, pageNumber, pageSize));
@@ -79,6 +87,29 @@ namespace Document_SPIT_BE.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(DefaultString.INVALID_MODEL);
             var result = await _services.GetPreviewByDocumetId(IdDocument);
+            if (result == null)
+                return NotFound(new { Message = "Không tồn tại file, vui lòng kiểm tra lại" });
+
+            var (data, contentType, fileName) = result.Value;
+
+            Response.Headers["Content-Disposition"] = $"inline; filename=\"{fileName}\"";
+            return new FileContentResult(data, contentType);
+        }
+        [HttpGet("{documentId}")]
+        public async Task<IActionResult> GetLinkViewId(long documentId)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+            var document = await _services.GetLinkView(documentId);
+          
+            return document.ToActionResult();
+        }
+        [HttpGet("view/{code}")]
+        public async Task<IActionResult> ViewDocumentByCode(string code)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+            var result = await _services.ViewOnce(code);
             if (result == null)
                 return NotFound(new { Message = "Không tồn tại file, vui lòng kiểm tra lại" });
 

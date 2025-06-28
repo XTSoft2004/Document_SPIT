@@ -59,5 +59,32 @@ namespace Domain.Common.GoogleDriver.Interfaces
         /// <param name="folderId"></param>
         /// <returns></returns>
         Task<List<TreeDocumentResponse>> GetTreeDocument(string folderId);
+        /// <summary>
+        /// Sao chép file từ Google Drive vào một thư mục khác
+        /// </summary>
+        /// <param name="fileId"></param>
+        /// <param name="folderId"></param>
+        /// <returns></returns>
+        Task<DriveFileItem?> CopyFile(string fileId, string folderId);
+        /// <summary>
+        /// Cắt file từ một thư mục này sang thư mục khác, đồng thời xoá file cũ
+        /// </summary>
+        /// <param name="fileId"></param>
+        /// <param name="folderNewId"></param>
+        /// <param name="folderOldId"></param>
+        /// <returns></returns>
+        Task<bool> CutFile(string fileId, string folderNewId, string folderOldId);
+        /// <summary>
+        /// Xoá file khỏi Google Drive
+        /// </summary>
+        /// <param name="fileId"></param>
+        /// <returns></returns>
+        Task<bool> DeleteFile(string fileId);
+        /// <summary>
+        /// Lấy thông tin file theo ID
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task<FileInfoResponse?> GetInfoById(string id);
     }
 }

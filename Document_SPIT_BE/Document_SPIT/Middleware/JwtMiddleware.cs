@@ -16,32 +16,30 @@ namespace Server_Manager.Middleware
         private readonly RequestDelegate _next;
         private readonly string _secretKey;
         private readonly ITokenServices _tokenServices;
-        //private readonly IUserServices _userServices;
-        //public JwtMiddleware(RequestDelegate next, IConfiguration config, ITokenServices tokenServices, IUserServices userServices)
-        //{
-        //    _next = next;
-        //    _secretKey = config["JwtSettings:Secret"];
-        //    _tokenServices = tokenServices;
-        //    _userServices = userServices;
-        //}
+        private readonly IUserServices _userServices;
+        public JwtMiddleware(RequestDelegate next, IConfiguration config, ITokenServices tokenServices, IUserServices userServices)
+        {
+            _next = next;
+            _secretKey = config["JwtSettings:Secret"];
+            _tokenServices = tokenServices;
+            _userServices = userServices;
+        }
 
         public async Task Invoke(HttpContext context)
         {
             var bypassRoutes = new[]
             {
                 "/auth/login",
+                "/auth/register",
                 "/auth/sign-up",
                 "/auth/refresh-token",
-                "/extension/upload",
-                "/extension/image",
-                "/extension/base64",
-                "/driver/upload",
-                "/driver/preview",
-                "/user/profile",
+                "/document/view",
+                "/extension/",
                 "/server",
             };
 
-            if (bypassRoutes.Contains(context.Request.Path.Value.ToLower()))
+            var requestPath = context.Request.Path.Value?.ToLower() ?? string.Empty;
+            if (bypassRoutes.Any(route => requestPath.Contains(route)))
             {
                 await _next(context);
                 return;
@@ -81,7 +79,7 @@ namespace Server_Manager.Middleware
 
                 await _next(context);
 
-                if (context.Response.StatusCode == (int)HttpStatusCode.Unauthorized)
+                if (context.Response.StatusCode == (int)StatusCodes.Status403Forbidden)
                 {
                     context.Response.StatusCode = StatusCodes.Status403Forbidden;
                     await context.Response.WriteAsJsonAsync(new { Message = "Bạn không có quyền truy cập tài nguyên này!" });
