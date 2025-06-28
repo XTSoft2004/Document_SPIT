@@ -25,7 +25,7 @@ interface GridDocumentProps {
 export default function GridDocument({ data, content, slug, path, treeData, mobileSearchResults }: GridDocumentProps) {
     const router = useRouter();
     const url = useMemo(() => slug.join('/'), [slug]);
-    const [previewFile, setPreviewFile] = useState<{ fileName: string, folderId: string } | null>(null);
+    const [previewFile, setPreviewFile] = useState<{ fileName: string, documentId: number } | null>(null);
     const [loading, setLoading] = useState(false);
     const [showTree, setShowTree] = useState(true);
     const [filtered, setFiltered] = useState<IDriveItem[] | null>(null);
@@ -42,7 +42,7 @@ export default function GridDocument({ data, content, slug, path, treeData, mobi
 
     const allItems = useMemo(() => flattenData(data), [data]);
 
-    const getCurrentFolderId = useCallback(() => {
+    const getCurrentfolderId = useCallback(() => {
         if (path.length === 0) return '';
         let current = data;
         let folderId = '';
@@ -61,7 +61,7 @@ export default function GridDocument({ data, content, slug, path, treeData, mobi
 
 
     useEffect(() => {
-        const currentFolderId = getCurrentFolderId();
+        const currentFolderId = getCurrentfolderId();
         setSelectedKeys(currentFolderId ? [currentFolderId] : []);
 
 
@@ -75,7 +75,7 @@ export default function GridDocument({ data, content, slug, path, treeData, mobi
             }
         }
         setExpandedKeys(expandIds);
-    }, [path, getCurrentFolderId, data]);
+    }, [path, getCurrentfolderId, data]);
 
     const handleSetMode = useCallback((m: 'list' | 'preview') => {
         setMode(m);
@@ -89,7 +89,7 @@ export default function GridDocument({ data, content, slug, path, treeData, mobi
         if (!node) return;
 
         if (node.isLeaf) {
-            setPreviewFile({ fileName: node.title, folderId: node.key });
+            setPreviewFile({ fileName: node.title, documentId: node.key });
         } else {
 
             router.push(`/document/${node.path.join('/')}`);
@@ -183,14 +183,14 @@ export default function GridDocument({ data, content, slug, path, treeData, mobi
                         <GridDocumentList
                             content={displayContent}
                             url={url}
-                            onPreviewFile={file => setPreviewFile({ fileName: file.name, folderId: file.folderId })}
+                            onPreviewFile={file => setPreviewFile({ fileName: file.name, documentId: file.documentId })}
                             onFolderClick={() => setLoading(true)}
                         />
                     ) : (
                         <GridDocumentPreview
                             content={displayContent}
                             url={url}
-                            onPreviewFile={file => setPreviewFile({ fileName: file.name, folderId: file.folderId })}
+                            onPreviewFile={file => setPreviewFile({ fileName: file.name, documentId: file.documentId })}
                             onFolderClick={() => setLoading(true)}
                             loading={loading}
                         />
@@ -199,7 +199,7 @@ export default function GridDocument({ data, content, slug, path, treeData, mobi
                         open={!!previewFile}
                         onClose={() => setPreviewFile(null)}
                         fileName={previewFile?.fileName || ''}
-                        folderId={previewFile?.folderId || ''}
+                        documentId={previewFile?.documentId || 0}
                     />
                 </div>
             </div>

@@ -29,17 +29,19 @@ export interface IFolder {
 }
 
 export interface IDriveResponse {
+  documentId: number
   name: string
-  totalDownloads?: number
-  totalViews?: number
+  totalDownloads: number
+  totalViews: number
   folderId: string
   isFolder: boolean
   children: IDriveResponse[]
 }
 export interface IDriveItem {
+  documentId: number
   name: string
-  totalDownloads?: number
-  totalViews?: number
+  totalDownloads: number
+  totalViews: number
   folderId: string
   isFolder: boolean
 }

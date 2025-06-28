@@ -39,7 +39,7 @@ export default function DocumentPageClient({
 
     return (
         <>
-            <div className="sticky top-0 z-10 shadow-sm">
+            <div className="sticky top-0 z-10">
                 {isMobile ? (
                     <HeaderDocument
                         treeData={treeData}
