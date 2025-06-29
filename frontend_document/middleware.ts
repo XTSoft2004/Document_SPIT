@@ -41,40 +41,43 @@ const getMe = async () => {
   } as IShowResponse<IUserResponse>
 }
 
+const redirectTo = (url: string, request: NextRequest) => {
+  return NextResponse.redirect(new URL(url, request.url))
+}
+
 export async function middleware(request: NextRequest) {
   console.log('server >> middleware', request.nextUrl.pathname)
 
+  const userResponse = await getMe()
+  const isLocked = userResponse.data.islocked
+  const nextUrl = request.nextUrl.pathname
+
   // Kiểm tra xem người dùng đã đăng nhập hay chưa
-  if (request.nextUrl.pathname.startsWith('/auth')) {
+  if (nextUrl.startsWith('/auth')) {
     // Nếu đã đăng nhập, chuyển hướng đến trang chủ
     const accessToken = cookies().get('accessToken')?.value
+
     if (accessToken) {
-      return NextResponse.redirect(new URL('/', request.url))
-    }
+      // Kiểm tra xem người dùng có bị khóa hay không
+      if (isLocked === true) return redirectTo('/ban', request)
+      else return redirectTo('/', request)
+    } else return NextResponse.next()
   }
 
-  if (request.nextUrl.pathname.startsWith('/dashboard')) {
+  if (nextUrl.startsWith('/ban')) {
+    if (isLocked !== true) return redirectTo('/', request)
+  }
+
+  if (nextUrl.startsWith('/admin')) {
     const accessToken = cookies().get('accessToken')?.value
-    if (!accessToken) {
-      return NextResponse.redirect(new URL('/auth', request.url))
-    }
+    if (!accessToken) return redirectTo('/auth', request)
 
-    // Lấy thông tin người dùng từ API
-    const userResponse = await getMe()
+    // Kiểm tra xem người dùng có tồn tại hay không
+    if (!userResponse.ok) return redirectTo('/auth', request)
 
-    if (!userResponse.ok) {
-      // Nếu không lấy được thông tin người dùng, chuyển hướng đến trang đăng nhập
-      return NextResponse.redirect(new URL('/auth', request.url))
-    }
-
-    if (userResponse.data.roleName !== 'admin') {
-      // Nếu người dùng không phải là admin, chuyển hướng đến trang chủ
-      return NextResponse.redirect(new URL('/', request.url))
-    }
+    // Kiểm tra xem người dùng có phải là Admin hay không
+    if (userResponse.data.roleName !== 'Admin') return redirectTo('/', request)
   }
 
-  // Logic middleware cơ bản
-  const response = NextResponse.next()
-
-  return response
+  return NextResponse.next()
 }

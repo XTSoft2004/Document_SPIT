@@ -44,7 +44,7 @@ const Header = ({ treeData, allItems, onMobileSearch, isMobile }: HeaderProps) =
                         alt="Logo"
                         width={40}
                         height={40}
-                        className="sm:w-[50px] sm:h-[50px] rounded-full object-cover transition-transform hover:scale-105 cursor-pointer"
+                        className="sm:w-[35px] sm:h-[35px] rounded-full object-cover transition-transform hover:scale-105 cursor-pointer"
                         onClick={() => router.push('/document')}
                     />
                 </div>
@@ -60,7 +60,7 @@ const Header = ({ treeData, allItems, onMobileSearch, isMobile }: HeaderProps) =
                                 value={searchQuery}
                                 onChange={e => setSearchQuery(e.target.value)}
                                 className="rounded-lg shadow-sm border-gray-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition-all duration-200"
-                                size="large"
+                                size="middle"
                                 style={{
                                     width: '100%',
                                     minWidth: 60,
@@ -70,6 +70,7 @@ const Header = ({ treeData, allItems, onMobileSearch, isMobile }: HeaderProps) =
                         </div>
                     </div>
                 )}
+
                 {/* Mobile Menu - hiện ở mobile */}
                 <div className="md:hidden">
                     <MenuMobile />

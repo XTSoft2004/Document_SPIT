@@ -40,8 +40,8 @@ const Header = () => {
                             <Image
                                 src="/logo/logo-500x500.png"
                                 alt="Logo"
-                                width={60}
-                                height={60}
+                                width={40}
+                                height={40}
                                 className="rounded-lg"
                                 priority
                             />
@@ -60,7 +60,7 @@ const Header = () => {
                                 onClick={() => setShowProfileMenu((prev) => !prev)}
                                 className="flex flex-col items-center focus:outline-none"
                             >
-                                <Avatar size={60} icon={<UserOutlined />} />
+                                <Avatar size={40} icon={<UserOutlined />} />
                             </button>
                             {showProfileMenu && (
                                 <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-50">

@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/shadcn-ui/chart"
 import { IInfoGoogleDriveResponse } from "@/types/driver"
 import { useEffect, useState } from "react"
-import { getInfoGoogleDriver } from "@/actions/driver.action"
+import { getInfoGoogleDriver } from "@/actions/driver.actions"
 
 export const description = "A radial chart with stacked sections"
 

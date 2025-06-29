@@ -174,7 +174,7 @@ export default function PreviewFile({ open, onClose, fileName, documentId }: Pre
                     ) : isImage ? (
                         <img
                             ref={imgRef}
-                            src={`${globalConfig.baseUrl}/driver/preview/${documentId}`}
+                            src={`${globalConfig.baseUrl}/document/preview/${documentId}`}
                             alt={fileName}
                             style={{
                                 transform: `scale(${scale}) translate(${translate.x / scale}px, ${translate.y / scale}px)`,
@@ -189,7 +189,7 @@ export default function PreviewFile({ open, onClose, fileName, documentId }: Pre
                         />
                     ) : (
                         <iframe
-                            src={`${globalConfig.baseUrl}/driver/preview/${documentId}`}
+                            src={`${globalConfig.baseUrl}/document/preview/${documentId}`}
                             className="w-full h-full border-0"
                             style={{ minHeight: '80vh', height: '100%' }}
                         />

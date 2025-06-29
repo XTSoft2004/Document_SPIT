@@ -131,13 +131,6 @@ export default function GridDocument({ data, content, slug, path, treeData, mobi
                                 </>
                             )
                         }
-                        <button
-                            className="sm:hidden p-2 rounded bg-gray-200 text-gray-500 ml-2"
-                            onClick={() => setShowTree(!showTree)}
-                            title={showTree ? "Ẩn sidebar" : "Hiện sidebar"}
-                        >
-                            {showTree ? "Ẩn thư mục" : "Hiện thư mục"}
-                        </button>
                         <Back path={path} />
                         <button
                             className={`relative overflow-hidden p-2 rounded transition-all duration-200 ${mode === 'list'

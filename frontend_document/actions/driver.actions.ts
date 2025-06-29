@@ -14,6 +14,7 @@ import {
   IUploadFile,
   IFolder,
   IDriveResponse,
+  IInfoGoogleDriveResponse,
 } from '@/types/driver'
 
 export const getThumbnail = async (fileId: string) => {
@@ -34,39 +35,6 @@ export const getThumbnail = async (fileId: string) => {
     status: response.status,
     ...data,
   } as IBaseResponse
-}
-
-export const loadFolder = async (folderId: string) => {
-  const response = await fetch(
-    `${globalConfig.baseUrl}/driver/find/${folderId}`,
-    {
-      method: 'GET',
-    },
-  )
-
-  const data = await response.json()
-  revalidateTag('driver.folder')
-
-  // Sort theo folder, = folder thì sort theo tên
-  const res = (data as ILoadFolder[]).sort((a, b) => {
-    if (a.isFolder && b.isFolder)
-      if (a.name.toLocaleLowerCase() < b.name.toLocaleLowerCase()) return -1
-      else return 1
-
-    if (a.isFolder && !b.isFolder) return -1
-    if (!a.isFolder && b.isFolder) return 1
-
-    if (!a.isFolder && !b.isFolder)
-      if (a.name.toLocaleLowerCase() < b.name.toLocaleLowerCase()) return -1
-      else return 1
-    return 0
-  })
-
-  return {
-    ok: response.ok,
-    status: response.status,
-    data: res,
-  } as IIndexResponse<ILoadFolder>
 }
 
 export const loadOnlyFolder = async (folderId: string) => {
@@ -157,6 +125,7 @@ export const getTree = async () => {
       },
       next: {
         tags: ['driver.tree'],
+        revalidate: 60, // Fallback: tự động revalidate sau 60s nếu không có manual trigger
       },
     },
   )
@@ -168,4 +137,87 @@ export const getTree = async () => {
     status: response.status,
     data: data,
   } as IIndexResponse<IDriveResponse>
+}
+
+export const getInfoGoogleDriver = async () => {
+  const response = await fetch(`${globalConfig.baseUrl}/driver/info`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization:
+        headers().get('Authorization') ||
+        `Bearer ${cookies().get('accessToken')?.value || ' '}`,
+    },
+    next: {
+      tags: ['driver.info'],
+    },
+  })
+
+  const data = await response.json()
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    ...data,
+  } as IInfoGoogleDriveResponse
+}
+
+export const loadFolder = async (
+  folderId: string,
+  isOnlyFolder: boolean = true,
+) => {
+  const response = await fetch(
+    `${globalConfig.baseUrl}/driver/find/${folderId}?isOnlyFolder=${isOnlyFolder}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization:
+          headers().get('Authorization') ||
+          `Bearer ${cookies().get('accessToken')?.value || ' '}`,
+      },
+      next: {
+        tags: ['driver.folder'],
+      },
+    },
+  )
+
+  const data = await response.json()
+  //   revalidateTag('driver.folder')
+
+  const res = (data as ILoadFolder[]).sort((a, b) => {
+    if (a.isFolder === b.isFolder) return 0
+    return a.isFolder ? -1 : 1
+  })
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    data: res,
+  } as IIndexResponse<ILoadFolder>
+}
+
+export const createFolder = async (name: string, parentId: string) => {
+  const response = await fetch(
+    `${globalConfig.baseUrl}/driver/create-folder?folderName=${name}&parentId=${parentId}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization:
+          headers().get('Authorization') ||
+          `Bearer ${cookies().get('accessToken')?.value || ' '}`,
+      },
+    },
+  )
+
+  const data = await response.json()
+
+  revalidateTag('driver.folder')
+
+  return {
+    ...data,
+    ok: response.ok,
+    status: response.status,
+  } as IBaseResponse
 }
