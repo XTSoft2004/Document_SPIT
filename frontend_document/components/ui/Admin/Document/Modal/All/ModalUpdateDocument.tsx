@@ -115,118 +115,107 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
         return courses.find(course => course.id === courseId);
     }, [courses, form]);
 
-    // Initialize modal data
     useEffect(() => {
-        const initializeModal = async () => {
-            if (!visible) {
-                resetAllStates();
-                return;
-            }
-
-            if (Document) {
-                try {
-                    // Set form values
-                    form.setFieldsValue({
-                        name: Document.name,
-                        courseId: Document.courseId,
-                        folderId: Document.folderId,
-                    });
-
-                    // Set original course ID
-                    setOriginalCourseId(Document.courseId);
-
-                    // Load initial course and set it in courses list
-                    const initialCourse = await getCourseById(Document.courseId);
-                    if (initialCourse?.data) {
-                        setCourses([initialCourse.data]);
-
-                        // Update folder from course
-                        await updateFolderFromCourse(Document.courseId);
-                    }
-
-                    // Don't show folder selector initially
-                    setShowFolderSelector(false);
-                } catch (error) {
-                    console.error('Error initializing modal:', error);
-                    message.error('Không thể tải thông tin môn học');
+        const fetchInitialCourse = async () => {
+            if (visible && Document && Document.courseId) {
+                const initialCourse = await getCourseById(Document.courseId);
+                if (initialCourse?.data) {
+                    setCourses(pre => [...pre, initialCourse.data]);
                 }
             }
         };
+        fetchInitialCourse();
+    }, [visible, form]);
 
-        initializeModal();
-    }, [visible, Document, form, updateFolderFromCourse, resetAllStates]);
+    useEffect(() => {
+        if (visible && Document) {
+            form.setFieldsValue({
+                name: Document.name,
+                courseId: Document.courseId,
+                folderId: Document.folderId,
+            });
+            // Lưu courseId ban đầu
+            setOriginalCourseId(Document.courseId);
 
-    const handleSubmit = useCallback(async () => {
+            // Cập nhật folder từ course ban đầu
+            updateFolderFromCourse(Document.courseId);
+
+            // Không hiển thị FolderSelector ban đầu vì dùng course gốc
+            setShowFolderSelector(false);
+        } else if (visible) {
+            // Reset khi mở modal mà không có Document
+            resetAllStates();
+        }
+    }, [visible, Document, form, courses]);
+
+    const handleSubmit = async () => {
         try {
             setLoading(true);
             const values = await form.validateFields();
 
+            // Lấy folderId từ selectedFolderId hoặc fallback to current course folder
+            // const folderId = selectedFolderId?.id || getCurrentCourseFolderId();
+
             let folderId = "";
             let base64String = "";
             let fileName = "";
-
             if (showFolderSelector) {
-                folderId = values.folderId || await getCurrentCourseFolderId();
-
-                // Handle file upload
-                if (values.fileUpload && values.fileUpload[0]?.originFileObj) {
-                    try {
-                        base64String = await new Promise<string>((resolve, reject) => {
-                            const reader = new FileReader();
-                            reader.readAsDataURL(values.fileUpload[0].originFileObj);
-                            reader.onload = () => resolve(reader.result as string);
-                            reader.onerror = () => reject(new Error('Cannot read file'));
-                        });
-                        fileName = values.fileUpload[0].name || '';
-                    } catch (error) {
-                        message.error('Không thể đọc file');
-                        return;
-                    }
-                }
+                folderId = values.folderId || getCurrentCourseFolderId();
+                base64String = values.fileUpload && values.fileUpload[0]?.originFileObj
+                    ? await new Promise<string>((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.readAsDataURL(values.fileUpload[0].originFileObj);
+                        reader.onload = () => resolve(reader.result as string);
+                        reader.onerror = () => reject();
+                    })
+                    : "";
+                fileName = values.fileUpload && values.fileUpload[0]?.name ? values.fileUpload[0].name : ''; // Lấy tên file từ fileUpload
             } else {
                 folderId = await getCurrentCourseFolderId();
+                base64String = "";
             }
 
             const DocumentUpdate: IDocumentUpdateRequest = {
                 name: values.name,
                 folderId: folderId || "",
-                base64String,
-                fileName,
+                base64String: base64String,
+                fileName: fileName,
                 courseId: values.courseId || 0,
             };
 
             const response = await updateDocument(String(Document?.id || ''), DocumentUpdate);
-
             if (response.ok) {
                 NotificationService.success({ message: "Cập nhật tài liệu thành công" });
-                handleCancel();
+                onCancel();
                 mutateTable('document');
             } else {
-                NotificationService.error({
-                    message: response.message || "Cập nhật tài liệu thất bại"
-                });
+                NotificationService.error({ message: "Cập nhật tài liệu thất bại" });
             }
-        } catch (error) {
-            console.error('Error updating document:', error);
+        } catch {
             NotificationService.error({ message: "Có lỗi xảy ra khi cập nhật tài liệu" });
         } finally {
             setLoading(false);
         }
-    }, [Document, showFolderSelector, getCurrentCourseFolderId, form]);
+    };
 
-    const handleCancel = useCallback(() => {
+    const handleCancel = () => {
         resetAllStates();
         onCancel();
-    }, [resetAllStates, onCancel]);
+    };
 
-    const handleCourseChange = useCallback((courseId: number) => {
+    const handleCourseChange = (courseId: number) => {
+        // Cập nhật courseId trong form
         form.setFieldsValue({ courseId });
 
+        // Kiểm tra nếu courseId khác với courseId ban đầu
         const isDifferentFromOriginal = courseId !== originalCourseId;
 
+        // Cập nhật folder từ course được chọn
         updateFolderFromCourse(courseId).then((selectedCourse) => {
+            // Chỉ hiển thị FolderSelector khi chọn môn học khác với ban đầu và course có folderId
             setShowFolderSelector(isDifferentFromOriginal && !!selectedCourse?.data?.folderId);
 
+            // Thông báo phù hợp
             const message = isDifferentFromOriginal
                 ? `Đã chọn môn học khác: ${selectedCourse?.data?.name || 'Không tìm thấy môn học'}. Vui lòng chọn thư mục mới.`
                 : `Trở về môn học ban đầu: ${selectedCourse?.data?.name || 'Không tìm thấy môn học'}`;
@@ -234,40 +223,11 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
             const notificationType = isDifferentFromOriginal ? 'info' : 'success';
             NotificationService[notificationType]({ message });
         });
-    }, [originalCourseId, updateFolderFromCourse, form]);
+    };
 
-    const handleFolderSelect = useCallback((folder: IFileInfo) => {
-        setSelectedFolderId(folder);
-        form.setFieldsValue({ folderId: folder.id, fileUpload: [] });
-        setPreviewSrc(null);
-        setPreviewType(null);
-        NotificationService.info({
-            message: `Đã chọn thư mục: ${folder.id}`
-        });
-    }, [form]);
-
-    const handleFileChange = useCallback(({ fileList }: any) => {
-        form.setFieldsValue({ fileUpload: fileList });
-
-        if (fileList.length > 0) {
-            if (selectedFolderId) {
-                form.setFieldsValue({ folderId: selectedFolderId.id });
-            }
-
-            const file = fileList[0];
-            if (file?.originFileObj) {
-                handleFilePreview(file, setPreviewSrc, setPreviewType, () => {
-                    message.warning("Không thể xem trước file này.");
-                });
-            } else {
-                setPreviewSrc(null);
-                setPreviewType(null);
-            }
-        } else {
-            setPreviewSrc(null);
-            setPreviewType(null);
-        }
-    }, [selectedFolderId, form]);
+    const handleReload = () => {
+        setPreviewKey(prev => prev + 1); // Force refresh preview
+    };
 
     return (
         <Modal
@@ -278,14 +238,12 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
             centered
             destroyOnClose={true}
             maskClosable={false}
-            style={{ top: 10, maxHeight: '90vh' }}
+            style={{
+                top: 10,
+                maxHeight: '90vh'
+            }}
             footer={[
-                <Button
-                    key="cancel"
-                    onClick={handleCancel}
-                    size="middle"
-                    disabled={loading}
-                >
+                <Button key="cancel" onClick={handleCancel} size="middle">
                     Hủy
                 </Button>,
                 <Button
@@ -305,10 +263,9 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
                     <Form
                         form={form}
                         layout="vertical"
-                        size="middle"
+                        size="small"
                         className="space-y-2"
                         onFinish={handleSubmit}
-                        preserve={false}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter' && !e.shiftKey) {
                                 e.preventDefault();
@@ -341,11 +298,15 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
                                 showSearch
                                 placeholder="Tìm kiếm và chọn môn học..."
                                 size="middle"
-                                filterOption={false}
+                                optionFilterProp="children"
+                                filterOption={false} // Use server-side search
                                 loading={loadingCourses}
                                 allowClear
                                 notFoundContent={loadingCourses ? 'Đang tìm kiếm...' : 'Không tìm thấy môn học'}
-                                options={courseOptions}
+                                options={courses.map(course => ({
+                                    value: course.id,
+                                    label: `${course.code} - ${course.name}`
+                                }))}
                                 onChange={handleCourseChange}
                                 onSearch={handleSearchCourse}
                             />
@@ -361,8 +322,16 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
                                     ]}
                                 >
                                     <FolderSelector
-                                        title={`Chọn thư mục của môn học | ${currentCourse?.code || ''} - ${currentCourse?.name || ''}`}
-                                        onSelect={handleFolderSelect}
+                                        title={`Chọn thư mục của môn học | ${courses.find(course => course.id === form.getFieldValue('courseId'))?.code || ''} - ${courses.find(course => course.id === form.getFieldValue('courseId'))?.name || ''}`}
+                                        onSelect={(folder, _) => {
+                                            setSelectedFolderId(folder);
+                                            form.setFieldsValue({ folderId: folder.id, fileUpload: [] }); // Reset file khi đổi thư mục
+                                            setPreviewSrc(null);
+                                            setPreviewType(null);
+                                            NotificationService.info({
+                                                message: `Đã chọn thư mục: ${folder.id}`
+                                            });
+                                        }}
                                         folderIdCurrent={currentFolderId}
                                     />
                                 </Form.Item>
@@ -382,11 +351,27 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
                                         showUploadList={true}
                                         maxCount={1}
                                         beforeUpload={() => false}
-                                        onChange={handleFileChange}
+                                        onChange={({ fileList }) => {
+                                            form.setFieldsValue({ fileUpload: fileList });
+                                            if (fileList.length > 0) {
+                                                // Nếu có file mới, set lại folderId (nếu cần)
+                                                if (selectedFolderId) {
+                                                    form.setFieldsValue({ folderId: selectedFolderId.id });
+                                                }
+                                                const file = fileList[0];
+                                                if (file && file.originFileObj) {
+                                                    handleFilePreview(file, setPreviewSrc, setPreviewType, () => {
+                                                        message.warning("Không thể xem trước file này.");
+                                                    });
+                                                } else {
+                                                    setPreviewSrc(null);
+                                                }
+                                            } else {
+                                                setPreviewSrc(null);
+                                            }
+                                        }}
                                     >
-                                        <Button icon={<UploadOutlined />} size="middle">
-                                            Chọn file
-                                        </Button>
+                                        <Button icon={<UploadOutlined />} size="middle">Chọn file</Button>
                                     </Upload>
                                 </Form.Item>
                             </>
@@ -403,11 +388,19 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
                             </div>
                         )}
 
-                        <div className="bg-blue-50 p-3 rounded-lg">
-                            <p className="font-bold text-sm text-blue-700 mb-1">
+                        {/* 
+                        <Form.Item name="folderId" label="Chọn thư mục" rules={[{ required: true, message: 'Vui lòng chọn thư mục' }]}>
+                            <FolderSelector onSelect={(folder, _) => {
+                                setSelectedFolderId(folder);
+                                form.setFieldsValue({ folderId: folder.id });
+                            }} />
+                        </Form.Item> */}
+
+                        <div className="bg-blue-50 p-3 rounded-lg"> {/* Giảm padding */}
+                            <p className="font-bold text-sm text-blue-700 mb-1"> {/* Giảm text size */}
                                 Hướng dẫn:
                             </p>
-                            <ul className="text-sm text-blue-600 space-y-0.5">
+                            <ul className="text-sm text-blue-600 space-y-0.5"> {/* Giảm text size và spacing */}
                                 <li>• Chỉnh sửa tên tài liệu</li>
                                 <li>• Chọn môn học và thư mục</li>
                                 <li>• Nhấn <span className="font-bold">"Cập nhật"</span></li>
