@@ -10,18 +10,17 @@ import { ICourseResponse } from '@/types/course';
 import { IFileInfo } from '@/types/driver';
 import NotificationService from '@/components/ui/Notification/NotificationService';
 import PreviewPanel from '@/components/ui/Admin/Document/PreviewPanel';
+import { getCourse, getCourseById } from '@/actions/course.action';
 
 interface ModalReviewDocumentProps {
     visible: boolean;
     Document?: IDocumentResponse;
-    courses: ICourseResponse[];
     onCancel: () => void;
 }
 
 export default function ModalReviewDocument({
     visible,
     Document,
-    courses,
     onCancel,
 }: ModalReviewDocumentProps) {
     const [form] = Form.useForm();
@@ -30,29 +29,49 @@ export default function ModalReviewDocument({
     const [previewKey, setPreviewKey] = useState(0);
     const [currentFolderId, setCurrentFolderId] = useState<string>('');
 
-    useEffect(() => {
-        if (visible && Document) {
-            form.setFieldsValue({
-                name: Document.name,
-                courseId: Document.courseId,
-                folderId: undefined, // Để user phải chọn thư mục
-            });
-
-            const initialCourse = courses.find(course => Number(course.id) === Number(Document.courseId));
-            const courseFolderId = initialCourse?.folderId || '';
-            setCurrentFolderId(courseFolderId);
-
-            if (courseFolderId) {
-                setSelectedFolderId({
-                    id: courseFolderId,
-                    name: initialCourse?.name || 'Course Folder'
-                });
+    const [loadingCourses, setLoadingCourses] = useState(false);
+    const [courses, setCourses] = useState<ICourseResponse[]>([]);
+    const handleSearchCourse = async (search: string) => {
+        if (search && search.trim() !== '') {
+            setLoadingCourses(true);
+            const response = await getCourse(search, 1, 20);
+            if (response.ok) {
+                setCourses(response.data);
             }
-        } else if (visible) {
-            setCurrentFolderId('');
-            setSelectedFolderId(null);
+            setLoadingCourses(false);
         }
-    }, [visible, Document, form, courses]);
+    }
+
+    useEffect(() => {
+        const fetchInitialCourse = async () => {
+            if (visible && Document) {
+                form.setFieldsValue({
+                    name: Document.name,
+                    courseId: Document.courseId,
+                    folderId: undefined, // Để user phải chọn thư mục
+                });
+
+                const initialCourse = await getCourseById(Document.courseId);
+                setCourses(pre => [...pre, initialCourse.data]);
+
+                const courseFolderId = initialCourse?.data?.folderId || '';
+                setCurrentFolderId(courseFolderId);
+
+                if (courseFolderId) {
+                    setSelectedFolderId({
+                        id: courseFolderId,
+                        name: initialCourse?.data?.name || 'Course Folder'
+                    });
+                }
+            } else if (visible) {
+                setCurrentFolderId('');
+                setSelectedFolderId(null);
+            }
+        };
+
+        fetchInitialCourse();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [visible]);
 
     const handleSubmit = async (statusDocument: string) => {
         try {
@@ -190,12 +209,15 @@ export default function ModalReviewDocument({
                                     value: course.id,
                                     label: `${course.code} - ${course.name}`
                                 }))}
+                                notFoundContent={loadingCourses ? 'Đang tìm kiếm...' : 'Không tìm thấy môn học'}
                                 onChange={handleCourseChange}
+                                onSearch={handleSearchCourse}
                             />
                         </Form.Item>
 
                         <Form.Item name="folderId" label="Chọn thư mục" rules={[{ required: true, message: 'Vui lòng chọn thư mục' }]}>
                             <FolderSelector
+                                title={`Chọn thư mục lưu tài liệu | ${selectedFolderId?.name}`}
                                 onSelect={(folder, _) => {
                                     setSelectedFolderId(folder);
                                     form.setFieldsValue({ folderId: folder.id });

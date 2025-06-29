@@ -16,8 +16,13 @@ export default function DepartmentPage() {
             title: 'Mã phòng ban',
             dataIndex: 'code',
             key: 'code',
-            width: 100,
+            width: 50,
             ellipsis: true,
+            render: (code: string) => (
+                <span className="max-w-32 truncate inline-block" title={code}>
+                    {code}
+                </span>
+            ),
         },
         {
             title: 'Tên phòng ban',
@@ -42,7 +47,7 @@ export default function DepartmentPage() {
                     </svg>
                     {folderId
                         ? (
-                            <span className="max-w-14 truncate inline-block" title={folderId}>
+                            <span className="max-w-24 truncate inline-block" title={folderId}>
                                 {folderId}
                             </span>
                         )

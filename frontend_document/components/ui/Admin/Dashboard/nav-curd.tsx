@@ -69,6 +69,11 @@ export function NavCRUD() {
             icon: Book,
         },
         {
+            name: "Quản lý danh mục",
+            url: "/admin/category",
+            icon: ChartColumnStacked,
+        },
+        {
             name: "Quản lý lịch sử",
             url: "#",
             icon: History,
@@ -101,12 +106,8 @@ export function NavCRUD() {
                     icon: UserRound,
                 },
             ]
-        },
-        {
-            name: "Quản lý danh mục",
-            url: "#",
-            icon: ChartColumnStacked,
-        }]
+        }
+    ]
 
     const { isMobile } = useSidebar();
     const router = useRouter();

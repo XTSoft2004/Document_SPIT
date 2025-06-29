@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { Modal, Form, Input, Select, message, Button, Upload } from 'antd';
 import { InboxOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { UploadProps, UploadFile } from 'antd';
@@ -10,19 +10,20 @@ import NotificationService from '@/components/ui/Notification/NotificationServic
 import FilePreview from '@/components/common/FilePreview';
 import { handleFilePreview } from '@/utils/filePreview';
 import { IDocumentPendingRequest } from '@/types/document';
+import { getCourse } from '@/actions/course.action';
 
 const { Dragger } = Upload;
 
 interface ModalPendingDocumentProps {
     visible: boolean;
-    courses: ICourseResponse[];
+    // courses: ICourseResponse[];
     onCancel: () => void;
     onSuccess?: () => void;
 }
 
 export default function ModalPendingDocument({
     visible,
-    courses,
+    // courses,
     onCancel,
     onSuccess,
 }: ModalPendingDocumentProps) {
@@ -31,6 +32,20 @@ export default function ModalPendingDocument({
     const [fileList, setFileList] = useState<UploadFile[]>([]);
     const [previewSrc, setPreviewSrc] = useState<string | null>(null);
     const [previewType, setPreviewType] = useState<"pdf" | "image" | "unsupported" | null>(null);
+
+    const [loadingCourses, setLoadingCourses] = useState(false);
+    const [courses, setCourses] = useState<ICourseResponse[]>([]);
+    const handleSearchCourse = async (search: string) => {
+        if (search && search.trim() !== '') {
+            setLoadingCourses(true);
+            const response = await getCourse(search, 1, 20);
+            if (response.ok) {
+                setCourses(response.data);
+                console.log(response.data);
+            }
+            setLoadingCourses(false);
+        }
+    }
 
     // Reset form khi modal mở/đóng
     useEffect(() => {
@@ -265,6 +280,8 @@ export default function ModalPendingDocument({
                                 filterOption={(input, option) =>
                                     (`${option?.label ?? ''}`).toLowerCase().includes(input.toLowerCase())
                                 }
+                                notFoundContent={loadingCourses ? 'Đang tải môn học...' : 'Không tìm thấy môn học'}
+                                onSearch={handleSearchCourse}
                                 options={courses.map(course => ({
                                     value: course.id,
                                     label: `${course.code} - ${course.name}`

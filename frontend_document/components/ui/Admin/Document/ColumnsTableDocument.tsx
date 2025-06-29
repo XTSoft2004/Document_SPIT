@@ -25,15 +25,29 @@ export const allColumnsTableDocument: TableColumnType<IDocumentResponse>[] = [
         title: 'Lượt tải',
         dataIndex: 'totalDownloads',
         key: 'totalDownloads',
-        width: 100,
+        width: 50,
         align: 'center',
+        render: (totalDownloads: number) => {
+            return (
+                <span className="max-w-12">
+                    {totalDownloads}
+                </span>
+            );
+        }
     },
     {
         title: 'Lượt xem',
         dataIndex: 'totalViews',
         key: 'totalViews',
-        width: 100,
+        width: 50,
         align: 'center',
+        render: (totalViews: number) => {
+            return (
+                <span className="max-w-12">
+                    {totalViews}
+                </span>
+            );
+        }
     },
     {
         title: 'Người đăng tải',

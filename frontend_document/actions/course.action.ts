@@ -10,6 +10,7 @@ import {
 } from '@/types/global'
 import { revalidateTag } from 'next/cache'
 import { ICourseRequest, ICourseResponse } from '@/types/course'
+import { IDriveResponse } from '@/types/driver'
 
 export const createCourse = async (
   Course: ICourseRequest,
@@ -100,4 +101,23 @@ export const getCourse = async (
     status: response.status,
     ...data,
   } as IIndexResponse<ICourseResponse>
+}
+
+export const getCourseById = async (
+  id: number,
+): Promise<IShowResponse<ICourseResponse>> => {
+  const response = await fetch(`${globalConfig.baseUrl}/course/${id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${cookies().get('accessToken')?.value || ''}`,
+    },
+  })
+
+  const data = await response.json()
+  return {
+    ok: response.ok,
+    status: response.status,
+    ...data,
+  } as IShowResponse<ICourseResponse>
 }

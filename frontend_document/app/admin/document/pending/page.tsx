@@ -30,21 +30,9 @@ export default function DocumentPendingPage() {
     const [selectedItem, setSelectedItem] = useState<IDocumentResponse>();
     const [loading, setLoading] = useState(true);
 
-
-
-    const [courses, setCourses] = useState<ICourseResponse[]>([]);
-    const fetchDepartments = async () => {
-        const response = await getCourse();
-        if (response.ok) {
-            setCourses(response.data);
-        }
-    };
-
     const listColumn = getFilteredColumnsTableDocument(['name', 'statusDocument', 'fullNameUser', 'courseName', 'isPrivate']);
     const [columns, setColumns] = useState<TableColumnType<IDocumentResponse>[]>(listColumn);
     useEffect(() => {
-        fetchDepartments();
-
         setColumns([
             ...columns,
             {
@@ -119,7 +107,7 @@ export default function DocumentPendingPage() {
 
             <ModalPendingDocument
                 visible={isShowModalCreate}
-                courses={courses}
+                // courses={courses}
                 onCancel={() => setIsShowModalCreate(false)}
                 onSuccess={() => {
                     setIsShowModalCreate(false);
@@ -130,7 +118,6 @@ export default function DocumentPendingPage() {
             <ModalReviewDocument
                 visible={isShowModalReview}
                 Document={selectedDocument}
-                courses={courses}
                 onCancel={() => {
                     setIsShowModalReview(false);
                     setSelectedDocument(undefined);

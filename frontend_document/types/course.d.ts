@@ -9,5 +9,5 @@ export interface ICourseResponse {
   name: string
   code: string
   folderId: string
-  departmentId: string
+  departmentId: number
 }

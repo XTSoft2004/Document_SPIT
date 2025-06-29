@@ -3,7 +3,7 @@ import { Modal, Button, List, Typography, Skeleton } from 'antd';
 import { FileOutlined, FolderFilled, ReloadOutlined } from '@ant-design/icons';
 import PathFolder from '@/components/ui/Document/breadcrumb-folder';
 import { IFileInfo, ILoadFolder } from '@/types/driver';
-import { createFolder, loadFolder } from '@/actions/driver.action';
+import { createFolder, loadFolder } from '@/actions/driver.actions';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import PhotoIcon from '@mui/icons-material/Photo';
 import DescriptionIcon from '@mui/icons-material/Description';

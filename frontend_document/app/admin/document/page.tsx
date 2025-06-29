@@ -25,20 +25,10 @@ export default function DocumentPage() {
     const [selectedItem, setSelectedItem] = useState<IDocumentResponse>();
     const [loading, setLoading] = useState(true);
 
-    const [courses, setCourses] = useState<ICourseResponse[]>([]);
-    const fetchDepartments = async () => {
-        const response = await getCourse();
-        if (response.ok) {
-            setCourses(response.data);
-        }
-    };
-
-    const listColumn = getFilteredColumnsTableDocument(['name', 'statusDocument', 'totalDownloads', 'totalViews', 'fullNameUser', 'folderId', 'isPrivate']);
+    const listColumn = getFilteredColumnsTableDocument(['name', 'courseName', 'statusDocument', 'totalDownloads', 'totalViews', 'fullNameUser', 'isPrivate']);
     const [columns, setColumns] = useState<TableColumnType<IDocumentResponse>[]>(listColumn);
 
     useEffect(() => {
-        fetchDepartments();
-
         setColumns([
             ...columns,
             {
@@ -119,7 +109,6 @@ export default function DocumentPage() {
             <ModalUpdateDocument
                 visible={isShowModalUpdate}
                 Document={selectedDocument}
-                courses={courses}
                 onCancel={() => {
                     setIsShowModalUpdate(false);
                     setSelectedDocument(undefined);

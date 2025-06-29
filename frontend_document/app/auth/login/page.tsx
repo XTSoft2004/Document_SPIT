@@ -10,7 +10,6 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import NotificationService from '@/components/ui/Notification/NotificationService';
 import { motion } from 'framer-motion';
-import ModernAuthLoading from '@/components/ui/Loading/ModernAuthLoading';
 
 export default function PageLogin() {
     const {
@@ -53,83 +52,101 @@ export default function PageLogin() {
             transition={{ duration: 0.4, ease: 'easeOut' }}
             className="w-full h-full flex flex-col justify-center"
         >
-            {loading ? (
-                <div className="flex items-center justify-center flex-1">
-                    <ModernAuthLoading />
-                </div>
-            ) : (
-                <div className="flex flex-col justify-center space-y-4">
-                    <form
-                        onSubmit={handleSubmit(onSubmit)}
-                        className="space-y-4"
-                    >
-                        <div className="space-y-3">
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.1, duration: 0.3 }}
-                            >
-                                <CustomTextField
-                                    control={control}
-                                    errors={errors}
-                                    name="username"
-                                    placeholder="Enter your username"
-                                    icon={<CircleUser size={18} className="text-gray-400" />}
-                                />
-                            </motion.div>
-
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.2, duration: 0.3 }}
-                            >
-                                <CustomTextField
-                                    control={control}
-                                    errors={errors}
-                                    name="password"
-                                    type="password"
-                                    placeholder="Enter your password"
-                                    icon={<KeyRound size={18} className="text-gray-400" />}
-                                />
-                            </motion.div>
-                        </div>
+            <div className="flex flex-col justify-center space-y-4">
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                    <div className="space-y-3">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.1, duration: 0.3 }}
+                        >
+                            <CustomTextField
+                                control={control}
+                                errors={errors}
+                                name="username"
+                                placeholder="Nhập tên đăng nhập"
+                                icon={
+                                    <CircleUser
+                                        size={18}
+                                        className="text-gray-400"
+                                    />
+                                }
+                            />
+                        </motion.div>
 
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.3, duration: 0.3 }}
-                            className="pt-2"
+                            transition={{ delay: 0.2, duration: 0.3 }}
                         >
-                            <motion.div
-                                whileHover={{ scale: 1.03 }}
-                                whileTap={{ scale: 0.97 }}
-                                className="w-full"
-                            >
-                                <Button
-                                    type="primary"
-                                    htmlType="submit"
-                                    className="w-full h-12 text-base font-semibold rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 border-none shadow-md hover:shadow-lg transition-all duration-300"
-                                    style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)', fontSize: '16px', height: '48px', borderRadius: '16px' }}
-                                >
-                                    Sign In
-                                </Button>
-                            </motion.div>
+                            <CustomTextField
+                                control={control}
+                                errors={errors}
+                                name="password"
+                                type="password"
+                                placeholder="Nhập mật khẩu"
+                                icon={
+                                    <KeyRound
+                                        size={18}
+                                        className="text-gray-400"
+                                    />
+                                }
+                            />
                         </motion.div>
-                    </form>
+                    </div>
 
-                    {/* Forgot Password */}
                     <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.4, duration: 0.3 }}
-                        className="text-center pt-2"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3, duration: 0.3 }}
+                        className="pt-2"
                     >
-                        <a href="#" className="text-sm text-blue-600 hover:underline">
-                            Forgot your password?
-                        </a>
+                        <motion.div
+                            whileHover={{ scale: 1.03 }}
+                            whileTap={{ scale: 0.97 }}
+                            className="w-full"
+                        >
+                            <Button
+                                type="primary"
+                                htmlType="submit"
+                                disabled={loading}
+                                className="w-full h-12 text-base font-semibold rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 border-none shadow-md hover:shadow-lg transition-all duration-300"
+                                style={{
+                                    background:
+                                        'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
+                                    fontSize: '16px',
+                                    height: '48px',
+                                    borderRadius: '16px',
+                                }}
+                            >
+                                {loading ? (
+                                    <span className="text-white flex items-center justify-center gap-2">
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        <span>Đang đăng nhập...</span>
+                                    </span>
+                                ) : (
+                                    'Đăng nhập'
+                                )}
+                            </Button>
+                        </motion.div>
                     </motion.div>
-                </div>
-            )}
+                </form>
+
+                {/* Forgot Password */}
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.4, duration: 0.3 }}
+                    className="text-center pt-2"
+                >
+                    <a
+                        href="#"
+                        className="text-sm text-blue-600 hover:underline"
+                    >
+                        Quên mật khẩu?
+                    </a>
+                </motion.div>
+            </div>
         </motion.div>
     );
 }
