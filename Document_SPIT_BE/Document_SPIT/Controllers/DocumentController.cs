@@ -4,6 +4,7 @@ using Domain.Interfaces.Services;
 using Domain.Model.Request.Document;
 using Domain.Services;
 using Infrastructure.Migrations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using static Domain.Common.AppConstants;
 
@@ -20,6 +21,7 @@ namespace Document_SPIT_BE.Controllers
             _services = services;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("create")]
         public async Task<IActionResult> CreateAsync(DocumentPendingRequest documentPending)
         {
@@ -39,6 +41,7 @@ namespace Document_SPIT_BE.Controllers
             return response.ToActionResult();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPatch("{IdDocument}")]
         public async Task<IActionResult> UpdateAsync(long IdDocument, DocumentRequest documentRequest)
         {
@@ -48,6 +51,7 @@ namespace Document_SPIT_BE.Controllers
             var response = await _services.UpdateAsync(IdDocument, documentRequest);
             return response.ToActionResult();
         }
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{IdDocument}")]
         public async Task<IActionResult> DeleteAsync(long IdDocument)
         {

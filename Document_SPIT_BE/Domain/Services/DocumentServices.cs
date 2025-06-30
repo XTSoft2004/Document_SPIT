@@ -25,16 +25,19 @@ namespace Domain.Services
     public class DocumentServices : BaseService, IDocumentServices
     {
         private readonly IRepositoryBase<Document>? _document;
+        private readonly IRepositoryBase<DocumentCategory>? _documentCategory;
+        private readonly IRepositoryBase<CategoryType>? _catetoryType;
         private readonly IRepositoryBase<Course>? _course;
         private readonly IRepositoryBase<DetailDocument>? _detailDocument;
         private readonly IRepositoryBase<User>? _user;
         private readonly IRepositoryBase<History> _history;
         private readonly IGoogleDriverServices? _googleDriverServices;
+        private readonly ICategoryTypeServices? _categoryTypeServices;
         private readonly ITokenServices? _tokenServices;
         private readonly IRepositoryBase<OneTimeToken>? _oneTimeToken;
         private UserTokenResponse? userMeToken;
 
-        public DocumentServices(IRepositoryBase<Document>? document, IRepositoryBase<User>? user, IGoogleDriverServices? googleDriverServices, IRepositoryBase<DetailDocument>? detailDocument, ITokenServices? tokenServices, IRepositoryBase<OneTimeToken>? oneTimeToken, IRepositoryBase<Course>? course)
+        public DocumentServices(IRepositoryBase<Document>? document, IRepositoryBase<User>? user, IGoogleDriverServices? googleDriverServices, IRepositoryBase<DetailDocument>? detailDocument, ITokenServices? tokenServices, IRepositoryBase<OneTimeToken>? oneTimeToken, IRepositoryBase<Course>? course, ICategoryTypeServices? categoryTypeServices, IRepositoryBase<CategoryType>? catetoryType, IRepositoryBase<DocumentCategory>? documentCategory)
         {
             _document = document;
             _user = user;
@@ -44,8 +47,11 @@ namespace Domain.Services
             userMeToken = _tokenServices.GetTokenBrowser();
             _oneTimeToken = oneTimeToken;
             _course = course;
+            _categoryTypeServices = categoryTypeServices;
+            _catetoryType = catetoryType;
             var envPath = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.Parent.FullName, ".env");
             DotNetEnv.Env.Load(envPath);
+            _documentCategory = documentCategory;
         }
 
         public async Task<HttpResponse> CreatePending(DocumentPendingRequest documentCreatePending)
@@ -128,6 +134,16 @@ namespace Domain.Services
             if (course == null)
                 return HttpResponse.Error("Khóa học không tồn tại.", System.Net.HttpStatusCode.BadRequest);
 
+            List<CategoryType?>? categoryType = null;
+            if (documentRequest.categoryIds != null && documentRequest.categoryIds.Count != 0)
+            {
+                categoryType = _catetoryType!.ListBy(l => documentRequest.categoryIds.Contains(l.Id)).ToList();
+                if (categoryType == null)
+                    return HttpResponse.Error("Danh mục tài liệu không hợp lệ.", System.Net.HttpStatusCode.BadRequest);
+                else
+                    await _categoryTypeServices.AddListCategoryDocument(categoryType, documentPending.Id);
+            }
+
             documentPending.Name = documentRequest.name?.Trim() ?? documentPending.Name;
             documentPending.Course = course;
             documentPending.CourseId = course.Id;
@@ -175,7 +191,17 @@ namespace Domain.Services
                 if (enumStatusDocument == null)
                     return HttpResponse.Error("Trạng thái điểm danh không hợp lệ.", System.Net.HttpStatusCode.BadRequest);
             }
-            
+
+            List<CategoryType?>? categoryType = null;
+            if (documentRequest.categoryIds != null && documentRequest.categoryIds.Count != 0)
+            {
+                categoryType = _catetoryType!.ListBy(l => documentRequest.categoryIds.Contains(l.Id)).ToList();
+                if (categoryType == null)
+                    return HttpResponse.Error("Danh mục tài liệu không hợp lệ.", System.Net.HttpStatusCode.BadRequest);
+                else
+                    await _categoryTypeServices.AddListCategoryDocument(categoryType, document.Id);
+            }
+
             var user = _user!.Find(f => f.Id == userMeToken.Id);
             if (user == null)
                 return HttpResponse.Error("Người dùng không tồn tại.", System.Net.HttpStatusCode.NotFound);
@@ -319,8 +345,7 @@ namespace Domain.Services
             return (data, contentType, fileName);
         }
         public List<DocumentResponse> GetDocuments(string search, int pageNumber, int pageSize, out int totalRecords, string statusDocument = "")
-        {
-            // Start with queryable including navigation properties
+        {            
             var query = _document!.All()
                 .Include(d => d.User)
                 .Include(d => d.Course)
@@ -367,7 +392,6 @@ namespace Domain.Services
             }
 
             var users = _user!.All().ToList();
-
             // Chuyển đổi sang danh sách DocumentResponse
             var documentsSearch = orderedQuery
                 .AsEnumerable()
@@ -385,6 +409,7 @@ namespace Domain.Services
                     FolderId = s.FolderId,
                     CourseId = s.CourseId,
                     CourseName = s.Course != null ? s.Course.Name : string.Empty,
+                    CategoryIds = _documentCategory.ListBy(l => l.DocumentId == s.Id).Select(s => s.Id).ToList(),
                     CreatedDate = s.CreatedDate,
                     ModifiedDate = s.ModifiedDate
                 }).ToList();

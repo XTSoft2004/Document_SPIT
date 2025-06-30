@@ -13,6 +13,7 @@ namespace Domain.Model.Request.Document
         public string? Name { get; set; }
         public bool? IsPrivate { get; set; } = false;
         public string? StatusDocument { get; set; }
+        public List<long>? categoryIds { get; set; }
         public long? courseId { get; set; }
     }
 }

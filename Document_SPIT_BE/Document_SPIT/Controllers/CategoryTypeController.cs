@@ -1,4 +1,6 @@
-﻿using Domain.Interfaces.Services;
+﻿using Domain.Common.Http;
+using Domain.Entities;
+using Domain.Interfaces.Services;
 using Domain.Model.Request.CategoryType;
 using Microsoft.AspNetCore.Mvc;
 using static Domain.Common.AppConstants;
@@ -16,7 +18,7 @@ namespace Document_SPIT_BE.Controllers
             _services = categoryTypeServices;
         }
 
-        [HttpPost("create")]
+        [HttpPost]
         public async Task<IActionResult> CreateAsync(CategoryTypeRequest categoryTypeRequest)
         {
             if (!ModelState.IsValid)
@@ -25,7 +27,7 @@ namespace Document_SPIT_BE.Controllers
             var response = await _services.CreateAsync(categoryTypeRequest);
             return response.ToActionResult();
         }
-        [HttpPut("{IdCategoryType}")]
+        [HttpPatch("{IdCategoryType}")]
         public async Task<IActionResult> UpdateAsync(long IdCategoryType, CategoryTypeRequest categoryTypeRequest)
         {
             if (!ModelState.IsValid)
@@ -42,6 +44,17 @@ namespace Document_SPIT_BE.Controllers
 
             var response = await _services.DeleteAsync(IdCategoryType);
             return response.ToActionResult();
+        }
+        [HttpGet]
+        public IActionResult GetCategory(string search = "", int pageNumber = -1, int pageSize = -1)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+
+            var categories = _services.GetCategory(search, pageNumber, pageSize, out int totalRecords);
+
+            var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+            return Ok(ResponseArray.ResponseList(categories, totalRecords, totalPages, pageNumber, pageSize));
         }
     }
 }

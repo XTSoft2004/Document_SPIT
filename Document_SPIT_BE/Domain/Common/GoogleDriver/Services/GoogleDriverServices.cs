@@ -357,32 +357,51 @@ namespace Domain.Common.GoogleDriver.Services
 
             return files;
         }
-        public List<TreeDocumentResponse> BuildDriveTree(List<DriveFileItem> allItems, string rootFolderId)
+        public async Task<List<TreeDocumentResponse>> BuildDriveTree(List<DriveFileItem> allItems, string rootFolderId)
         {
-            var treeMap = allItems.ToDictionary(
-                item => item.Id,
-                item => new TreeDocumentResponse
+            var treeMap = new Dictionary<string, TreeDocumentResponse>();
+            foreach (var item in allItems)
+            {
+                treeMap[item.Id] = new TreeDocumentResponse
                 {
+                    DocumentId = item.DocumentId,
                     Name = item.Name,
                     FolderId = item.Id,
                     IsFolder = item.MimeType == "application/vnd.google-apps.folder",
+                    TotalDownloads = item.TotalDownloads,
+                    TotalViews = item.TotalViews,
                     Children = new List<TreeDocumentResponse>()
-                }
-            );
+                };
+            }
+            ;
+
+            bool checkEmptyFolder(TreeDocumentResponse node)
+            {
+                if ((bool)!node.IsFolder)
+                    return true;
+
+                node.Children = node.Children.Where(c => checkEmptyFolder(c)).ToList();
+
+                return (node.Children.Count > 0);
+            }
 
             var roots = new List<TreeDocumentResponse>();
 
             foreach (var item in allItems)
             {
+                var rootNode = treeMap[item.Id];
                 if (item.Parents != null && item.Parents.Count > 0)
-                    {
+                {
                     var parentId = item.Parents[0];
                     if (treeMap.ContainsKey(parentId))
-                        treeMap[parentId].Children.Add(treeMap[item.Id]);
+                        treeMap[parentId].Children.Add(rootNode);
                 }
 
                 if (item.Id == rootFolderId)
-                    roots.Add(treeMap[item.Id]);
+                {
+                    if (checkEmptyFolder(rootNode))
+                        roots.Add(rootNode);
+                }
             }
 
             return roots.Select(r => treeMap[r.FolderId!]).ToList();
@@ -391,7 +410,7 @@ namespace Domain.Common.GoogleDriver.Services
         {
             await GetAccessToken();
             var allItems = await GetAllDriveItems();
-            return BuildDriveTree(allItems, rootFolderId);
+            return await BuildDriveTree(allItems, rootFolderId);
         }
     }
 }

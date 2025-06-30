@@ -121,5 +121,21 @@ namespace Domain.Services
 
             return coursesSearch;
         }
+        public async Task<HttpResponse> GetCourseById(long? Id)
+        {
+            var course = _course.Find(f => f.Id == Id);
+            if(course == null)
+                return HttpResponse.Error(message: "Học phần không tồn tại.");
+
+            var courseResponse = new CourseResponse
+            {
+                Id = course.Id,
+                Code = course.Code,
+                Name = course.Name,
+                FolderId = course.FolderId,
+                DepartmentId = course.DepartmentId,
+            };
+            return HttpResponse.OK(data: courseResponse, message: "Lấy thông tin học phần thành công.");
+        }
     }
 }
