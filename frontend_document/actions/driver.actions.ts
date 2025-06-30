@@ -125,7 +125,7 @@ export const getTree = async () => {
       },
       next: {
         tags: ['driver.tree'],
-        revalidate: 60, // Fallback: tự động revalidate sau 60s nếu không có manual trigger
+        revalidate: 60,
       },
     },
   )

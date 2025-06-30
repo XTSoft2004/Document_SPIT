@@ -49,7 +49,7 @@ export async function middleware(request: NextRequest) {
   console.log('server >> middleware', request.nextUrl.pathname)
 
   const userResponse = await getMe()
-  const isLocked = userResponse.data.islocked
+  const isLocked = userResponse.data?.islocked
   const nextUrl = request.nextUrl.pathname
 
   // Kiểm tra xem người dùng đã đăng nhập hay chưa

@@ -75,7 +75,7 @@ export default function RecentContributions() {
             setLoading(true);
             setError(null);
             const response = await getRecentDocuments(5);
-            
+
             if (response.ok && response.data) {
                 setContributions(response.data);
             } else {
@@ -99,16 +99,22 @@ export default function RecentContributions() {
 
     if (loading) {
         return (
-            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
+            <div className="bg-white rounded-lg sm:rounded-xl lg:rounded-2xl shadow-lg border border-gray-200 p-4 sm:p-6 lg:p-8">
                 <div className="animate-pulse">
-                    <div className="h-8 bg-gray-200 rounded w-64 mb-4"></div>
-                    <div className="space-y-4">
+                    <div className="h-6 sm:h-8 bg-gray-200 rounded w-32 sm:w-64 mb-3 sm:mb-4"></div>
+                    <div className="space-y-3 sm:space-y-4">
                         {[1, 2, 3].map((i) => (
-                            <div key={i} className="flex items-center p-4 border border-gray-200 rounded-lg">
-                                <div className="w-12 h-12 bg-gray-200 rounded-lg"></div>
-                                <div className="flex-1 ml-4">
-                                    <div className="h-5 bg-gray-200 rounded w-3/4 mb-2"></div>
-                                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                            <div key={i} className="flex flex-col sm:flex-row sm:items-center p-3 sm:p-4 border border-gray-200 rounded-lg space-y-3 sm:space-y-0">
+                                <div className="flex items-center space-x-3 sm:space-x-4 flex-1">
+                                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-200 rounded-lg flex-shrink-0"></div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="h-4 sm:h-5 bg-gray-200 rounded w-3/4 mb-2"></div>
+                                        <div className="h-3 sm:h-4 bg-gray-200 rounded w-1/2"></div>
+                                    </div>
+                                </div>
+                                <div className="flex sm:flex-col space-x-4 sm:space-x-0 sm:space-y-1">
+                                    <div className="h-3 bg-gray-200 rounded w-12"></div>
+                                    <div className="h-3 bg-gray-200 rounded w-12"></div>
                                 </div>
                             </div>
                         ))}
@@ -120,20 +126,23 @@ export default function RecentContributions() {
 
     if (error) {
         return (
-            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
-                <div className="text-center py-8">
+            <div className="bg-white rounded-lg sm:rounded-xl lg:rounded-2xl shadow-lg border border-gray-200 p-4 sm:p-6 lg:p-8">
+                <div className="text-center py-6 sm:py-8">
                     <div className="text-red-500 mb-4">
-                        <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-12 h-12 sm:w-16 sm:h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Không thể tải dữ liệu</h3>
-                    <p className="text-gray-600 mb-4">{error}</p>
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
+                        <span className="hidden sm:inline">Không thể tải dữ liệu</span>
+                        <span className="sm:hidden">Không thể tải</span>
+                    </h3>
+                    <p className="text-sm sm:text-base text-gray-600 mb-4">{error}</p>
                     <button
                         onClick={fetchRecentDocuments}
-                        className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        className="inline-flex items-center px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
                     >
-                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
                         Thử lại
@@ -145,109 +154,134 @@ export default function RecentContributions() {
 
     if (contributions.length === 0) {
         return (
-            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
-                <div className="text-center py-8">
+            <div className="bg-white rounded-lg sm:rounded-xl lg:rounded-2xl shadow-lg border border-gray-200 p-4 sm:p-6 lg:p-8">
+                <div className="text-center py-6 sm:py-8">
                     <div className="text-gray-400 mb-4">
-                        <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-12 h-12 sm:w-16 sm:h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Chưa có tài liệu nào</h3>
-                    <p className="text-gray-600">Hãy là người đầu tiên đóng góp tài liệu!</p>
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
+                        <span className="hidden sm:inline">Chưa có tài liệu nào</span>
+                        <span className="sm:hidden">Chưa có tài liệu</span>
+                    </h3>
+                    <p className="text-sm sm:text-base text-gray-600">
+                        <span className="hidden sm:inline">Hãy là người đầu tiên đóng góp tài liệu!</span>
+                        <span className="sm:hidden">Hãy đóng góp đầu tiên!</span>
+                    </p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
-            <div className="flex items-center justify-between mb-6">
+        <div className="bg-white rounded-lg sm:rounded-xl lg:rounded-2xl shadow-lg border border-gray-200 p-4 sm:p-6 lg:p-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 space-y-2 sm:space-y-0">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                        Tài liệu mới nhất
+                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">
+                        <span className="hidden sm:inline">Tài liệu mới nhất</span>
+                        <span className="sm:hidden">Tài liệu mới</span>
                     </h2>
-                    <p className="text-gray-600">
-                        Những tài liệu được đóng góp gần đây bởi cộng đồng
+                    <p className="text-sm sm:text-base text-gray-600">
+                        <span className="hidden sm:inline">Những tài liệu được đóng góp gần đây bởi cộng đồng</span>
+                        <span className="sm:hidden">Tài liệu đóng góp gần đây</span>
                     </p>
                 </div>
-                <button
-                    onClick={() => setShowAll(!showAll)}
-                    className="text-blue-600 hover:text-blue-700 font-medium text-sm flex items-center space-x-1"
-                >
-                    <span>{showAll ? 'Thu gọn' : 'Xem tất cả'}</span>
-                    <svg
-                        className={`w-4 h-4 transition-transform ${showAll ? 'rotate-180' : ''}`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                </button>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
                 {displayedContributions.map((contribution) => (
                     <div
                         key={contribution.id}
-                        className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-md transition-all cursor-pointer"
+                        className="flex flex-col sm:flex-row sm:items-center p-3 sm:p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-md transition-all duration-200 cursor-pointer space-y-3 sm:space-y-0 overflow-hidden"
                     >
-                        {getFileIcon(contribution.typeFile)}
+                        <div className="flex items-start sm:items-center space-x-3 sm:space-x-4 flex-1 min-w-0 overflow-hidden">
+                            <div className="flex-shrink-0">
+                                {getFileIcon(contribution.typeFile)}
+                            </div>
 
-                        <div className="flex-1 ml-4">
-                            <h3 className="font-semibold text-gray-900 mb-1">
-                                {contribution.name}
-                            </h3>
-                            <div className="flex items-center space-x-4 text-sm text-gray-500">
-                                <span className="flex items-center">
-                                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                    {contribution.fileName}
-                                </span>
-                                <span className="flex items-center">
-                                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                    </svg>
-                                    {contribution.username}
-                                </span>
-                                <span className="flex items-center">
-                                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                    {formatDate(contribution.createdDate)}
-                                </span>
+                            <div className="flex-1 min-w-0 overflow-hidden">
+                                <div className="mb-1 sm:mb-2">
+                                    <h3
+                                        className="font-semibold text-gray-900 text-sm sm:text-base break-words line-clamp-2"
+                                        title={contribution.name}
+                                    >
+                                        {contribution.name}
+                                    </h3>
+                                </div>
+
+                                {/* Mobile: Stack vertically */}
+                                <div className="sm:hidden space-y-1 overflow-hidden">
+                                    <div className="flex items-center justify-between text-xs text-gray-500 gap-2 min-w-0">
+                                        <div className="flex items-center min-w-0 flex-1">
+                                            <svg className="w-3 h-3 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                            </svg>
+                                            <span
+                                                className="truncate min-w-0"
+                                                title={contribution.fullname}
+                                            >
+                                                {contribution.fullname}
+                                            </span>
+                                        </div>
+                                        <span className="text-xs text-gray-400 flex-shrink-0 whitespace-nowrap">
+                                            {formatDate(contribution.createdDate)}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Desktop: Horizontal layout */}
+                                <div className="hidden sm:flex items-center space-x-4 text-sm text-gray-500 overflow-hidden">
+                                    <span className="flex items-center min-w-0 flex-1">
+                                        <svg className="w-4 h-4 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                        <span
+                                            className="truncate"
+                                            title={contribution.fullname}
+                                        >
+                                            {contribution.fullname}
+                                        </span>
+                                    </span>
+                                    <span className="flex items-center flex-shrink-0 whitespace-nowrap">
+                                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        {formatDate(contribution.createdDate)}
+                                    </span>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="text-right">
-                            <div className="flex items-center space-x-4 text-sm text-gray-500">
-                                <span className="flex items-center">
-                                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                    {contribution.totalDownloads}
-                                </span>
-                                <span className="flex items-center">
-                                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                    </svg>
-                                    {contribution.totalViews}
-                                </span>
-                            </div>
+                        {/* Stats section */}
+                        <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center space-x-4 sm:space-x-0 sm:space-y-1 text-xs sm:text-sm text-gray-500 sm:ml-4 flex-shrink-0">
+                            <span className="flex items-center whitespace-nowrap">
+                                <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <span className="sm:hidden">↓</span>
+                                <span className="ml-1">{contribution.totalDownloads}</span>
+                            </span>
+                            <span className="flex items-center whitespace-nowrap">
+                                <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                <span className="ml-1">{contribution.totalViews}</span>
+                            </span>
                         </div>
                     </div>
                 ))}
             </div>
 
             {contributions.length > 3 && !showAll && (
-                <div className="text-center mt-6">
+                <div className="text-center mt-4 sm:mt-6">
                     <button
                         onClick={() => setShowAll(true)}
-                        className="text-blue-600 hover:text-blue-700 font-medium"
+                        className="text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors duration-200 hover:bg-blue-50 px-4 py-2 rounded-lg"
                     >
-                        Xem thêm {contributions.length - 3} tài liệu khác
+                        <span className="hidden sm:inline">Xem thêm {contributions.length - 3} tài liệu khác</span>
+                        <span className="sm:hidden">Xem thêm ({contributions.length - 3})</span>
                     </button>
                 </div>
             )}

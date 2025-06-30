@@ -35,7 +35,7 @@ export interface IDocumentRecentResponse {
   name: string
   fileId: string
   fileName: string
-  username: string
+  fullname: string
   totalDownloads: number
   totalViews: number
   typeFile: string

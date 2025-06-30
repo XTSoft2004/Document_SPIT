@@ -7,6 +7,10 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ITreeNode } from '@/types/tree';
 import { IDriveItem } from '@/types/driver';
+import { IUserResponse } from '@/types/user';
+import { getMe } from '@/actions/user.action';
+import { logoutAccount } from '@/actions/auth.actions';
+import NotificationService from '../Notification/NotificationService';
 import MenuMobile from '../Menu/MenuMobile';
 
 interface HeaderProps {
@@ -19,6 +23,34 @@ interface HeaderProps {
 const Header = ({ treeData, allItems, onMobileSearch, isMobile }: HeaderProps) => {
     const router = useRouter();
     const [searchQuery, setSearchQuery] = useState("");
+    const [user, setUser] = useState<IUserResponse>();
+    const [isLogin, setIsLogin] = useState<boolean>(false);
+
+    // Fetch user data
+    useEffect(() => {
+        const fetchUser = async () => {
+            const userData = await getMe();
+            setUser(userData.data);
+            if (userData.status === 200)
+                setIsLogin(true);
+            else
+                setIsLogin(false);
+        };
+        fetchUser();
+    }, []);
+
+    const handleLogout = async () => {
+        try {
+            await logoutAccount();
+            setIsLogin(false);
+            setUser(undefined);
+            window.location.href = '/';
+            NotificationService.success({ message: 'Đăng xuất thành công' });
+        } catch (error) {
+            NotificationService.error({ message: 'Đăng xuất thất bại' });
+            console.error('Logout failed:', error);
+        }
+    };
 
     useEffect(() => {
         if (allItems && onMobileSearch) {
@@ -52,7 +84,7 @@ const Header = ({ treeData, allItems, onMobileSearch, isMobile }: HeaderProps) =
                 {/* Only show search bar on mobile */}
                 {allItems && isMobile && (
                     <div className="flex-1 flex justify-center items-center w-full">
-                        <div className="w-full max-w-xs">
+                        <div className="w-full max-w-xs ml-2 mr-2">
                             <Input
                                 allowClear
                                 placeholder="Tìm kiếm toàn bộ file hoặc thư mục..."
@@ -73,7 +105,7 @@ const Header = ({ treeData, allItems, onMobileSearch, isMobile }: HeaderProps) =
 
                 {/* Mobile Menu - hiện ở mobile */}
                 <div className="md:hidden">
-                    <MenuMobile />
+                    <MenuMobile isLoggedIn={isLogin} onLogout={handleLogout} />
                 </div>
             </div>
         </header>

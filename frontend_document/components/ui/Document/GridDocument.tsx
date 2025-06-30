@@ -12,6 +12,7 @@ import { flattenData } from "@/utils/flattenData";
 import { IDriveItem, IDriveResponse } from '@/types/driver';
 import { ITreeNode } from '@/types/tree';
 import Search from './Search';
+import convertSlug from '@/utils/convertSlug';
 
 interface GridDocumentProps {
     data: IDriveResponse[]
@@ -104,7 +105,7 @@ export default function GridDocument({ data, content, slug, path, treeData, mobi
     }, [mobileSearchResults, filtered, content]);
 
     return (
-        <div className="flex h-full min-h-0">
+        <div className="flex h-full min-h-0 relative">
             <SidebarTree
                 treeData={treeData}
                 selectedKeys={selectedKeys}
@@ -116,62 +117,68 @@ export default function GridDocument({ data, content, slug, path, treeData, mobi
                 allItems={allItems}
                 onSearchResult={setFiltered}
             />
-            <div className="flex-1 flex flex-col min-h-0 relative">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 sm:mb-4 w-full gap-2 sm:gap-3 flex-shrink-0 pt-3 sm:pt-4 px-3 sm:px-4">
-                    <div className="flex items-center gap-2 sm:gap-3 min-w-0 overflow-hidden">
+            <div className="flex-1 flex flex-col min-h-0 relative overflow-hidden">
+                <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between mb-3 sm:mb-4 w-full gap-2 xs:gap-3 flex-shrink-0 pt-3 sm:pt-4 px-3 sm:px-4">
+                    <div className="flex items-center gap-2 sm:gap-3 min-w-0 overflow-hidden flex-1">
                         <PathFolder path={path} />
                     </div>
-                    <div className="flex gap-1 sm:gap-2 items-center justify-end flex-shrink-0">
+                    <div className="flex gap-1 xs:gap-2 items-center justify-end flex-shrink-0">
                         {
                             (!showTree && window.innerWidth > 768) && (
                                 <>
-                                    <div className="flex items-center ml-0 sm:ml-4 md:flex">
+                                    <div className="hidden sm:flex items-center ml-0 sm:ml-4">
                                         <Search allItems={allItems} onResult={setFiltered} />
                                     </div>
                                 </>
                             )
                         }
-                        <Back path={path} />
-                        <button
-                            className={`relative overflow-hidden p-2 rounded transition-all duration-200 ${mode === 'list'
-                                ? 'bg-blue-100 text-blue-600 scale-110 shadow'
-                                : 'bg-gray-200 text-gray-500 scale-100'
-                                }`}
-                            onClick={() => handleSetMode('list')}
-                            title="Chế độ danh sách"
-                        >
-                            <span
-                                className={`absolute inset-0 z-0 transition-transform duration-500 ${mode === 'list'
-                                    ? 'translate-x-0 bg-blue-200 opacity-60'
-                                    : '-translate-x-full opacity-0'
+                        {/* Back button - hide on very small screens */}
+                        <div className="hidden xs:block">
+                            <Back path={path} />
+                        </div>
+                        {/* Switch Mode buttons - hide on very small screens */}
+                        <div className="hidden xs:flex gap-1">
+                            <button
+                                className={`relative overflow-hidden p-1.5 xs:p-2 rounded transition-all duration-200 ${mode === 'list'
+                                    ? 'bg-blue-100 text-blue-600 scale-110 shadow'
+                                    : 'bg-gray-200 text-gray-500 scale-100'
                                     }`}
-                            />
-                            <span className="relative z-10">
-                                <ListIcon className="w-5 h-5" />
-                            </span>
-                        </button>
-                        <button
-                            className={`relative overflow-hidden p-2 md:mr-5 rounded transition-all duration-200 ${mode === 'preview'
-                                ? 'bg-blue-100 text-blue-600 scale-110 shadow'
-                                : 'bg-gray-200 text-gray-500 scale-100'
-                                }`}
-                            onClick={() => handleSetMode('preview')}
-                            title="Chế độ lưới"
-                        >
-                            <span
-                                className={`absolute inset-0 z-0 transition-transform duration-500 ${mode === 'preview'
-                                    ? 'translate-x-0 bg-blue-200 opacity-60'
-                                    : 'translate-x-full opacity-0'
+                                onClick={() => handleSetMode('list')}
+                                title="Chế độ danh sách"
+                            >
+                                <span
+                                    className={`absolute inset-0 z-0 transition-transform duration-500 ${mode === 'list'
+                                        ? 'translate-x-0 bg-blue-200 opacity-60'
+                                        : '-translate-x-full opacity-0'
+                                        }`}
+                                />
+                                <span className="relative z-10">
+                                    <ListIcon className="w-4 h-4 xs:w-5 xs:h-5" />
+                                </span>
+                            </button>
+                            <button
+                                className={`relative overflow-hidden p-1.5 xs:p-2 md:mr-5 rounded transition-all duration-200 ${mode === 'preview'
+                                    ? 'bg-blue-100 text-blue-600 scale-110 shadow'
+                                    : 'bg-gray-200 text-gray-500 scale-100'
                                     }`}
-                            />
-                            <span className="relative z-10">
-                                <LayoutGridIcon className="w-5 h-5" />
-                            </span>
-                        </button>
+                                onClick={() => handleSetMode('preview')}
+                                title="Chế độ lưới"
+                            >
+                                <span
+                                    className={`absolute inset-0 z-0 transition-transform duration-500 ${mode === 'preview'
+                                        ? 'translate-x-0 bg-blue-200 opacity-60'
+                                        : 'translate-x-full opacity-0'
+                                        }`}
+                                />
+                                <span className="relative z-10">
+                                    <LayoutGridIcon className="w-4 h-4 xs:w-5 xs:h-5" />
+                                </span>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 {/* Content area với responsive padding */}
-                <div className="flex-1 min-h-0 overflow-auto px-3 sm:px-4 pb-4 sm:pb-5">
+                <div className="flex-1 min-h-0 overflow-auto px-2 xs:px-3 sm:px-4 pb-3 xs:pb-4 sm:pb-5">
                     {mode === 'list' ? (
                         <GridDocumentList
                             content={displayContent}
@@ -194,6 +201,52 @@ export default function GridDocument({ data, content, slug, path, treeData, mobi
                         fileName={previewFile?.fileName || ''}
                         documentId={previewFile?.documentId || 0}
                     />
+                </div>
+                {/* Mobile-only navigation for very small screens */}
+                <div className="xs:hidden flex items-center justify-between mb-2 px-1">
+                    <button
+                        className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${path.length > 0
+                                ? 'text-blue-600 hover:bg-blue-50 active:bg-blue-100'
+                                : 'text-gray-400 cursor-not-allowed'
+                            }`}
+                        onClick={() => {
+                            if (path.length > 0) {
+                                const parentUrl = path.length > 1
+                                    ? '/document/' + path.slice(0, -1).map(convertSlug).join('/')
+                                    : '/document';
+                                router.push(parentUrl);
+                            }
+                        }}
+                        disabled={path.length === 0}
+                        title="Quay lại"
+                    >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                        <span>Back</span>
+                    </button>
+                    <div className="flex gap-1">
+                        <button
+                            className={`p-1 rounded text-xs transition-colors ${mode === 'list'
+                                ? 'bg-blue-100 text-blue-600'
+                                : 'bg-gray-200 text-gray-500'
+                                }`}
+                            onClick={() => handleSetMode('list')}
+                            title="List"
+                        >
+                            <ListIcon className="w-5 h-5" />
+                        </button>
+                        <button
+                            className={`p-1 rounded text-xs transition-colors ${mode === 'preview'
+                                ? 'bg-blue-100 text-blue-600'
+                                : 'bg-gray-200 text-gray-500'
+                                }`}
+                            onClick={() => handleSetMode('preview')}
+                            title="Grid"
+                        >
+                            <LayoutGridIcon className="w-5 h-5" />
+                        </button>
+                    </div>
                 </div>
             </div>
         </div >

@@ -35,18 +35,18 @@ export default function PathFolder({ path }: PathFolderProps) {
             {
                 title: (
                     <span
-                        className="ml-5 flex items-center px-2 py-1 rounded hover:bg-gray-100 transition-colors cursor-pointer font-semibold text-blue-600 align-middle"
+                        className="flex items-center px-1 xs:px-2 py-1 rounded hover:bg-gray-100 transition-colors cursor-pointer font-semibold text-blue-600 align-middle text-xs xs:text-sm"
                         onClick={() => router.push('/document')}
                         style={{ lineHeight: '1.5' }}
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
-                            width="1.2em"
-                            height="1.2em"
+                            width="1em"
+                            height="1em"
                             viewBox="0 0 24 24"
                             fill="none"
                             className="align-middle"
-                            style={{ verticalAlign: 'middle', display: 'inline-block' }}
+                            style={{ verticalAlign: 'middle', display: 'inline-block', marginBottom: '5px' }}
                         >
                             <path
                                 d="M3 10.5L12 4l9 6.5V20a1 1 0 0 1-1 1h-5v-5h-6v5H4a1 1 0 0 1-1-1V10.5z"
@@ -56,6 +56,7 @@ export default function PathFolder({ path }: PathFolderProps) {
                                 fill="none"
                             />
                         </svg>
+                        <span className="xs:inline ml-1 mb-1">Home</span>
                     </span>
                 ),
             },
@@ -63,21 +64,25 @@ export default function PathFolder({ path }: PathFolderProps) {
 
         path.forEach((item, index) => {
             const isLast = index === path.length - 1;
+            const truncatedItem = item.length > 15 ? `${item.substring(0, 12)}...` : item;
+            const displayItem = window.innerWidth < 480 ? truncatedItem : item;
+
             crumbs.push({
                 title: isLast ? (
                     <span
-                        className="font-semibold text-gray-800 align-middle cursor-pointer group relative"
+                        className="font-semibold text-gray-800 align-middle cursor-pointer group relative text-xs xs:text-sm break-words max-w-xs truncate"
                         style={{ verticalAlign: 'middle' }}
                         onClick={() => handleCopyPath(index)}
+                        title={item} // Show full text on hover
                     >
-                        {item}
+                        {displayItem}
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
-                            width="1em"
-                            height="1em"
+                            width="1.2em"
+                            height="1.2em"
                             viewBox="0 0 24 24"
                             fill="none"
-                            className="ml-2 mb-1 text-gray-500 hover:text-blue-600 transition-colors inline-block"
+                            className="ml-1 xs:ml-2 text-gray-500 hover:text-blue-600 transition-colors inline-block"
                             style={{ verticalAlign: 'middle' }}
                         >
                             <path
@@ -91,11 +96,12 @@ export default function PathFolder({ path }: PathFolderProps) {
                     </span>
                 ) : (
                     <span
-                        className="cursor-pointer text-blue-600 hover:underline align-middle"
+                        className="cursor-pointer text-blue-600 hover:underline align-middle text-xs xs:text-sm break-words max-w-xs truncate"
                         style={{ verticalAlign: 'middle' }}
                         onClick={() => handleNavigate(index)}
+                        title={item} // Show full text on hover
                     >
-                        {item}
+                        {displayItem}
                     </span>
                 ),
             });
@@ -105,10 +111,12 @@ export default function PathFolder({ path }: PathFolderProps) {
     }, [path, handleNavigate, router, handleCopyPath]);
 
     return (
-        <Breadcrumb
-            items={items}
-            className="text-base"
-            separator={<span className="text-gray-400 align-middle" style={{ verticalAlign: 'middle' }}>/</span>}
-        />
+        <div className="min-w-0 flex-1 overflow-hidden">
+            <Breadcrumb
+                items={items}
+                className="text-xs xs:text-sm sm:text-base overflow-hidden"
+                separator={<span className="text-gray-400 align-middle px-1" style={{ verticalAlign: 'middle' }}>/</span>}
+            />
+        </div>
     );
 }
