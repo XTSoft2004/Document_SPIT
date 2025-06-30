@@ -408,16 +408,6 @@ namespace Domain.Common.GoogleDriver.Services
                 return (node.Children.Count > 0);
             }
 
-            bool checkEmptyFolder(TreeDocumentResponse node)
-            {
-                if ((bool)!node.IsFolder)
-                    return true;
-                
-                node.Children = node.Children.Where(c => checkEmptyFolder(c)).ToList();
-
-                return (node.Children.Count > 0);
-            }
-
             var roots = new List<TreeDocumentResponse>();
 
             foreach (var item in allItems)
