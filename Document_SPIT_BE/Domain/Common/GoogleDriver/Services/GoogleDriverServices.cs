@@ -395,21 +395,36 @@ namespace Domain.Common.GoogleDriver.Services
                     TotalViews = item.TotalViews,
                     Children = new List<TreeDocumentResponse>()
                 };
-            };
+            }
+            ;
+
+            bool checkEmptyFolder(TreeDocumentResponse node)
+            {
+                if ((bool)!node.IsFolder)
+                    return true;
+
+                node.Children = node.Children.Where(c => checkEmptyFolder(c)).ToList();
+
+                return (node.Children.Count > 0);
+            }
 
             var roots = new List<TreeDocumentResponse>();
 
             foreach (var item in allItems)
             {
+                var rootNode = treeMap[item.Id];
                 if (item.Parents != null && item.Parents.Count > 0)
-                    {
+                {
                     var parentId = item.Parents[0];
                     if (treeMap.ContainsKey(parentId))
-                        treeMap[parentId].Children.Add(treeMap[item.Id]);
+                        treeMap[parentId].Children.Add(rootNode);
                 }
 
                 if (item.Id == rootFolderId)
-                    roots.Add(treeMap[item.Id]);
+                {
+                    if (checkEmptyFolder(rootNode))
+                        roots.Add(rootNode);
+                }
             }
 
             return roots.Select(r => treeMap[r.FolderId!]).ToList();

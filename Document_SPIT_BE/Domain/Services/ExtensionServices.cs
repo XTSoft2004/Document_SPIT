@@ -117,7 +117,7 @@ namespace Domain.Services
             RequestHttpClient _request = new RequestHttpClient();
             _request.SetCookie(cookie, "/", "student.husc.edu.vn");
 
-            string[] courseId = File.ReadAllLines("D:\\Learn_HUSC\\CSharp\\Document_SPIT\\Document_SPIT_BE\\Document_SPIT_BE\\CourseList.txt");
+            string[] courseId = File.ReadAllLines("G:\\Learn_HUSC\\Project_CaNhan\\Document_SPIT\\Document_SPIT_BE\\Document_SPIT_BE\\CourseList.txt");
             foreach(var course in courseId)
             {
                 var response = await _request.GetAsync($"https://student.husc.edu.vn/Subject/Details/{course}/");
@@ -127,7 +127,7 @@ namespace Domain.Services
                     var htmlDoc = new HtmlDocument();
                     htmlDoc.LoadHtml(content);  // Load từ HTML string
 
-                    var trinhdodaotao = htmlDoc.DocumentNode.SelectSingleNode("/html/body/div[2]/div[2]/div/div/div/fieldset[1]/div[5]/div/p");
+                    var trinhdodaotao = htmlDoc.DocumentNode.SelectSingleNode(" ");
                     if(trinhdodaotao != null)
                     {
                         var trinhDoDaoTao = WebUtility.HtmlDecode(trinhdodaotao.InnerText.Trim());

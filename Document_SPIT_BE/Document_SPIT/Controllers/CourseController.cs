@@ -58,5 +58,13 @@ namespace Document_SPIT_BE.Controllers
             var response = await _services.DeleteAsync(id);
             return response.ToActionResult();
         }
+        [HttpGet("{Id}")]
+        public async Task<IActionResult> GetCourseById(long? Id)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+            var response = await _services.GetCourseById(Id);
+            return response.ToActionResult();
+        }
     }
 }

@@ -20,6 +20,7 @@ namespace Domain.Model.Response.Document
         public string? FolderId { get; set; }
         public long? CourseId { get; set; }
         public string? CourseName { get; set; }
+        public List<long>? CategoryIds { get; set; }
         public string TypeFile
         {
             get

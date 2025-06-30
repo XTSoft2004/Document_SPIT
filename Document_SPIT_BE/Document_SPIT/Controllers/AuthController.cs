@@ -45,5 +45,15 @@ namespace Document_SPIT_BE.Controllers
             var response = await _sevices!.RefreshTokenAccount();
             return response.ToActionResult();
         }
+        [HttpPost("password-security")]
+        public async Task<IActionResult> PasswordSecurity([FromBody] PasswordSecurityRequest passwordSecurityRequest)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+            if(passwordSecurityRequest.PasswordSecurity == "SPIT_19082023")
+                return Ok(new { message = "Xác minh mật khẩu bảo mật thành công" });
+            else
+                return BadRequest(new { message = "Mật khẩu bảo mật không chính xác" });
+        }
     } 
 }

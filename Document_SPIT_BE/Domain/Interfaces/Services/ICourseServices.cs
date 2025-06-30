@@ -39,5 +39,11 @@ namespace Domain.Interfaces.Services
         /// <param name="totalRecords"></param>
         /// <returns></returns>
         List<CourseResponse>? GetCourse(string search, int pageNumber, int pageSize, out int totalRecords);
+        /// <summary>
+        /// Lấy một học phần theo ID.
+        /// </summary>
+        /// <param name="Id"></param>
+        /// <returns></returns>
+        Task<HttpResponse> GetCourseById(long? Id);
     }
 }

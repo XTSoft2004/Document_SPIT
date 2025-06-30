@@ -11,6 +11,7 @@ namespace Domain.Model.Request.Document
         public string? name { get; set; }
         public long? courseId { get; set; }
         public string? folderId { get; set; }
-       public string? statusDocument { get; set; } = "Pending";
+        public List<long>? categoryIds { get; set; }
+        public string? statusDocument { get; set; } = "Pending";
     }
 }
