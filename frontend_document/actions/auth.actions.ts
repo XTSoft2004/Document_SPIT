@@ -84,3 +84,30 @@ export const logoutAccount = async () => {
     ...data,
   } as IResponse
 }
+
+export const checkAuthSecurity = async (password: string) => {
+  const response = await fetch(
+    `${globalConfig.baseUrl}/auth/password-security`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization:
+          headers().get('Authorization') ||
+          `Bearer ${cookies().get('accessToken')?.value || ''}`,
+      },
+      body: JSON.stringify({ passwordSecurity: password }),
+      next: {
+        tags: ['auth.passwordSecurity'],
+      },
+    },
+  )
+
+  const data = await response.json()
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    ...data,
+  } as IBaseResponse
+}
