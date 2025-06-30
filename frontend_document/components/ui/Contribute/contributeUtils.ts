@@ -1,17 +1,17 @@
-import { uploadFile } from '@/actions/driver.actions'
+import { createDocument } from '@/actions/document.actions'
 
 export interface ContributeFormData {
   name: string
   file: File | null
   subject: string
-  courseId: number | null
+  courseId: number
 }
 
 export const createEmptyFormData = (): ContributeFormData => ({
   name: '',
   file: null,
   subject: '',
-  courseId: null,
+  courseId: 0,
 })
 
 export const validateForm = (formData: ContributeFormData): boolean => {
@@ -29,8 +29,7 @@ export const fileToBase64 = (file: File): Promise<string> => {
     reader.readAsDataURL(file)
     reader.onload = () => {
       const base64String = reader.result as string
-      const base64Content = base64String.split(',')[1]
-      resolve(base64Content)
+      resolve(base64String)
     }
     reader.onerror = (error) => reject(error)
   })
@@ -50,13 +49,16 @@ export const uploadDocument = async (
     throw new Error('Không tìm thấy folder pending')
   }
 
-  const uploadResponse = await uploadFile({
+  const uploadResponse = await createDocument({
+    name: formData.name,
+    fileName: formData.file.name,
     base64String,
-    fileName: formData.name,
-    folderId: pendingFolderId,
+    courseId: formData.courseId,
   })
 
+  console.log('Upload response:', uploadResponse)
+
   if (!uploadResponse.ok) {
-    throw new Error(uploadResponse.message || 'Lỗi khi upload file')
+    throw new Error(uploadResponse.message)
   }
 }

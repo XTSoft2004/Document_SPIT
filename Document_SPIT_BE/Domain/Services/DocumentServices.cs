@@ -65,7 +65,7 @@ namespace Domain.Services
                 return HttpResponse.Error("Base64 không hợp lệ, vui lòng kiểm tra lại.", System.Net.HttpStatusCode.BadRequest);
 
             // Kiểm tra thông tin tài liệu
-            if (AppExtension.IsBase64String(base64Check) == false)
+            if (AppExtension.IsBase64String(base64Check) == false)                      
                 return HttpResponse.Error("Base64 không hợp lệ, vui lòng kiểm tra lại.", System.Net.HttpStatusCode.BadRequest);
 
             // Tính toán MD5 từ Base64

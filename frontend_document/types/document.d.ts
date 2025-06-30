@@ -47,7 +47,7 @@ export interface IDocumentPendingRequest {
   name: string
   fileName: string
   base64String: string
-  courseId?: string
+  courseId?: number
 }
 export interface IDocumentRecentResponse {
   id: number

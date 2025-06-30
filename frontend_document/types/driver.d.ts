@@ -21,6 +21,7 @@ export interface IUploadFile {
   base64String: string
   fileName: string
   folderId: string
+  courseId: number
 }
 
 export interface IFolder {

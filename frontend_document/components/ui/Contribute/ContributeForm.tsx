@@ -47,8 +47,8 @@ export default function ContributeForm() {
 
             setFormData(createEmptyFormData());
         } catch (error) {
-            console.error('Error uploading file:', error);
-            NotificationService.error({ message: 'Đã xảy ra lỗi khi gửi tài liệu', description: 'Vui lòng thử lại sau.' });
+            const errorMessage = (error instanceof Error && error.message) ? error.message : 'Đã xảy ra lỗi';
+            NotificationService.error({ message: errorMessage, description: 'Vui lòng thử lại sau.' });
         } finally {
             setIsSubmitting(false);
         }

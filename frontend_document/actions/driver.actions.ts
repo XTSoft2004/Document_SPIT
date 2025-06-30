@@ -13,6 +13,7 @@ import {
   IDriveResponse,
   IInfoGoogleDriveResponse,
   ILoadFolder,
+  IUploadFile,
 } from '@/types/driver'
 
 export const getInfoGoogleDriver = async () => {
