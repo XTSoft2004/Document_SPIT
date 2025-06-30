@@ -37,11 +37,12 @@ namespace Domain.Services
                 // Lấy số lượng tài liệu đã tải lên của người dùng
                 var documentCount = documents.Count(d => d.UserId == user.Id);
                 // Thêm vào bảng xếp hạng
-                ranking.Add(new RankingResponse
-                {
-                    Fullname = user.Fullname,
-                    TotalUpload = documentCount,
-                });
+                if (documentCount != 0)
+                    ranking.Add(new RankingResponse
+                    {
+                        Fullname = user.Fullname,
+                        TotalUpload = documentCount,
+                    });
             }
 
             // Trả kết quả

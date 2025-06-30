@@ -192,7 +192,6 @@ namespace Domain.Services
                 RoleName = _role!.Find(f => f.Id == user.RoleId)?.DisplayName ?? "",
             });
         }
-    }
         public async Task<HttpResponse> getStars()
         {
             // Lấy danh sách sao của người dùng
