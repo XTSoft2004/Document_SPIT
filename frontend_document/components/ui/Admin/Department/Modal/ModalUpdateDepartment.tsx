@@ -1,31 +1,33 @@
 import React, { useState } from "react";
-import { Modal, Button, Input, Form, message, notification } from "antd";
+import { Modal, Button, Input, Form, message } from "antd";
 import { IUserResponse, IUserUpdate } from "@/types/user";
 import { updateUser } from "@/actions/user.action";
-import NotificationService from "../../Notification/NotificationService";
-import { mutateTable } from "@/utils/swrReload";
+import { mutateTable, reloadTable } from "@/utils/swrReload";
+import NotificationService from "@/components/ui/Notification/NotificationService";
+import { IDepartmentRequest, IDepartmentResponse } from "@/types/department";
+import { updateDepartment } from "@/actions/department.action";
 
-interface ModalUpdateUserProps {
+interface ModalUpdateDepartmentProps {
     visible: boolean;
-    user?: IUserResponse;
+    department?: IDepartmentResponse;
     onCancel: () => void;
 }
 
-const ModalUpdateUser: React.FC<ModalUpdateUserProps> = ({
+const ModalUpdateDepartment: React.FC<ModalUpdateDepartmentProps> = ({
     visible,
-    user,
+    department,
     onCancel,
 }) => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
 
     React.useEffect(() => {
-        if (user) {
-            form.setFieldsValue(user);
+        if (department) {
+            form.setFieldsValue(department);
         } else {
             form.resetFields();
         }
-    }, [user, form]); const handleOk = async () => {
+    }, [department, form]); const handleOk = async () => {
         await handleSubmit();
     };
 
@@ -34,22 +36,19 @@ const ModalUpdateUser: React.FC<ModalUpdateUserProps> = ({
             setLoading(true);
             const values = await form.validateFields();
 
-            const userUpdate: IUserUpdate = {
-                fullname: values.fullname,
-                password: values.password || '', // Optional field
+            const departmentUpdate: IDepartmentRequest = {
+                code: values.code,
+                name: values.name,
             };
-            const response = await updateUser(form.getFieldValue("id"), userUpdate);
+            const response = await updateDepartment(form.getFieldValue("id"), departmentUpdate);
             if (response.ok) {
                 NotificationService.success({
-                    message: "Cập nhật người dùng thành công"
+                    message: "Cập nhật phòng ban thành công"
                 });
                 onCancel();
-                // Mutate trực tiếp để có trải nghiệm mượt mà
-                mutateTable('user');
-            }
-            else {
+            } else {
                 NotificationService.error({
-                    message: "Cập nhật người dùng thất bại"
+                    message: "Cập nhật phòng ban thất bại"
                 });
             }
 
@@ -63,7 +62,7 @@ const ModalUpdateUser: React.FC<ModalUpdateUserProps> = ({
 
     return (
         <Modal
-            title="Cập nhật thông tin người dùng"
+            title="Cập nhật thông tin phòng ban"
             open={visible}
             onOk={handleOk}
             onCancel={onCancel}
@@ -83,24 +82,23 @@ const ModalUpdateUser: React.FC<ModalUpdateUserProps> = ({
                 }}
             >
                 <Form.Item
-                    label="Tên tài khoản:"
-                    name="username"
-                    rules={[{ required: true, message: "Vui lòng nhập người dùng!" }]}
+                    label="Mã phòng ban:"
+                    name="code"
+                    rules={[{ required: true, message: "Vui lòng nhập mã phòng ban!" }]}
                 >
-                    <Input disabled value={form.getFieldValue("username")} />
+                    <Input value={form.getFieldValue("code")} />
                 </Form.Item>
+
                 <Form.Item
-                    label="Họ và tên:"
-                    name="fullname"
-                    rules={[
-                        { required: true, message: "Vui lòng nhập họ và tên!" },
-                    ]}
+                    label="Tên phòng ban:"
+                    name="name"
+                    rules={[{ required: true, message: "Vui lòng nhập tên phòng ban!" }]}
                 >
-                    <Input value={form.getFieldValue("fullname")} />
+                    <Input value={form.getFieldValue("name")} />
                 </Form.Item>
             </Form>
         </Modal>
     );
 };
 
-export default ModalUpdateUser;
+export default ModalUpdateDepartment;

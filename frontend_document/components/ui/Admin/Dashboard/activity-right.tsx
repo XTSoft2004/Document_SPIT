@@ -36,14 +36,14 @@ const ActivityCard = ({ index }: { index: number }) => (
 
 export default function ActivityRight() {
     return (
-        <div className="flex flex-col gap-4 p-4 pt-0">
+        <div className="flex flex-col gap-4 p-2 sm:p-4 pt-0">
             {/* Header */}
             <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Activity</h2>
-                <a className="flex items-center text-sm text-blue-500 hover:underline cursor-pointer">
+                <h2 className="text-base sm:text-lg font-semibold">Activity</h2>
+                <a className="flex items-center text-xs sm:text-sm text-blue-500 hover:underline cursor-pointer">
                     <span>View All</span>
                     <svg
-                        className="ml-1 w-4 h-4"
+                        className="ml-1 w-3 h-3 sm:w-4 sm:h-4"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
@@ -60,7 +60,7 @@ export default function ActivityRight() {
             </div>
 
             {/* Activity List */}
-            <div className="overflow-auto max-h-[100vh] scrollbar-hide">
+            <div className="overflow-auto max-h-[60vh] sm:max-h-[70vh] lg:max-h-[80vh] scrollbar-hide space-y-2">
                 {Array.from({ length: 20 }).map((_, idx) => (
                     <ActivityCard key={idx} index={idx} />
                 ))}

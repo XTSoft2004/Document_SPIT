@@ -1,7 +1,7 @@
 import DocumentPageClient from "@/components/ui/Document/DocumentPageClient";
-import { getTree } from "@/actions/driver.actions";
 import getContent from "@/utils/getContent";
 import { convertToTreeData } from "@/utils/convertToTreeData";
+import { getTree } from "@/actions/driver.actions";
 
 export default async function DocumentPage({ params }: { params: { slug: string[] } }) {
     const { data } = await getTree();

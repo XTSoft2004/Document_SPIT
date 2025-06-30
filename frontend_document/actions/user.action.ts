@@ -48,7 +48,7 @@ export const updateUser = async (id: string, user: IUserUpdate) => {
       'Content-Type': 'application/json',
       Authorization:
         headers().get('Authorization') ||
-        `Bearer ${cookies().get('accessToken')?.value || ' '}`,
+        `Bearer ${cookies().get('accessToken')?.value || ''}`,
     },
     body: JSON.stringify(user),
     next: {
@@ -57,7 +57,6 @@ export const updateUser = async (id: string, user: IUserUpdate) => {
   })
 
   const data = (await response.json()) as IBaseResponse
-
   revalidateTag('user.index')
 
   return {
@@ -67,16 +66,9 @@ export const updateUser = async (id: string, user: IUserUpdate) => {
   } as IResponse
 }
 
-export const setRoleUser = async (id: string, roleName: string) => {
-  if (!id || !roleName) {
-    return {
-      ok: false,
-      status: 400,
-      message: 'User ID and role name are required',
-    } as IResponse
-  }
+export const setRoleUser = async (username: string, roleName: string) => {
   const response = await fetch(
-    `${globalConfig.baseUrl}/user/set-role?userId=${id}&roleName=${roleName}`,
+    `${globalConfig.baseUrl}/user/set-role?username=${username}&roleName=${roleName}`,
     {
       method: 'POST',
       headers: {

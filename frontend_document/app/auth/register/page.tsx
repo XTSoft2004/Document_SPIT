@@ -1,17 +1,15 @@
 'use client';
 import { useForm } from 'react-hook-form';
-import { LockOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import { CustomTextField } from '@/components/ui/Input/CustomTextField';
-import { CircleUser, CircleUserRound, KeyRound, SquareUserRound } from 'lucide-react';
+import { CircleUser, KeyRound, SquareUserRound } from 'lucide-react';
 import { IRegisterRequest } from '@/types/auth';
 import { registerAccount } from '@/actions/auth.actions';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import MoonLoading from '@/components/ui/Loading/MoonLoading';
 import ModernAuthLoading from '@/components/ui/Loading/ModernAuthLoading';
 import NotificationService from '@/components/ui/Notification/NotificationService';
-import { motion } from 'framer-motion'; // Thêm Framer Motion   
+import { motion } from 'framer-motion';
 
 export default function PageRegister() {
     const {
@@ -32,7 +30,7 @@ export default function PageRegister() {
 
         const register = await registerAccount(registerRequest);
         if (register.ok) {
-            router.push('/login');
+            router.push('/auth');
             NotificationService.success({
                 message: 'Đăng ký thành công',
                 description: `Chào mừng bạn ${data.username} đã đăng ký thành công!`,
@@ -43,34 +41,33 @@ export default function PageRegister() {
         NotificationService.error({
             message: register.message || 'Đăng ký thất bại',
         });
-    }; return (
+    };
+
+    return (
         <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -50 }}
             transition={{ duration: 0.4, ease: 'easeOut' }}
-            className="w-full"
-            style={{ height: 320 }} // Chiều dài cố định
+            className="w-full h-full flex flex-col justify-center"
         >
-            {loading ? (
-                <ModernAuthLoading />
-            ) : (
+            <div className="flex flex-col justify-center space-y-4">
                 <form
                     onSubmit={handleSubmit(onSubmit)}
-                    className="space-y-6"
+                    className="space-y-3"
                 >
-                    <div className="space-y-5">
+                    <div className="space-y-3">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.1, duration: 0.3 }}
-                        >                            <CustomTextField
+                        >
+                            <CustomTextField
                                 control={control}
                                 errors={errors}
                                 name="username"
-                                placeholder="Choose a username"
-                                // label="Username"
-                                icon={<CircleUser size={20} className="text-gray-400" />}
+                                placeholder="Nhập tên đăng nhập"
+                                icon={<CircleUser size={18} className="text-gray-400" />}
                             />
                         </motion.div>
 
@@ -78,13 +75,14 @@ export default function PageRegister() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2, duration: 0.3 }}
-                        >                            <CustomTextField
+                        >
+                            <CustomTextField
                                 control={control}
                                 errors={errors}
                                 name="password"
                                 type="password"
-                                placeholder="Create a password"
-                                icon={<KeyRound size={20} className="text-gray-400" />}
+                                placeholder="Tạo mật khẩu"
+                                icon={<KeyRound size={18} className="text-gray-400" />}
                             />
                         </motion.div>
 
@@ -92,13 +90,14 @@ export default function PageRegister() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3, duration: 0.3 }}
-                        >                            <CustomTextField
+                        >
+                            <CustomTextField
                                 control={control}
                                 errors={errors}
                                 name="fullname"
                                 type="text"
-                                placeholder="Enter your full name"
-                                icon={<SquareUserRound size={20} className="text-gray-400" />}
+                                placeholder="Nhập họ và tên"
+                                icon={<SquareUserRound size={18} className="text-gray-400" />}
                             />
                         </motion.div>
                     </div>
@@ -113,34 +112,41 @@ export default function PageRegister() {
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             className="w-full"
+                        >                                <Button
+                            type="primary"
+                            htmlType="submit"
+                            disabled={loading}
+                            className="w-full h-12 text-base font-semibold rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 border-none shadow-md hover:shadow-lg transition-all duration-300"
+                            style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%)', fontSize: 16, height: 48, borderRadius: '16px' }}
                         >
-                            <Button
-                                type="primary"
-                                htmlType="submit"
-                                className="w-full h-12 text-base font-semibold rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 border-none shadow-lg hover:shadow-xl transition-all duration-300"
-                                style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%)' }}
-                            >
-                                Create Account
+                                {loading ? (
+                                    <span className="text-white flex items-center justify-center gap-2">
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        <span>Đang đăng ký...</span>
+                                    </span>
+                                ) : (
+                                    'Đăng ký'
+                                )}
                             </Button>
                         </motion.div>
                     </motion.div>
-
-                    {/* Terms and conditions */}
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.5, duration: 0.3 }}
-                        className="text-center text-xs text-gray-500 pt-4"
-                    >
-                        <p>
-                            By creating an account, you agree to our{' '}
-                            <a href="#" className="text-blue-600 hover:underline">Terms of Service</a>
-                            {' '}and{' '}
-                            <a href="#" className="text-blue-600 hover:underline">Privacy Policy</a>
-                        </p>
-                    </motion.div>
                 </form>
-            )}
+
+                {/* Terms and conditions */}
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.5, duration: 0.3 }}
+                    className="text-center text-xs text-gray-500 pt-1"
+                >
+                    <p className="leading-relaxed">
+                        Bằng việc tạo tài khoản, bạn đồng ý với{' '}
+                        <a href="#" className="text-blue-600 hover:underline">Điều khoản dịch vụ</a>
+                        {' '}và{' '}
+                        <a href="#" className="text-blue-600 hover:underline">Chính sách bảo mật</a>
+                    </p>
+                </motion.div>
+            </div>
         </motion.div>
     );
 }

@@ -44,21 +44,23 @@ const ModalCreateDocument: React.FC<ModalCreateDocumentProps> = ({ visible, onCa
                 reader.onerror = () => reject();
             }) : "";
 
-            const documentCreate: IDocumentRequest = {
-                name: values.fileName,
-                fileName: values.fileUpload[0]?.name || "",
-                base64String,
-                folderId: selectedFolderId ? selectedFolderId.id : "",
-            }; const response = await createDocument(documentCreate);
-            if (response.ok) {
-                NotificationService.success({ message: "Tạo tài liệu thành công, chờ xét duyệt" });
-                form.resetFields();
-                setPreviewSrc(null); onCancel();
-                // Mutate trực tiếp để có trải nghiệm mượt mà
-                mutateTable('document');
-            } else {
-                NotificationService.error({ message: response.message || "Tạo tài liệu thất bại" });
-            }
+            // const documentCreate: IDocumentRequest = {
+            //     name: values.fileName,
+            //     fileName: values.fileUpload[0]?.name || "",
+            //     base64String,
+            //     folderId: selectedFolderId ? selectedFolderId.id : "",
+            // };
+
+            // const response = await createDocument(documentCreate);
+            // if (response.ok) {
+            //     NotificationService.success({ message: "Tạo tài liệu thành công, chờ xét duyệt" });
+            //     form.resetFields();
+            //     setPreviewSrc(null); onCancel();
+            //     // Mutate trực tiếp để có trải nghiệm mượt mà
+            //     mutateTable('document');
+            // } else {
+            //     NotificationService.error({ message: response.message || "Tạo tài liệu thất bại" });
+            // }
         } catch { } finally {
             setLoading(false);
         }

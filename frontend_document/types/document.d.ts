@@ -12,6 +12,8 @@ export interface IDocumentUpdateRequest {
   base64String?: string
   fileName?: string
   folderId?: string
+  courseId?: number
+  categoryIds?: number[]
 }
 
 export interface IDocumentResponse {
@@ -23,9 +25,27 @@ export interface IDocumentResponse {
   fileName: string
   isPrivate: boolean
   statusDocument: string
-  userId: number
+  fullNameUser: string
   folderId: string
+  courseId: number
+  courseName: string
   typeFile: string
+  categoryIds: number[]
   createdDate: date
   modifiedDate: date
+}
+
+export interface IDocumentReviewRequest {
+  name: string
+  courseId?: string
+  folderId?: string
+  categoryIds?: number[]
+  statusDocument: string
+}
+
+export interface IDocumentPendingRequest {
+  name: string
+  fileName: string
+  base64String: string
+  courseId?: string
 }
