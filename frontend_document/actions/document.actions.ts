@@ -2,6 +2,7 @@
 import globalConfig from '@/app.config'
 import {
   IDocumentPendingRequest,
+  IDocumentRecentResponse,
   IDocumentRequest,
   IDocumentResponse,
   IDocumentReviewRequest,
@@ -168,4 +169,30 @@ export const getCodeView = async (documentId: number) => {
     status: response.status,
     ...data,
   } as IShowResponse<{ code: string }>
+}
+
+export const getRecentDocuments = async (number: number) => {
+  const response = await fetch(
+    `${globalConfig.baseUrl}/document/recent/${number}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization:
+          headers().get('Authorization') ||
+          `Bearer ${cookies().get('accessToken')?.value || ' '}`,
+      },
+      next: {
+        tags: ['document.recent'],
+      },
+    },
+  )
+
+  const data = await response.json()
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    ...data,
+  } as IIndexResponse<IDocumentRecentResponse>
 }

@@ -18,9 +18,6 @@ export default function DraggerUpload() {
     const [isModalOpenFolder, setIsModalOpenFolder] = useState(false);
     const [selectedFolderId, setSelectedFolderId] = useState<IFileInfo | null>(null);
     const [breadcrumb, setBreadcrumb] = useState<string>('');
-    useEffect(() => {
-        console.log(selectedFolderId);
-    }, [selectedFolderId]);
 
     const props: UploadProps = {
         name: 'file',

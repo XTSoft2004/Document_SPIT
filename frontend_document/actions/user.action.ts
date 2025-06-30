@@ -146,3 +146,26 @@ export const createUser = async (user: IUserCreateRequest) => {
     status: response.status,
   } as IResponse
 }
+
+export const getMe = async () => {
+  const response = await fetch(`${globalConfig.baseUrl}/user/me`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization:
+        headers().get('Authorization') ||
+        `Bearer ${cookies().get('accessToken')?.value || ' '}`,
+    },
+    next: {
+      tags: ['user.me'],
+    },
+  })
+
+  const data = await response.json()
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    ...data,
+  } as IShowResponse<IUserResponse>
+}

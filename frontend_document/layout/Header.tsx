@@ -1,82 +1,121 @@
 'use client';
-
 import Image from 'next/image';
-import { Avatar, Input } from 'antd';
-import { SearchOutlined, UserOutlined } from '@ant-design/icons';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { ITreeNode } from '@/types/tree';
-import { IDriveItem } from '@/types/driver';
+import Menu from '@/components/ui/Menu/Menu';
+import MenuMobile from '@/components/ui/Menu/MenuMobile';
+import NavigationLink from '@/components/ui/Navigation/NavigationLink';
+import { IUserResponse } from '@/types/user';
+import {
+    getMe
+} from '@/actions/user.action';
+import { logoutAccount } from '@/actions/auth.actions';
+import React, { useEffect } from 'react';
+import MenuProfile from '@/components/ui/Menu/MenuProfile';
+import NotificationService from '@/components/ui/Notification/NotificationService';
 
-interface HeaderProps {
-    treeData?: ITreeNode[];
-    allItems?: IDriveItem[];
-    onMobileSearch?: (results: IDriveItem[] | null) => void;
-}
+import { UserOutlined } from '@ant-design/icons';
+import { Avatar } from 'antd';
 
-const Header = ({ treeData, allItems, onMobileSearch }: HeaderProps) => {
-    const router = useRouter();
-    const [searchQuery, setSearchQuery] = useState("");
+const Header = () => {
+    const [user, setUser] = React.useState<IUserResponse>();
+    const [islogin, setIsLogin] = React.useState<boolean>(false);
+    const [showProfileMenu, setShowProfileMenu] = React.useState<boolean>(false);
 
     useEffect(() => {
-        if (allItems && onMobileSearch) {
-            if (!searchQuery.trim()) {
-                onMobileSearch(null);
-            } else {
-                const lower = searchQuery.toLowerCase();
-                const filtered = allItems.filter(item =>
-                    item.name.toLowerCase().includes(lower)
-                );
-                onMobileSearch(filtered);
-            }
+        const fetchUser = async () => {
+            const userData = await getMe();
+            setUser(userData.data);
+            if (userData.status === 200)
+                setIsLogin(true);
+            else
+                setIsLogin(false);
+        };
+        fetchUser();
+    }, []);
+
+    const handleLogout = async () => {
+        try {
+            await logoutAccount();
+            setIsLogin(false);
+            setUser(undefined);
+            setShowProfileMenu(false);
+            window.location.href = '/';
+            NotificationService.success({ message: 'Đăng xuất thành công' });
+        } catch (error) {
+            NotificationService.error({ message: 'Đăng xuất thất bại' });
+            console.error('Logout failed:', error);
         }
-    }, [searchQuery, allItems, onMobileSearch]);
+    };
     return (
-        <header className="w-full flex flex-col bg-white shadow-lg border-b border-gray-200">
-            {/* Main header */}
-            <div className="flex items-center justify-between px-4 sm:px-6 py-3">
-                {/* Left: Logo */}
-                <div className="flex-shrink-0">
-                    <Image
-                        src="/logo/logo-500x500.png"
-                        alt="Logo"
-                        width={40}
-                        height={40}
-                        className="sm:w-[50px] sm:h-[50px] rounded-full object-cover transition-transform hover:scale-105 cursor-pointer"
-                        onClick={() => router.push('/document')}
-                    />
-                </div>
-
-                {/* Only show search bar on mobile */}
-                {allItems && (
-                    <div className="flex-1 flex justify-center items-center w-full sm:hidden">
-                        <div className="w-full max-w-xs">
-                            <Input
-                                allowClear
-                                placeholder="Tìm kiếm toàn bộ file hoặc thư mục..."
-                                prefix={<SearchOutlined className="text-blue-500" />}
-                                value={searchQuery}
-                                onChange={e => setSearchQuery(e.target.value)}
-                                className="rounded-lg shadow-sm border-gray-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition-all duration-200"
-                                size="large"
-                                style={{
-                                    width: '100%',
-                                    minWidth: 60,
-                                    transition: 'max-width 0.3s, min-width 0.3s'
-                                }}
+        <header className="sticky top-0 z-40 backdrop-blur-sm">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex items-center justify-between h-16">
+                    {/* Logo bên trái */}
+                    <div className="flex items-center">
+                        <NavigationLink href="/" className="flex items-center">
+                            <Image
+                                src="/logo/logo-500x500.png"
+                                alt="Logo"
+                                width={40}
+                                height={40}
+                                className="rounded-lg"
+                                priority
                             />
-                        </div>
+                        </NavigationLink>
                     </div>
-                )}
 
-                {/* Right: Avatar */}
-                <div className="flex-shrink-0">
-                    <Avatar
-                        shape="circle"
-                        size={40}
-                        icon={<UserOutlined className="text-gray-600" />}
-                        className="sm:w-12 sm:h-12 hover:shadow-md transition-shadow duration-200"
-                    />
+                    {/* Navigation chính giữa */}
+                    <div className="hidden md:flex items-center">
+                        <Menu />
+                    </div>
+
+                    {/* Right side - User actions */}
+                    {islogin ? (
+                        // Khi đã login
+                        <div className="flex items-center space-x-3">
+                            {/* Mobile Menu - chỉ hiện trên mobile */}
+                            <div className="md:hidden">
+                                <MenuMobile isLoggedIn={true} onLogout={handleLogout} />
+                            </div>
+
+                            {/* Desktop - Avatar và username */}
+                            <div className="hidden md:flex items-center space-x-3 relative">
+                                <span className="text-sm font-medium text-gray-700 uppercase">{user?.username}</span>
+                                <button
+                                    onClick={() => setShowProfileMenu((prev) => !prev)}
+                                    className="flex items-center focus:outline-none hover:opacity-80 transition-opacity"
+                                >
+                                    <Avatar size={36} icon={<UserOutlined />} className="border-2 border-gray-200" />
+                                </button>
+                                {showProfileMenu && (
+                                    <div className="absolute right-0 top-full mt-2 z-50">
+                                        <MenuProfile onClose={() => setShowProfileMenu(false)} />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    ) : (
+                        // Khi chưa login
+                        <div className="flex items-center space-x-3">
+                            {/* Mobile Menu - chỉ hiện trên mobile */}
+                            <div className="md:hidden">
+                                <MenuMobile isLoggedIn={false} />
+                            </div>
+
+                            {/* Desktop - Login button */}
+                            <div className="hidden md:flex items-center">
+                                <div className="relative group">
+                                    <div className="absolute inset-0 duration-1000 opacity-50 transition-all bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 rounded-xl blur-lg filter group-hover:opacity-75 group-hover:duration-200" />
+                                    <NavigationLink href="/auth" className="group relative inline-flex items-center justify-center text-sm rounded-xl bg-white px-6 py-2 font-semibold text-gray-900 transition-all duration-200 hover:bg-gray-50 hover:shadow-lg hover:-translate-y-0.5 hover:shadow-gray-300/30 border border-gray-200">
+                                        Login
+                                        <svg aria-hidden="true" viewBox="0 0 10 10" height={10} width={10} fill="none" className="mt-0.5 ml-2 -mr-1 stroke-gray-900 stroke-2">
+                                            <path d="M0 5h7" className="transition opacity-0 group-hover:opacity-100" />
+                                            <path d="M1 1l4 4-4 4" className="transition group-hover:translate-x-[3px]" />
+                                        </svg>
+                                    </NavigationLink>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </header>

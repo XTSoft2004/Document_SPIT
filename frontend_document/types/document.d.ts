@@ -49,3 +49,15 @@ export interface IDocumentPendingRequest {
   base64String: string
   courseId?: string
 }
+export interface IDocumentRecentResponse {
+  id: number
+  name: string
+  fileId: string
+  fileName: string
+  fullname: string
+  totalDownloads: number
+  totalViews: number
+  typeFile: string
+  createdDate: date
+  modifiedDate: date
+}

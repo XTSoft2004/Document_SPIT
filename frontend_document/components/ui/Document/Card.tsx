@@ -28,7 +28,7 @@ export const FileCard: React.FC<FileCardProps> = ({ item, onPreviewFile }) => (
     >
         <img
             src={`${globalConfig.baseUrl}/driver/thumbnail/${item.folderId}`}
-            className="w-full h-24 object-cover rounded mb-2 border transition-transform duration-200 group-hover:scale-105 z-10"
+            className="w-full h-42 object-cover rounded mb-2 border transition-transform duration-200 group-hover:scale-150 z-10"
             style={{ cursor: 'pointer' }}
             alt={item.name}
         />

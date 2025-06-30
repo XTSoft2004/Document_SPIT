@@ -7,10 +7,10 @@ interface PreviewFilePopupProps {
     open: boolean;
     onClose: () => void;
     fileName: string;
-    folderId: string;
+    documentId: number;
 }
 
-export default function PreviewFile({ open, onClose, fileName, folderId }: PreviewFilePopupProps) {
+export default function PreviewFile({ open, onClose, fileName, documentId }: PreviewFilePopupProps) {
     const imgRef = useRef<HTMLImageElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [scale, setScale] = useState(1);
@@ -59,14 +59,14 @@ export default function PreviewFile({ open, onClose, fileName, folderId }: Previ
     };
 
     useEffect(() => {
-        if (open && folderId) {
+        if (open && documentId) {
             setIsLoading(true);
             const timer = setTimeout(() => {
                 setIsLoading(false);
             }, 1000);
             return () => clearTimeout(timer);
         }
-    }, [open, folderId]);
+    }, [open, documentId]);
 
     useEffect(() => {
         if (!open) {
@@ -174,7 +174,7 @@ export default function PreviewFile({ open, onClose, fileName, folderId }: Previ
                     ) : isImage ? (
                         <img
                             ref={imgRef}
-                            src={`${globalConfig.baseUrl}/driver/preview/${folderId}`}
+                            src={`${globalConfig.baseUrl}/document/preview/${documentId}`}
                             alt={fileName}
                             style={{
                                 transform: `scale(${scale}) translate(${translate.x / scale}px, ${translate.y / scale}px)`,
@@ -189,7 +189,7 @@ export default function PreviewFile({ open, onClose, fileName, folderId }: Previ
                         />
                     ) : (
                         <iframe
-                            src={`${globalConfig.baseUrl}/driver/preview/${folderId}#toolbar=0`}
+                            src={`${globalConfig.baseUrl}/document/preview/${documentId}`}
                             className="w-full h-full border-0"
                             style={{ minHeight: '80vh', height: '100%' }}
                         />

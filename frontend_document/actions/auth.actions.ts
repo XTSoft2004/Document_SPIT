@@ -63,9 +63,9 @@ export const loginAccount = async (formData: ILoginRequest) => {
 
 export const logoutAccount = async () => {
   const response = await fetch(`${globalConfig.baseUrl}/auth/logout`, {
-    method: 'POST',
+    method: 'GET',
     headers: {
-      'Content-Type': 'application/json',
+      Authorization: `Bearer ${cookies().get('accessToken')?.value || ' '}`,
     },
     next: {
       tags: ['auth.logout'],

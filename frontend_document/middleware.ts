@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { ITokenInfoResponse } from './types/user'
+import { IShowResponse } from './types/global'
+import { IUserResponse } from './types/user'
 import globalConfig from './app.config'
+import { cookies, headers } from 'next/headers'
 
 export const config = {
   matcher: [
@@ -16,162 +19,66 @@ export const config = {
   ],
 }
 
-const getProfile = async (accessToken: string): Promise<ITokenInfoResponse> => {
-  const response = await fetch(`${globalConfig.baseUrl}/user/profile`, {
+const getMe = async () => {
+  const response = await fetch(`${globalConfig.baseUrl}/user/me`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`,
+      Authorization:
+        headers().get('Authorization') ||
+        `Bearer ${cookies().get('accessToken')?.value || ' '}`,
+    },
+    next: {
+      tags: ['user.me'],
     },
   })
 
-  if (!response.ok) {
-    throw response
-  }
-
   const data = await response.json()
-  // console.log('server >> getProfile', data)
-  return data as ITokenInfoResponse
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    ...data,
+  } as IShowResponse<IUserResponse>
 }
 
-const refreshTokenNew = async (
-  refreshToken: string,
-): Promise<ITokenInfoResponse> => {
-  const response = await fetch(`${globalConfig.baseUrl}/auth/refresh-token`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${refreshToken}`,
-    },
-  })
-
-  if (!response.ok) {
-    throw response
-  }
-
-  const data = await response.json()
-  // console.log('server >> refreshTokenNew', data)
-  return data as ITokenInfoResponse
-}
-
-const clearAuthCookies = (response: NextResponse) => {
-  response.cookies.delete('accessToken')
-  response.cookies.delete('refreshToken')
-  return response
-}
-
-const redirectLogin = (request: NextRequest) => {
-  const isLoginPage = request.nextUrl.pathname === '/auth'
-  if (!isLoginPage) {
-    const response = NextResponse.redirect(new URL('/auth', request.url))
-    return clearAuthCookies(response)
-  }
-
-  const response = NextResponse.next()
-  return clearAuthCookies(response)
-}
-
-const redirectLocked = (request: NextRequest) => {
-  const isLockedPage = request.nextUrl.pathname === '/locked'
-
-  if (!isLockedPage) {
-    return NextResponse.redirect(new URL('/locked', request.url))
-  }
-
-  return NextResponse.next()
-}
-
-const handleError = (error: unknown, request: NextRequest) => {
-  if (!(error instanceof Response)) {
-    console.error('Unexpected error in middleware:', error)
-    return NextResponse.redirect(new URL('/500', request.url))
-  }
-
-  const response = error as Response
-
-  switch (response.status) {
-    case 500:
-      return NextResponse.redirect(new URL('/500', request.url))
-    case 423:
-      return redirectLocked(request)
-    default:
-      return redirectLogin(request)
-  }
-}
-
-const handleRefreshToken = async (
-  refreshToken: string,
-  globalResponse: NextResponse,
-): Promise<void> => {
-  const newToken = await refreshTokenNew(refreshToken)
-
-  globalResponse.cookies.set('accessToken', newToken.accessToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-  })
-  globalResponse.cookies.set('refreshToken', newToken.refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-  })
-
-  globalResponse.headers.set('Authorization', `Bearer ${newToken.accessToken}`)
+const redirectTo = (url: string, request: NextRequest) => {
+  return NextResponse.redirect(new URL(url, request.url))
 }
 
 export async function middleware(request: NextRequest) {
   console.log('server >> middleware', request.nextUrl.pathname)
 
-  // Chỉ check authentication cho admin routes
-  const isAdminRoute = request.nextUrl.pathname.startsWith('/admin')
+  const userResponse = await getMe()
+  const isLocked = userResponse.data?.islocked
+  const nextUrl = request.nextUrl.pathname
 
-  if (!isAdminRoute) {
-    // Nếu không phải admin route, cho phép truy cập
-    return NextResponse.next()
+  // Kiểm tra xem người dùng đã đăng nhập hay chưa
+  if (nextUrl.startsWith('/auth')) {
+    // Nếu đã đăng nhập, chuyển hướng đến trang chủ
+    const accessToken = cookies().get('accessToken')?.value
+
+    if (accessToken) {
+      // Kiểm tra xem người dùng có bị khóa hay không
+      if (isLocked === true) return redirectTo('/ban', request)
+      else return redirectTo('/', request)
+    } else return NextResponse.next()
   }
 
-  // Từ đây chỉ xử lý admin routes
-  const accessToken = request.cookies.get('accessToken')?.value ?? ''
-
-  // Nếu không có access token, chuyển hướng đến trang đăng nhập
-  if (!accessToken) {
-    return redirectLogin(request)
+  if (nextUrl.startsWith('/ban')) {
+    if (isLocked !== true) return redirectTo('/', request)
   }
 
-  try {
-    const profile = await getProfile(accessToken)
+  if (nextUrl.startsWith('/admin')) {
+    const accessToken = cookies().get('accessToken')?.value
+    if (!accessToken) return redirectTo('/auth', request)
 
-    // Kiểm tra tài khoản có bị khóa hay không
-    if (profile.isLocked) {
-      return redirectLocked(request)
-    }
+    // Kiểm tra xem người dùng có tồn tại hay không
+    if (!userResponse.ok) return redirectTo('/auth', request)
 
-    // Nếu có profile Admin và đang ở trang login, chuyển hướng đến dashboard
-    if (profile.roleName === 'Admin' && request.nextUrl.pathname === '/auth') {
-      return NextResponse.redirect(new URL('/admin/dashboard', request.url))
-    }
-
-    return NextResponse.next()
-  } catch (error) {
-    // Xử lý lỗi 401 - token hết hạn
-    if (error instanceof Response && error.status === 401) {
-      const refreshToken = request.cookies.get('refreshToken')?.value?.trim()
-
-      if (!refreshToken) {
-        return redirectLogin(request)
-      }
-
-      try {
-        const globalResponse = NextResponse.next()
-        await handleRefreshToken(refreshToken, globalResponse)
-        return globalResponse
-      } catch (refreshError) {
-        console.error('Refresh token failed:', refreshError)
-        return handleError(refreshError, request)
-      }
-    }
-
-    // Xử lý các lỗi khác
-    return handleError(error, request)
+    // Kiểm tra xem người dùng có phải là Admin hay không
+    if (userResponse.data.roleName !== 'Admin') return redirectTo('/', request)
   }
+
+  return NextResponse.next()
 }
