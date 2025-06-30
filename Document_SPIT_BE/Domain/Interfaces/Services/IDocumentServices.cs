@@ -75,5 +75,11 @@ namespace Domain.Interfaces.Services
         /// <param name="DocumentId"></param>
         /// <returns></returns>
         Task<(byte[] Data, string ContentType, string FileName)?> GetPreviewByDocumetId(long DocumentId);
+        /// <summary>
+        /// Lấy danh sách tài liệu gần đây
+        /// </summary>
+        /// <param name="number"></param>
+        /// <returns></returns>
+        Task<HttpResponse> GetRecentDocuments(int number);
     }
 }

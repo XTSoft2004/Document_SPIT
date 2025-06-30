@@ -11,9 +11,9 @@ namespace Domain.Entities
     public class DetailDocument : EntityBase
     {
         // Tổng số lượt tải xuống
-        public long? TotalDownload { get; set; } = 0;
+        public long? TotalDownload { get; set; }
         // Tổng số lượt xem
-        public long? TotalView { get; set; } = 0;
+        public long? TotalView { get; set; }
 
         // ID của tài liệu liên kết
         public long? DocumentId { get; set; }

@@ -61,5 +61,20 @@ namespace Domain.Interfaces.Services
         /// <param name="userId"></param>
         /// <returns></returns>
         Task<HttpResponse> GetProfileToken();
+        /// Lấy danh sách sao của người dùng
+        /// </summary>
+        /// <returns></returns>
+        Task<HttpResponse> getStars();
+        /// <summary>
+        /// Thay đổi trạng thái sao của tài liệu theo ID
+        /// </summary>
+        /// <param name="documentId"></param>
+        /// <returns></returns>
+        Task<HttpResponse> ChangeStatusStar(long documentId);
+        /// <summary>
+        /// Lấy danh sách tài liệu đã tải lên gần đây của người dùng
+        /// </summary>
+        /// <returns></returns>
+        Task<HttpResponse> GetRecentUpload();
     }
 }

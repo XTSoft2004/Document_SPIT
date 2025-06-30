@@ -4,6 +4,8 @@ using Domain.Common.GoogleDriver.Model;
 using Domain.Common.GoogleDriver.Model.Request;
 using Domain.Common.GoogleDriver.Model.Response;
 using Domain.Common.Http;
+using Domain.Entities;
+using Domain.Interfaces.Repositories;
 using HelperHttpClient;
 using HelperHttpClient.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -29,11 +31,15 @@ namespace Domain.Common.GoogleDriver.Services
         private readonly RequestHttpClient? _request;
         private readonly IConfiguration _config;
         private readonly IHttpClientFactory _httpClientFactory;
-        public GoogleDriverSevices(IConfiguration configuration, IHttpClientFactory httpClientFactory)
+        private readonly IRepositoryBase<Document>? _document;
+        private readonly IRepositoryBase<DetailDocument>? _detailDocument;
+        public GoogleDriverSevices(IConfiguration configuration, IHttpClientFactory httpClientFactory, IRepositoryBase<DetailDocument>? detailDocument, IRepositoryBase<Document>? document)
         {
             _request = new RequestHttpClient();
             _config = configuration;
             _httpClientFactory = httpClientFactory;
+            _detailDocument = detailDocument;
+            _document = document;
         }
         //public async Task<string> UploadImage(UploadFileRequest uploadFileRequest)
         //{
@@ -350,7 +356,24 @@ namespace Domain.Common.GoogleDriver.Services
                 var content = JObject.Parse(_request.Content);
 
                 var items = JsonConvert.DeserializeObject<List<DriveFileItem>>(content["files"]?.ToString() ?? "[]");
-                if (items != null) files.AddRange(items);
+                if (items != null)
+                {
+                    foreach (var item in items)
+                    {
+                        var document = _document.Find(d => d.FileId == item.Id);
+                        if (document != null)
+                        {
+                            var detailDocument = _detailDocument.Find(dd => dd.Id == document.DetaiDocumentId);
+                            if (detailDocument != null)
+                            {
+                                item.TotalViews = detailDocument.TotalView;
+                                item.TotalDownloads = detailDocument.TotalDownload;
+                                item.DocumentId = document.Id;
+                            }
+                        }
+                    }
+                    files.AddRange(items);
+                }
 
                 nextPageToken = content["nextPageToken"]?.ToString();
             } while (!string.IsNullOrEmpty(nextPageToken));
