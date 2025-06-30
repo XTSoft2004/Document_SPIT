@@ -13,6 +13,7 @@ export interface IDocumentUpdateRequest {
   fileName?: string
   folderId?: string
   courseId?: number
+  categoryIds?: number[]
 }
 
 export interface IDocumentResponse {
@@ -29,6 +30,7 @@ export interface IDocumentResponse {
   courseId: number
   courseName: string
   typeFile: string
+  categoryIds: number[]
   createdDate: date
   modifiedDate: date
 }
@@ -37,6 +39,7 @@ export interface IDocumentReviewRequest {
   name: string
   courseId?: string
   folderId?: string
+  categoryIds?: number[]
   statusDocument: string
 }
 

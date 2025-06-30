@@ -11,6 +11,8 @@ import { IFileInfo } from '@/types/driver';
 import NotificationService from '@/components/ui/Notification/NotificationService';
 import PreviewPanel from '@/components/ui/Admin/Document/PreviewPanel';
 import { getCourse, getCourseById } from '@/actions/course.action';
+import { ICategoryResponse } from '@/types/category';
+import { getCategory } from '@/actions/category.actions';
 
 interface ModalReviewDocumentProps {
     visible: boolean;
@@ -42,6 +44,8 @@ export default function ModalReviewDocument({
         }
     }
 
+    const [categories, setCategories] = useState<ICategoryResponse[]>([]);
+
     useEffect(() => {
         const fetchInitialCourse = async () => {
             if (visible && Document) {
@@ -69,7 +73,15 @@ export default function ModalReviewDocument({
             }
         };
 
+        const fetchCategories = async () => {
+            const response = await getCategory();
+            if (response.ok) {
+                setCategories(response.data);
+            }
+        };
+
         fetchInitialCourse();
+        fetchCategories();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [visible]);
 
@@ -93,6 +105,7 @@ export default function ModalReviewDocument({
                 name: values.name || Document.name,
                 courseId: courseId,
                 folderId: values.folderId || selectedFolderId?.id || courseFolderId || '',
+                categoryIds: values.categoryIds || [],
                 statusDocument: statusDocument,
             };
 
@@ -212,6 +225,51 @@ export default function ModalReviewDocument({
                                 notFoundContent={loadingCourses ? 'Đang tìm kiếm...' : 'Không tìm thấy môn học'}
                                 onChange={handleCourseChange}
                                 onSearch={handleSearchCourse}
+                            />
+                        </Form.Item>
+
+                        <Form.Item
+                            label="Loại danh mục:"
+                            name="categoryIds"
+                            rules={[{ required: true, message: "Vui lòng chọn loại danh mục!" }]}
+                        >
+                            <Select
+                                mode="multiple"
+                                showSearch
+                                placeholder="Chọn loại danh mục"
+                                optionFilterProp="children"
+                                filterOption={(input, option) =>
+                                    (`${option?.label ?? ''}`).toLowerCase().includes(input.toLowerCase())
+                                }
+                                options={
+                                    (Array.isArray(categories) ? categories : []).map(category => ({
+                                        value: category.id,
+                                        label: (
+                                            <div className="flex items-center gap-2">
+                                                <span className="inline-block w-2 h-2 rounded-full bg-blue-400" />
+                                                <span>{category.name}</span>
+                                            </div>
+                                        )
+                                    }))
+                                }
+                                notFoundContent={'Không tìm thấy loại danh mục'}
+                                className="custom-multi-select"
+                                maxTagCount="responsive"
+                                maxTagPlaceholder={omittedValues => `+${omittedValues.length} loại`}
+                                tagRender={({ label, closable, onClose }) => (
+                                    <div className="mt-1 bg-blue-100 text-blue-700 px-2 py-1 rounded flex items-center mr-1 mb-1">
+                                        {label}
+                                        {closable && (
+                                            <span
+                                                className="ml-1 cursor-pointer text-blue-500 hover:text-blue-700"
+                                                onClick={onClose}
+                                            >
+                                                ×
+                                            </span>
+                                        )}
+                                    </div>
+                                )}
+                                style={{ width: '100%' }}
                             />
                         </Form.Item>
 

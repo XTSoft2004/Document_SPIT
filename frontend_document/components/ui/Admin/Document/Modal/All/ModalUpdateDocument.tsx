@@ -12,6 +12,8 @@ import { ICourseResponse } from "@/types/course";
 import { handleFilePreview } from "@/utils/filePreview";
 import FilePreview from "@/components/common/FilePreview";
 import { getCourse, getCourseById } from "@/actions/course.action";
+import { ICategoryResponse } from "@/types/category";
+import { getCategory } from "@/actions/category.actions";
 
 interface ModalUpdateDocumentProps {
     visible: boolean;
@@ -115,6 +117,7 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
         return courses.find(course => course.id === courseId);
     }, [courses, form]);
 
+    const [categories, setCategories] = useState<ICategoryResponse[]>([]);
     useEffect(() => {
         const fetchInitialCourse = async () => {
             if (visible && Document && Document.courseId) {
@@ -124,7 +127,16 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
                 }
             }
         };
+
+        const fetchCategories = async () => {
+            const response = await getCategory();
+            if (response.ok) {
+                setCategories(response.data);
+            }
+        };
+
         fetchInitialCourse();
+        fetchCategories();
     }, [visible, form]);
 
     useEffect(() => {
@@ -133,6 +145,7 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
                 name: Document.name,
                 courseId: Document.courseId,
                 folderId: Document.folderId,
+                categoryIds: Document.categoryIds,
             });
             // Lưu courseId ban đầu
             setOriginalCourseId(Document.courseId);
@@ -181,6 +194,7 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
                 base64String: base64String,
                 fileName: fileName,
                 courseId: values.courseId || 0,
+                categoryIds: values.categoryIds || [],
             };
 
             const response = await updateDocument(String(Document?.id || ''), DocumentUpdate);
@@ -285,6 +299,51 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
                             <Input
                                 placeholder="Nhập tên tài liệu"
                                 size="middle"
+                            />
+                        </Form.Item>
+
+                        <Form.Item
+                            label="Loại danh mục:"
+                            name="categoryIds"
+                            rules={[{ required: true, message: "Vui lòng chọn loại danh mục!" }]}
+                        >
+                            <Select
+                                mode="multiple"
+                                showSearch
+                                placeholder="Chọn loại danh mục"
+                                optionFilterProp="children"
+                                filterOption={(input, option) =>
+                                    (`${option?.label ?? ''}`).toLowerCase().includes(input.toLowerCase())
+                                }
+                                options={
+                                    (Array.isArray(categories) ? categories : []).map(category => ({
+                                        value: category.id,
+                                        label: (
+                                            <div className="flex items-center gap-2">
+                                                <span className="inline-block w-2 h-2 rounded-full bg-blue-400" />
+                                                <span>{category.name}</span>
+                                            </div>
+                                        )
+                                    }))
+                                }
+                                notFoundContent={'Không tìm thấy loại danh mục'}
+                                className="custom-multi-select"
+                                maxTagCount="responsive"
+                                maxTagPlaceholder={omittedValues => `+${omittedValues.length} loại`}
+                                tagRender={({ label, closable, onClose }) => (
+                                    <div className="mt-1 bg-blue-100 text-blue-700 px-2 py-1 rounded flex items-center mr-1 mb-1">
+                                        {label}
+                                        {closable && (
+                                            <span
+                                                className="ml-1 cursor-pointer text-blue-500 hover:text-blue-700"
+                                                onClick={onClose}
+                                            >
+                                                ×
+                                            </span>
+                                        )}
+                                    </div>
+                                )}
+                                style={{ width: '100%' }}
                             />
                         </Form.Item>
 
