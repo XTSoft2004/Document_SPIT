@@ -224,9 +224,11 @@ export default function RecentContributions() {
                                                 {contribution.fullname}
                                             </span>
                                         </div>
-                                        <span className="text-xs text-gray-400 flex-shrink-0 whitespace-nowrap">
-                                            {formatDate(contribution.createdDate)}
-                                        </span>
+                                        <div className="flex items-center gap-2 flex-shrink-0">
+                                            <span className="text-xs text-gray-400 whitespace-nowrap">
+                                                {formatDate(contribution.createdDate)}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -254,8 +256,8 @@ export default function RecentContributions() {
                         </div>
 
                         {/* Stats section */}
-                        <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center space-x-4 sm:space-x-0 sm:space-y-1 text-xs sm:text-sm text-gray-500 sm:ml-4 flex-shrink-0">
-                            <span className="flex items-center whitespace-nowrap">
+                        <div className="flex items-center justify-between sm:flex-col sm:items-end sm:justify-center space-x-4 sm:space-x-0 sm:space-y-1 text-xs sm:text-sm text-gray-500 sm:ml-4 flex-shrink-0">
+                            <span className="mb-2 flex items-center whitespace-nowrap">
                                 <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>

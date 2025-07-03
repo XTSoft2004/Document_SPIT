@@ -39,18 +39,6 @@ export default function DocumentPageClient({
 
     return (
         <div className="flex flex-col h-full min-h-0">
-            <div className="sticky top-0 z-10 flex-shrink-0">
-                {isMobile ? (
-                    <HeaderDocument
-                        treeData={treeData}
-                        allItems={allItems}
-                        onMobileSearch={setMobileSearchResults}
-                        isMobile={isMobile}
-                    />
-                ) : (
-                    <Header />
-                )}
-            </div>
             <div className="flex-1 min-h-0 overflow-hidden mb-3">
                 <GridDocument
                     data={data}
@@ -61,9 +49,9 @@ export default function DocumentPageClient({
                     mobileSearchResults={mobileSearchResults}
                 />
             </div>
-            <div className="flex-shrink-0">
+            {/* <div className="flex-shrink-0">
                 <Footer />
-            </div>
+            </div> */}
         </div>
     );
 }

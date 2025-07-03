@@ -107,7 +107,7 @@ export default function ContributeForm() {
                 </div>
 
                 {/* Form Actions with responsive wrapper */}
-                <div className="w-full pt-2">
+                <div className="w-full">
                     <FormActions
                         isSubmitting={isSubmitting}
                         isFormValid={isFormValid}

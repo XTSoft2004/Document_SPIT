@@ -24,7 +24,7 @@ export default function PathFolder({ path }: PathFolderProps) {
 
     const handleCopyPath = useCallback(async (index: number) => {
         const fullPath = path.slice(0, index + 1).map(convertSlug);
-        await navigator.clipboard.writeText(`${globalConfig.baseUrl}/document/${fullPath.join('/')}`);
+        await navigator.clipboard.writeText(`${process.env.NEXT_PUBLIC_WEB_URL}/document/${fullPath.join('/')}`);
         NotificationService.success({
             message: 'Đã sao chép',
         });

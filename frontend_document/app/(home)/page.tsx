@@ -1,7 +1,6 @@
 'use client'
 import Image from 'next/image'
 import DocumentPage from './document/[[...slug]]/page'
-import PageAuth from './auth/page';
 import Header from "@/layout/Header";
 import Footer from "@/layout/Footer";
 import { useRouter } from "next/navigation";
@@ -9,23 +8,28 @@ import { useEffect, useState } from "react";
 import { getRecentDocuments } from "@/actions/document.actions";
 import { IDocumentRecentResponse } from "@/types/document";
 
-export default function Home() {
+export default function PageHome() {
   const router = useRouter();
   const [doc, setDoc] = useState<IDocumentRecentResponse[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       const response = await getRecentDocuments(3);
       if (response.ok) {
         setDoc(response.data);
       }
+      // Thêm delay nhỏ để animation mượt hơn
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 300);
     }
     fetchData();
   }, []);
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      <Header />
 
       {/* Hero Section - Flex grow để chiếm không gian còn lại */}
       <div className="flex-1 flex items-center justify-center relative overflow-hidden py-8 sm:py-12 lg:py-16">
@@ -86,10 +90,10 @@ export default function Home() {
             <div className="relative order-2 lg:order-2 mb-8 lg:mb-0">
               <div className="relative z-10">
                 {/* Main Card - Responsive */}
-                <div className="bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-2xl p-4 sm:p-6 border border-white/20 mx-4 sm:mx-0">
+                <div className="bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-2xl p-4 sm:p-6 border border-white/20 mx-4 sm:mx-0 transform scale-95 opacity-0 animate-slide-up" style={{ animationDelay: '0ms', animationFillMode: 'forwards' }}>
                   <div className="space-y-3 sm:space-y-4">
                     {/* Header */}
-                    <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="flex items-center gap-2 sm:gap-3 transform translate-y-4 opacity-0 animate-slide-up" style={{ animationDelay: '100ms', animationFillMode: 'forwards' }}>
                       <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg sm:rounded-xl flex items-center justify-center">
                         <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -102,33 +106,62 @@ export default function Home() {
 
                     {/* Document Preview - Responsive */}
                     <div className="space-y-2">
-                      {doc.slice(0, 3).map((item) => (
-                        <div key={item.id} className="flex items-center gap-2 sm:gap-3 p-2 bg-gray-50 rounded-lg sm:rounded-xl hover:bg-blue-50 transition-colors duration-300 group cursor-pointer" onClick={() => router.push('/document')}>
-                          <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-md sm:rounded-lg flex items-center justify-center flex-shrink-0">
-                            <svg className="w-3 h-3 sm:w-4 sm:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="text-xs sm:text-sm font-semibold text-gray-900 truncate">{item.name}</div>
-                            <div className="text-xs text-gray-500 hidden sm:block">
-                              Cập nhật lúc:
-                              <span className="ml-1">{new Date(item.modifiedDate).toLocaleString('vi-VN', {
-                                day: '2-digit',
-                                month: '2-digit',
-                                year: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                                hour12: false
-                              })}</span>
-                            </div>
-                            <div className="text-xs text-gray-500 sm:hidden">
-                              {new Date(item.modifiedDate).toLocaleDateString('vi-VN')}
+                      {isLoading ? (
+                        // Loading skeleton với animation
+                        [...Array(3)].map((_, index) => (
+                          <div
+                            key={index}
+                            className={`flex items-center gap-2 sm:gap-3 p-2 bg-gray-100 rounded-lg sm:rounded-xl transform translate-y-4 opacity-0 animate-slide-up`}
+                            style={{
+                              animationDelay: `${index * 100}ms`,
+                              animationFillMode: 'forwards'
+                            }}
+                          >
+                            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-300 rounded-md sm:rounded-lg animate-shimmer"></div>
+                            <div className="flex-1 min-w-0 space-y-1">
+                              <div className="h-3 bg-gray-300 rounded animate-shimmer"></div>
+                              <div className="h-2 bg-gray-200 rounded w-3/4 animate-shimmer"></div>
                             </div>
                           </div>
-                          <div className="w-2 h-2 bg-green-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        </div>
-                      ))}
+                        ))
+                      ) : (
+                        // Dữ liệu thực với animation
+                        doc.slice(0, 3).map((item, index) => (
+                          <div
+                            key={item.id}
+                            className={`flex items-center gap-2 sm:gap-3 p-2 bg-gray-50 rounded-lg sm:rounded-xl hover:bg-blue-50 transition-all duration-500 group cursor-pointer transform translate-y-4 opacity-0 animate-slide-up`}
+                            style={{
+                              animationDelay: `${index * 200}ms`,
+                              animationFillMode: 'forwards'
+                            }}
+                            onClick={() => router.push('/document')}
+                          >
+                            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-md sm:rounded-lg flex items-center justify-center flex-shrink-0">
+                              <svg className="w-3 h-3 sm:w-4 sm:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="text-xs sm:text-sm font-semibold text-gray-900 truncate">{item.name}</div>
+                              <div className="text-xs text-gray-500 hidden sm:block">
+                                Cập nhật lúc:
+                                <span className="ml-1">{new Date(item.modifiedDate).toLocaleString('vi-VN', {
+                                  day: '2-digit',
+                                  month: '2-digit',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                  hour12: false
+                                })}</span>
+                              </div>
+                              <div className="text-xs text-gray-500 sm:hidden">
+                                {new Date(item.modifiedDate).toLocaleDateString('vi-VN')}
+                              </div>
+                            </div>
+                            <div className="w-2 h-2 bg-green-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                          </div>
+                        ))
+                      )}
                     </div>
                   </div>
                 </div>
@@ -150,7 +183,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <Footer />
 
     </div >
   )

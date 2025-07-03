@@ -26,7 +26,7 @@ export default function FormActions({
                 variant="outline"
                 onClick={onCancel}
                 disabled={isSubmitting}
-                className="mt-3 w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base order-2 sm:order-1 transition-all duration-200 hover:bg-gray-50"
+                className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base order-2 sm:order-1 mt-3 sm:mt-0 transition-all duration-200 hover:bg-gray-50"
             >
                 <span className="hidden sm:inline">{cancelText}</span>
                 <span className="sm:hidden">Hủy</span>

@@ -43,7 +43,7 @@ export default function SidebarTrees({
     return (
         <>
             {/* Tree sidebar */}
-            <div className={`hidden md:flex h-full transition-all duration-300 ease-in-out ${showTree ? 'w-64 min-w-[200px] max-w-[300px]' : 'w-0 min-w-0 max-w-0'} overflow-hidden`}>
+            <div className={`ml-3 hidden md:flex h-full transition-all duration-300 ease-in-out ${showTree ? 'w-64 min-w-[200px] max-w-[300px]' : 'w-0 min-w-0 max-w-0'} overflow-hidden`}>
                 <div className={`w-64 min-w-[200px] max-w-[300px] flex-shrink-0 h-full max-h-full overflow-hidden relative flex flex-col pt-4 transition-transform duration-300 ease-in-out ${showTree ? 'translate-x-0' : '-translate-x-full'}`}>
                     {/* Header */}
                     <div className="sticky top-0 z-10 flex flex-col p-2 pl-0">

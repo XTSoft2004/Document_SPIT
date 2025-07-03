@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { usePathname } from 'next/navigation';
 import { Input } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
+import { motion, AnimatePresence } from 'framer-motion';
 import { IDriveItem } from '@/types/driver';
 import NavigationLink from '@/components/ui/Navigation/NavigationLink';
 
@@ -40,45 +41,175 @@ const Menu = ({ allItems, onMobileSearch }: MenuProps) => {
 
   const activeTab = getActiveTab();
 
+  const indicatorVariants = {
+    home: { x: 0 },
+    document: { x: 140 },
+    contribute: { x: 280 },
+    ranking: { x: 420 }
+  };
+
+  const getIndicatorStyle = (tab: string) => {
+    const baseStyle = {
+      background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.8) 0%, rgba(29, 78, 216, 0.8) 100%)',
+      boxShadow: '0px 6px 20px rgba(59, 130, 246, 0.2), 0px 2px 6px rgba(59, 130, 246, 0.1)'
+    };
+
+    switch (tab) {
+      case 'document':
+        return {
+          background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.8) 0%, rgba(124, 58, 237, 0.8) 100%)',
+          boxShadow: '0px 6px 20px rgba(139, 92, 246, 0.2), 0px 2px 6px rgba(139, 92, 246, 0.1)'
+        };
+      case 'contribute':
+        return {
+          background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.8) 0%, rgba(219, 39, 119, 0.8) 100%)',
+          boxShadow: '0px 6px 20px rgba(236, 72, 153, 0.2), 0px 2px 6px rgba(236, 72, 153, 0.1)'
+        };
+      case 'ranking':
+        return {
+          background: 'linear-gradient(135deg, rgba(251, 191, 36, 0.8) 0%, rgba(245, 158, 11, 0.8) 100%)',
+          boxShadow: '0px 6px 20px rgba(251, 191, 36, 0.2), 0px 2px 6px rgba(251, 191, 36, 0.1)'
+        };
+      default:
+        return baseStyle;
+    }
+  };
+
   return (
     <nav>
-      <div className="relative">
+      <motion.div
+        className="relative"
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
         <div className="absolute inset-0 duration-1000 opacity-30 transition-all bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 rounded-2xl blur-xl filter group-hover:opacity-40 group-hover:duration-200 scale-110" />
 
         <StyledWrapper className="relative z-10" $activeTab={activeTab}>
           <div className="menu-container group">
-            <div className="tab-container">
-              <NavigationLink href="/" className={`tab-link ${activeTab === 'home' ? 'active' : ''}`}>
-                <label className="tab_label">Trang chủ</label>
-              </NavigationLink>
-              <NavigationLink href="/document" className={`tab-link ${activeTab === 'document' ? 'active' : ''}`}>
-                <label className="tab_label">Tài liệu</label>
-              </NavigationLink>
-              <NavigationLink href="/contribute" className={`tab-link ${activeTab === 'contribute' ? 'active' : ''}`}>
-                <label className="tab_label">Đóng góp</label>
-              </NavigationLink>
-              <NavigationLink href="/ranking" className={`tab-link ${activeTab === 'ranking' ? 'active' : ''}`}>
-                <label className="tab_label">Bảng xếp hạng</label>
-              </NavigationLink>
-              <div className="indicator" />
-            </div>
+            <motion.div
+              className="tab-container"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.4, delay: 0.1 }}
+            >
+              <motion.div
+                className="indicator"
+                animate={{
+                  x: indicatorVariants[activeTab as keyof typeof indicatorVariants].x,
+                  ...getIndicatorStyle(activeTab)
+                }}
+                transition={{
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 30,
+                  duration: 0.6
+                }}
+              />
 
-            {allItems && (
-              <div className="search-container">
-                <Input
-                  allowClear
-                  placeholder="Tìm kiếm..."
-                  prefix={<SearchOutlined className="text-gray-400" />}
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  className="search-input"
-                  size="middle"
-                />
-              </div>
-            )}
+              <motion.div
+                whileTap={{ scale: 0.95 }}
+                initial={{ y: 10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.3, delay: 0.2 }}
+              >
+                <NavigationLink href="/" className={`tab-link ${activeTab === 'home' ? 'active' : ''}`}>
+                  <motion.label
+                    className="tab_label"
+                    animate={{
+                      color: activeTab === 'home' ? '#ffffff' : '#6b7280'
+                    }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    Trang chủ
+                  </motion.label>
+                </NavigationLink>
+              </motion.div>
+
+              <motion.div
+                whileTap={{ scale: 0.95 }}
+                initial={{ y: 10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.3, delay: 0.3 }}
+              >
+                <NavigationLink href="/document" className={`tab-link ${activeTab === 'document' ? 'active' : ''}`}>
+                  <motion.label
+                    className="tab_label"
+                    animate={{
+                      color: activeTab === 'document' ? '#ffffff' : '#6b7280'
+                    }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    Tài liệu
+                  </motion.label>
+                </NavigationLink>
+              </motion.div>
+
+              <motion.div
+
+                whileTap={{ scale: 0.95 }}
+                initial={{ y: 10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.3, delay: 0.4 }}
+              >
+                <NavigationLink href="/contribute" className={`tab-link ${activeTab === 'contribute' ? 'active' : ''}`}>
+                  <motion.label
+                    className="tab_label"
+                    animate={{
+                      color: activeTab === 'contribute' ? '#ffffff' : '#6b7280'
+                    }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    Đóng góp
+                  </motion.label>
+                </NavigationLink>
+              </motion.div>
+
+              <motion.div
+
+                whileTap={{ scale: 0.95 }}
+                initial={{ y: 10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.3, delay: 0.5 }}
+              >
+                <NavigationLink href="/ranking" className={`tab-link ${activeTab === 'ranking' ? 'active' : ''}`}>
+                  <motion.label
+                    className="tab_label"
+                    animate={{
+                      color: activeTab === 'ranking' ? '#ffffff' : '#6b7280'
+                    }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    Bảng xếp hạng
+                  </motion.label>
+                </NavigationLink>
+              </motion.div>
+            </motion.div>
+
+            <AnimatePresence>
+              {allItems && (
+                <motion.div
+                  className="search-container"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Input
+                    allowClear
+                    placeholder="Tìm kiếm..."
+                    prefix={<SearchOutlined className="text-gray-400" />}
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    className="search-input"
+                    size="middle"
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </StyledWrapper>
-      </div>
+      </motion.div>
     </nav>
   );
 };
@@ -95,7 +226,7 @@ const StyledWrapper = styled.div<{ $activeTab: string }>`
     display: flex;
     align-items: flex-start;
     padding: 3px;
-    background: #ffffff;
+    background: #ffff;
     border-radius: 12px;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     border: 1px solid rgba(0, 0, 0, 0.1);
@@ -158,72 +289,25 @@ const StyledWrapper = styled.div<{ $activeTab: string }>`
     justify-content: center;
     text-decoration: none;
     border-radius: 9px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    transform: translateY(0);
-  }
-
-  .tab-link:hover {
-    scale: 1.15;
-  }
-
-  .tab-link.active {
-    transform: translateY(0px) scale(1.05);
   }
 
   .tab_label {
     font-size: 0.9rem;
     font-weight: 700;
     font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-    color: #6b7280;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     pointer-events: none;
-  }
-
-  .tab-link.active .tab_label {
-    color: #ffffff;
-    font-weight: 700;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   }
 
   .indicator {
     width: 140px;
     height: 36px;
-    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
     position: absolute;
     z-index: 9;
     border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 9px;
-    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     transform: translateY(0) scale(1.01);
     box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15), 0px 2px 4px rgba(0, 0, 0, 0.08);
-    ${({ $activeTab }) => {
-    if ($activeTab === 'home') return `
-        left: 5px;
-        transform: translateY(0) scale(1.03);
-        box-shadow: 0px 6px 20px rgba(59, 130, 246, 0.2), 0px 2px 6px rgba(59, 130, 246, 0.1);
-        background: linear-gradient(135deg, rgba(59, 130, 246, 0.8) 0%, rgba(29, 78, 216, 0.8) 100%);
-      `;
-    if ($activeTab === 'document') return `
-        left: calc(140px + 3px);
-        transform: translateY(0) scale(1.02);
-        box-shadow: 0px 6px 20px rgba(139, 92, 246, 0.2), 0px 2px 6px rgba(139, 92, 246, 0.1);
-        background: linear-gradient(135deg, rgba(139, 92, 246, 0.8) 0%, rgba(124, 58, 237, 0.8) 100%);
-      `;
-    if ($activeTab === 'contribute') return `
-        left: calc(140px * 2 + 2px);
-        transform: translateY(0) scale(1.02);
-        box-shadow: 0px 6px 20px rgba(236, 72, 153, 0.2), 0px 2px 6px rgba(236, 72, 153, 0.1);
-        background: linear-gradient(135deg, rgba(236, 72, 153, 0.8) 0%, rgba(219, 39, 119, 0.8) 100%);
-      `;
-    if ($activeTab === 'ranking') return `
-        left: calc(140px * 3 + 1px);
-        transform: translateY(0) scale(1.02);
-        box-shadow: 0px 6px 20px rgba(251, 191, 36, 0.2), 0px 2px 6px rgba(251, 191, 36, 0.1);
-        background: linear-gradient(135deg, rgba(251, 191, 36, 0.8) 0%, rgba(245, 158, 11, 0.8) 100%);
-      `;
-    return '';
-  }}
   }
 `;
 

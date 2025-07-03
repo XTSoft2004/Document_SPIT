@@ -3,24 +3,19 @@ import { IRanking } from "@/types/statistical";
 import { getRanking } from "@/actions/statistical.actions";
 import { useEffect, useState } from "react";
 import RankingList from "./RankingList";
-import Loading from "@/components/ui/Loading/Loading1";
 
 export default function RankingPageClient() {
     const [rankings, setRankings] = useState<IRanking[]>([]);
-    const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchRankings = async () => {
             try {
-                setLoading(true);
                 const response = await getRanking();
                 setRankings(response.data);
             } catch (err) {
                 setError('Có lỗi xảy ra khi tải dữ liệu');
                 console.error('Error fetching rankings:', err);
-            } finally {
-                setLoading(false);
             }
         };
 
@@ -30,15 +25,6 @@ export default function RankingPageClient() {
     const totalContributors = rankings.length;
     const totalDocuments = rankings.reduce((sum, ranking) => sum + ranking.totalUpload, 0);
     const topContributor = rankings.length > 0 ? rankings[0].totalUpload : 0;
-    const averagePerUser = totalContributors > 0 ? Math.round(totalDocuments / totalContributors) : 0;
-
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center py-12 sm:py-16 lg:py-20">
-                <Loading onLoadingComplete={() => { }} />
-            </div>
-        );
-    }
 
     if (error) {
         return (

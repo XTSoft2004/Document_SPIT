@@ -7,7 +7,6 @@ import ContributeFAQ from "@/components/ui/Contribute/ContributeFAQ";
 export default async function ContributePage() {
     return (
         <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-            <Header />
             <main className="flex-1 w-full">
                 {/* Hero Section with responsive padding */}
                 <div className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
@@ -126,7 +125,6 @@ export default async function ContributePage() {
                     </div>
                 </div>
             </main>
-            <Footer />
         </div>
     );
 }

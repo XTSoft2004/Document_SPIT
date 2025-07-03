@@ -1,11 +1,8 @@
-import Footer from "@/layout/Footer";
-import Header from "@/layout/Header";
 import RankingPageClient from "@/components/ui/Ranking/RankingPageClient";
 
 export default function RankingPage() {
     return (
         <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-            <Header />
             <main className="flex-1 w-full">
                 {/* Hero Section with responsive padding */}
                 <div className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
@@ -53,7 +50,6 @@ export default function RankingPage() {
                     </div>
                 </div>
             </main>
-            <Footer />
         </div>
     );
 }

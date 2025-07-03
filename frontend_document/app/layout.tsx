@@ -1,32 +1,24 @@
-import "./globals.css";
-import type { Metadata } from "next";
-import { AntdRegistry } from '@ant-design/nextjs-registry'
-import AppInitializer from "@/components/ui/Loading/AppInitializer";
-import PageTransitionLoader from "@/components/ui/Loading/PageTransitionLoader";
+import type { Metadata } from 'next';
+import { ReactNode } from 'react';
 
-export const metadata: Metadata = {
-  title: "Trang chủ SPIT",
-  description: "Trang chủ của SPIT - Nơi chia sẻ tài liệu học tập và đóng góp kiến thức",
-  icons: {
-    icon: "/logo/logo-500x500.png",
-  },
-};
+// Dynamic metadata based on the route
+export async function generateMetadata({
+    params,
+    searchParams,
+}: {
+    params: any;
+    searchParams: Record<string, string | string[] | undefined>;
+}): Promise<Metadata> {
+    return {
+        title: 'SPIT | Document',
+        description: 'Xem tài liệu của bạn một cách dễ dàng và nhanh chóng',
+    };
+}
 
-export default function RootLayout({
-  children,
+export default function AuthLayout({
+    children,
 }: Readonly<{
-  children: React.ReactNode;
-}>) {
-  return (
-    <html lang="en">
-      <body>
-        <AntdRegistry>
-          <AppInitializer>
-            <PageTransitionLoader />
-            {children}
-          </AppInitializer>
-        </AntdRegistry>
-      </body>
-    </html >
-  );
+    children: ReactNode;
+}>): JSX.Element {
+    return <>{children}</>;
 }
