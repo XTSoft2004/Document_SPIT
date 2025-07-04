@@ -6,32 +6,32 @@ const FAQ_DATA = [
     {
         id: 1,
         question: 'Tôi có thể đóng góp những loại tài liệu nào?',
-        answer: 'Bạn có thể đóng góp các loại tài liệu như: bài giảng, slide, đề thi, bài tập, source code, tài liệu tham khảo, v.v. Các định dạng được hỗ trợ bao gồm PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, TXT, ZIP, RAR.'
+        answer: 'Bạn có thể đóng góp các loại tài liệu học tập như: đề cương môn học, đề thi cũ, bài tập, tài liệu tham khảo, slide bài giảng và các tài nguyên học tập khác liên quan đến các môn học trong các khoa của Trường Đại Học Khoa Học Huế. Các định dạng được hỗ trợ bao gồm PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX.'
     },
     {
         id: 2,
         question: 'Tài liệu của tôi có được kiểm duyệt không?',
-        answer: 'Có, tất cả tài liệu đóng góp sẽ được kiểm duyệt bởi đội ngũ quản trị trước khi được công khai. Quá trình này thường mất từ 1-2 ngày làm việc.'
+        answer: 'Có, tất cả tài liệu đóng góp sẽ được kiểm duyệt bởi đội ngũ quản trị để đảm bảo tính chính xác và phù hợp trước khi được công khai. Quá trình này thường mất từ 1-2 ngày làm việc.'
     },
     {
         id: 3,
-        question: 'Tôi có nhận được điểm thưởng khi đóng góp không?',
-        answer: 'Có! Hệ thống sẽ cộng điểm thưởng dựa trên chất lượng và độ hữu ích của tài liệu. Điểm thưởng có thể được sử dụng để tải về các tài liệu premium.'
+        question: 'Tôi có nhận được gì khi đóng góp tài liệu?',
+        answer: 'Website của chúng tôi hoạt động phi lợi nhuận, tuy nhiên người đóng góp sẽ được ghi nhận và có thể tiếp cận những tài liệu đặc biệt. Quan trọng hơn, bạn đang giúp đỡ cộng đồng sinh viên Đại Học Khoa Học Huế có nguồn tài liệu học tập tốt hơn.'
     },
     {
         id: 4,
-        question: 'Làm sao để đảm bảo tài liệu không vi phạm bản quyền?',
-        answer: 'Chỉ đóng góp những tài liệu mà bạn sở hữu hoặc có quyền chia sẻ. Không đăng tải sách giáo khoa có bản quyền, tài liệu thương mại mà không có sự cho phép.'
+        question: 'Làm sao để đảm bảo tài liệu không vi phạm quy định?',
+        answer: 'Chỉ đóng góp những tài liệu mà bạn sở hữu, đề thi cũ bạn đã làm, hoặc tài liệu công khai của trường. Không đăng tải sách giáo khoa có bản quyền, đề thi chưa được phép công bố, hoặc tài liệu có nội dung nhạy cảm.'
     },
     {
         id: 5,
         question: 'Kích thước tối đa của tệp là bao nhiêu?',
-        answer: 'Kích thước tối đa cho mỗi tệp là 50MB. Nếu tài liệu của bạn lớn hơn, hãy thử nén tệp hoặc chia nhỏ thành nhiều phần.'
+        answer: 'Kích thước tối đa cho mỗi tệp là 5MB. Đối với các slide bài giảng hoặc tài liệu lớn, hãy nén file hoặc chia nhỏ thành nhiều phần để tải lên thuận tiện.'
     },
     {
         id: 6,
-        question: 'Tôi có thể chỉnh sửa tài liệu sau khi đã đăng không?',
-        answer: 'Sau khi tài liệu được phê duyệt, bạn có thể yêu cầu chỉnh sửa thông qua hệ thống báo cáo. Tuy nhiên, tốt nhất là kiểm tra kỹ trước khi đóng góp.'
+        question: 'Tôi có thể cập nhật đề cương hoặc đề thi khi có phiên bản mới không?',
+        answer: 'Có, bạn có thể cập nhật tài liệu khi có phiên bản mới hơn hoặc chính xác hơn. Hệ thống của chúng tôi khuyến khích việc cập nhật thường xuyên để sinh viên luôn có tài liệu mới nhất cho việc học tập.'
     }
 ];
 
@@ -116,23 +116,23 @@ export default function ContributeFAQ() {
                         </p>
                         <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-3">
                             <a
-                                href="mailto:support@example.com"
+                                href="mailto:xuantruong2004.dev@gmail.com"
                                 className="inline-flex items-center justify-center sm:justify-start text-blue-700 hover:text-blue-800 font-medium text-sm transition-colors duration-200 hover:bg-blue-100 px-3 py-2 rounded-lg"
                             >
                                 <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                 </svg>
-                                <span className="hidden sm:inline">support@example.com</span>
+                                <span className="hidden sm:inline">xuantruong2004.dev@gmail.com</span>
                                 <span className="sm:hidden">Email hỗ trợ</span>
                             </a>
                             <a
-                                href="tel:+84123456789"
+                                href="tel:+849*********"
                                 className="inline-flex items-center justify-center sm:justify-start text-blue-700 hover:text-blue-800 font-medium text-sm transition-colors duration-200 hover:bg-blue-100 px-3 py-2 rounded-lg"
                             >
                                 <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                                 </svg>
-                                <span className="hidden sm:inline">0123 456 789</span>
+                                <span className="hidden sm:inline">09* *** ***</span>
                                 <span className="sm:hidden">Hotline</span>
                             </a>
                         </div>

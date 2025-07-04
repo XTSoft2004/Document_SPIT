@@ -363,6 +363,8 @@ namespace Domain.Common.GoogleDriver.Services
                         var document = _document.Find(d => d.FileId == item.Id);
                         if (document != null)
                         {
+                            string? typeFile = item.Name.Split('.')[item.Name.Split('.').Length - 1];
+                            item.Name = $"{document.Name}.{typeFile}";
                             var detailDocument = _detailDocument.Find(dd => dd.Id == document.DetaiDocumentId);
                             if (detailDocument != null)
                             {

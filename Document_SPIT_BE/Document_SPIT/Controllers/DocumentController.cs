@@ -96,8 +96,11 @@ namespace Document_SPIT_BE.Controllers
 
             var (data, contentType, fileName) = result.Value;
 
+            //Response.Headers["Content-Disposition"] = $"inline; filename=\"{fileName}\"";
+            //return new FileContentResult(data, contentType);
+            var stream = new MemoryStream(data);
             Response.Headers["Content-Disposition"] = $"inline; filename=\"{fileName}\"";
-            return new FileContentResult(data, contentType);
+            return new FileStreamResult(stream, contentType);
         }
         [HttpGet("{documentId}")]
         public async Task<IActionResult> GetLinkViewId(long documentId)

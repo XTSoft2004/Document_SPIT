@@ -56,6 +56,7 @@ namespace Domain.Common
             string extension = Path.GetExtension(fileName).ToLowerInvariant();
             return MimeTypes.TryGetValue(extension, out var mime) ? mime : "application/octet-stream";
         }
+
         public static string GetMimeTypeFromBase64(string base64)
         {
             // Ví dụ: data:image/jpeg;base64,...
@@ -65,6 +66,21 @@ namespace Domain.Common
                 return match.Groups["mime"].Value;
             }
             return null;
+        }
+        public static string? GetExtensionFromMimeType(string mimeType)
+        {
+            if (string.IsNullOrWhiteSpace(mimeType))
+                return null;
+
+            // Find the first extension that matches the given mimeType
+            foreach (var kvp in MimeTypes)
+            {
+                if (string.Equals(kvp.Value, mimeType, StringComparison.OrdinalIgnoreCase))
+                {
+                    return kvp.Key;
+                }
+            }
+            return string.Empty;
         }
     }
 }

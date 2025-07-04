@@ -475,7 +475,8 @@ namespace Domain.Services
         public async Task<HttpResponse> GetRecentDocuments(int number)
         {
             var documents = _document!.All()
-                .Where(d => d.IsPrivate == false)
+                .Include("User")
+                .Where(d => d.IsPrivate == false && d.StatusDocument == StatusDocument_Enum.Approved)
                 .OrderByDescending(d => d.ModifiedDate)
                 .Take(number)
                 .ToList();
@@ -486,18 +487,19 @@ namespace Domain.Services
                 Name = s.Name,
                 FileId = s.FileId,
                 FileName = s.FileName,
+                Fullname = s.User != null ? s.User.Fullname : string.Empty,
                 TotalDownloads = s.DetaiDocument?.TotalDownload ?? 0,
                 TotalViews = s.DetaiDocument?.TotalView ?? 0,
                 CreatedDate = s.CreatedDate,
                 ModifiedDate = s.ModifiedDate
             }).ToList();
 
-            foreach (var doc in responseList)
-            {
-                var userId = documents.First(d => d.Id == doc.Id).UserId;
-                var user = _user.Find(f => f.Id == userId);
-                doc.Fullname = user?.Fullname ?? "Không rõ";
-            }
+            //foreach (var doc in responseList)
+            //{
+            //    var userId = documents.First(d => d.Id == doc.Id).UserId;
+            //    var user = _user.Find(f => f.Id == userId);
+            //    doc.Fullname = user?.Fullname ?? "Không rõ";
+            //}
 
             return HttpResponse.OK(data: responseList, message: "Lấy danh sách tài liệu gần đây thành công.");
         }

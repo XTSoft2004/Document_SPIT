@@ -68,9 +68,12 @@ namespace Document_SPIT_BE.Controllers
             await _documentServices.ViewFile(fileId);
 
             var (data, contentType, fileName) = result.Value;
-            
+
+            //Response.Headers["Content-Disposition"] = $"inline; filename=\"{fileName}\"";
+            //return new FileContentResult(data, contentType);
+            var stream = new MemoryStream(data);
             Response.Headers["Content-Disposition"] = $"inline; filename=\"{fileName}\"";
-            return new FileContentResult(data, contentType);
+            return new FileStreamResult(stream, contentType);
         }
         [HttpPost("upload")]
         public async Task<IActionResult> UploadFile(UploadFileBase64Request uploadFileRequest)

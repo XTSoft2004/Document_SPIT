@@ -164,6 +164,7 @@ export const getCodeView = async (documentId: number) => {
   )
 
   const data = await response.json()
+  console.log(data)
   return {
     ok: response.ok,
     status: response.status,
