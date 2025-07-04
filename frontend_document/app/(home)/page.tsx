@@ -77,9 +77,9 @@ export default function PageHome() {
                   </div>
                 </button>
 
-                <button onClick={() => router.push('/contribute')} className="group bg-white text-gray-700 px-4 sm:px-6 py-3 rounded-xl sm:rounded-2xl font-semibold text-sm sm:text-base border-2 border-gray-200 hover:border-blue-300 hover:text-blue-600 transition-all duration-300 hover:shadow-lg flex items-center justify-center gap-2 sm:gap-3 w-full sm:w-auto">
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h8m-6-10h8m-7 14h6" />
+                <button onClick={() => router.push('/contribute')} className="group bg-white text-gray-700 px-4 sm:px-6 py-3 rounded-xl sm:rounded-2xl font-semibold text-sm sm:text-base border-2 border-gray-200 hover:border-pink-400 hover:text-pink-700 transition-all duration-300 hover:shadow-lg flex items-center justify-center gap-2 sm:gap-3 w-full sm:w-auto">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-pink-500 group-hover:text-pink-700 transition-colors duration-300" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                   </svg>
                   <span>Đóng góp tài liệu</span>
                 </button>
