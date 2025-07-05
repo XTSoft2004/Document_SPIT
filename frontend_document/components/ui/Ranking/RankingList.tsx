@@ -1,14 +1,86 @@
 'use client'
 import { IRanking } from "@/types/statistical";
 import RankingCard from "./RankingCard";
+import { Skeleton, Card } from "antd";
 
 interface RankingListProps {
     rankings: IRanking[];
+    loading?: boolean;
 }
 
-export default function RankingList({ rankings }: RankingListProps) {
+export default function RankingList({ rankings, loading = false }: RankingListProps) {
     const topThree = rankings.slice(0, 3);
     const remaining = rankings.slice(3);
+
+    // Loading state
+    if (loading) {
+        return (
+            <div className="space-y-6 sm:space-y-8 lg:space-y-10">
+                {/* Top 3 Loading */}
+                <div className="mb-8 sm:mb-12">
+                    <div className="text-center mb-6 sm:mb-8">
+                        <Skeleton.Input active size="large" className="w-48 h-8 mx-auto" />
+                    </div>
+
+                    {/* Mobile: Vertical stack loading */}
+                    <div className="sm:hidden space-y-4">
+                        {[1, 2, 3].map((item) => (
+                            <Card key={item} className="p-4">
+                                <div className="flex items-center space-x-4">
+                                    <Skeleton.Avatar active size={60} />
+                                    <div className="flex-1">
+                                        <Skeleton.Input active size="small" className="w-32 mb-2" />
+                                        <Skeleton.Input active size="small" className="w-24" />
+                                    </div>
+                                    <div className="text-right">
+                                        <Skeleton.Input active size="small" className="w-16 mb-2" />
+                                        <Skeleton.Input active size="small" className="w-12" />
+                                    </div>
+                                </div>
+                            </Card>
+                        ))}
+                    </div>
+
+                    {/* Desktop: Podium layout loading */}
+                    <div className="hidden sm:grid sm:grid-cols-1 md:grid-cols-3 sm:gap-4 lg:gap-6">
+                        {[1, 2, 3].map((item) => (
+                            <Card key={item} className="p-4">
+                                <div className="text-center">
+                                    <Skeleton.Avatar active size={80} className="mx-auto mb-4" />
+                                    <Skeleton.Input active size="small" className="w-24 mb-2 mx-auto" />
+                                    <Skeleton.Input active size="small" className="w-16 mx-auto" />
+                                </div>
+                            </Card>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Remaining Rankings Loading */}
+                <div>
+                    <div className="mb-4 sm:mb-6">
+                        <Skeleton.Input active size="large" className="w-36 h-6" />
+                    </div>
+                    <div className="space-y-3 sm:space-y-4">
+                        {[1, 2, 3, 4, 5].map((item) => (
+                            <Card key={item} className="p-4">
+                                <div className="flex items-center space-x-4">
+                                    <Skeleton.Avatar active size={50} />
+                                    <div className="flex-1">
+                                        <Skeleton.Input active size="small" className="w-40 mb-2" />
+                                        <Skeleton.Input active size="small" className="w-32" />
+                                    </div>
+                                    <div className="text-right">
+                                        <Skeleton.Input active size="small" className="w-20 mb-2" />
+                                        <Skeleton.Input active size="small" className="w-16" />
+                                    </div>
+                                </div>
+                            </Card>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6 sm:space-y-8 lg:space-y-10">
@@ -19,7 +91,7 @@ export default function RankingList({ rankings }: RankingListProps) {
                         🏆 <span className="hidden sm:inline">Top 3 Contributors</span>
                         <span className="sm:hidden">Top 3</span>
                     </h2>
-                    
+
                     {/* Mobile: Vertical stack, Desktop: Podium layout */}
                     <div className="space-y-4 sm:space-y-0 sm:grid sm:grid-cols-1 md:grid-cols-3 sm:gap-4 lg:gap-6">
                         {/* Mobile: Show in order 1,2,3 */}
@@ -28,17 +100,16 @@ export default function RankingList({ rankings }: RankingListProps) {
                                 <RankingCard key={ranking.fullname} ranking={ranking} position={index + 1} />
                             ))}
                         </div>
-                        
+
                         {/* Desktop: Podium layout 2,1,3 */}
                         <div className="hidden sm:contents">
                             {topThree.map((ranking, index) => (
-                                <div 
-                                    key={ranking.fullname} 
-                                    className={`${
-                                        index === 0 ? 'md:order-2' : 
-                                        index === 1 ? 'md:order-1' : 
-                                        'md:order-3'
-                                    }`}
+                                <div
+                                    key={ranking.fullname}
+                                    className={`${index === 0 ? 'md:order-2' :
+                                        index === 1 ? 'md:order-1' :
+                                            'md:order-3'
+                                        }`}
                                 >
                                     <RankingCard ranking={ranking} position={index + 1} />
                                 </div>
@@ -57,10 +128,10 @@ export default function RankingList({ rankings }: RankingListProps) {
                     </h2>
                     <div className="space-y-3 sm:space-y-4">
                         {remaining.map((ranking, index) => (
-                            <RankingCard 
-                                key={ranking.fullname} 
-                                ranking={ranking} 
-                                position={index + 4} 
+                            <RankingCard
+                                key={ranking.fullname}
+                                ranking={ranking}
+                                position={index + 4}
                             />
                         ))}
                     </div>

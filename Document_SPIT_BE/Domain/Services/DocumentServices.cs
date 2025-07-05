@@ -65,7 +65,7 @@ namespace Domain.Services
                 return HttpResponse.Error("Base64 không hợp lệ, vui lòng kiểm tra lại.", System.Net.HttpStatusCode.BadRequest);
 
             // Kiểm tra thông tin tài liệu
-            if (AppExtension.IsBase64String(base64Check) == false)                      
+            if (AppExtension.IsBase64String(base64Check) == false)
                 return HttpResponse.Error("Base64 không hợp lệ, vui lòng kiểm tra lại.", System.Net.HttpStatusCode.BadRequest);
 
             // Tính toán MD5 từ Base64
@@ -149,9 +149,9 @@ namespace Domain.Services
             documentPending.CourseId = course.Id;
             documentPending.StatusDocument = EnumExtensions.GetEnumValueFromDisplayName<StatusDocument_Enum>(documentRequest.statusDocument) ?? documentPending.StatusDocument;
             _document.Update(documentPending);
-            await UnitOfWork.CommitAsync(); 
+            await UnitOfWork.CommitAsync();
 
-            if(documentPending.StatusDocument == StatusDocument_Enum.Approved)
+            if (documentPending.StatusDocument == StatusDocument_Enum.Approved)
             {
                 await _googleDriverServices.CutFile(documentPending.FileId, documentRequest.folderId?.Trim(), documentPending.FolderId);
                 documentPending.FolderId = documentRequest.folderId?.Trim() ?? documentPending.FolderId;
@@ -207,7 +207,7 @@ namespace Domain.Services
                 return HttpResponse.Error("Người dùng không tồn tại.", System.Net.HttpStatusCode.NotFound);
 
             // Thay đổi môn học tài liệu
-            if(documentRequest.courseId != null)
+            if (documentRequest.courseId != null)
             {
                 var course = _course!.Find(f => f.Id == documentRequest.courseId);
                 if (course == null)
@@ -345,7 +345,7 @@ namespace Domain.Services
             return (data, contentType, fileName);
         }
         public List<DocumentResponse> GetDocuments(string search, int pageNumber, int pageSize, out int totalRecords, string statusDocument = "")
-        {            
+        {
             var query = _document!.All()
                 .Include(d => d.User)
                 .Include(d => d.Course)
@@ -419,24 +419,30 @@ namespace Domain.Services
         public async Task<HttpResponse> GetLinkView(long? DocumentId)
         {
             var document = _document!.Find(f => f.Id == DocumentId);
-            if(document == null)
+            if (document == null)
                 return HttpResponse.Error("Tài liệu không tồn tại.", System.Net.HttpStatusCode.NotFound);
 
             var documentDriver = await _googleDriverServices.GetInfoById(document.FileId);
-            if(documentDriver == null)
-                return HttpResponse.Error("Thư mục tài liệu không tồn tại hoặc không hợp lệ.", System.Net.HttpStatusCode.NotFound); 
+            if (documentDriver == null)
+                return HttpResponse.Error("Thư mục tài liệu không tồn tại hoặc không hợp lệ.", System.Net.HttpStatusCode.NotFound);
 
-            var user = _user.Find(f => f.Id == userMeToken.Id);
-
-            var guid= Guid.NewGuid().ToString("N");
-            _oneTimeToken.Insert(new OneTimeToken
+            var guid = Guid.NewGuid().ToString("N");
+            var itemOneTimeToken = new OneTimeToken
             {
                 Code = guid,
                 FileId = document.FileId,
-                User = user,
-                UserId = user.Id,
                 CreatedDate = DateTime.Now
-            });
+            };
+            if (userMeToken != null)
+            {
+                var user = _user.Find(f => f.Id == userMeToken.Id);
+                if (user != null)
+                {
+                    itemOneTimeToken.User = user;
+                    itemOneTimeToken.UserId = user.Id;
+                }
+            }
+            _oneTimeToken.Insert(itemOneTimeToken);
             await UnitOfWork.CommitAsync();
             return HttpResponse.OK(message: "Lấy link thành công.", data: new { Code = $"{guid}" });
         }
@@ -502,6 +508,16 @@ namespace Domain.Services
             //}
 
             return HttpResponse.OK(data: responseList, message: "Lấy danh sách tài liệu gần đây thành công.");
+        }
+
+        public async Task<string> GetThumbnailBase64(long IdDocument)
+        {
+            var document = _document!.Find(f => f.Id == IdDocument);
+            if (document == null)
+                return string.Empty;
+
+            var thumbnailBase64 = await _googleDriverServices.GetThumbnailBase64(document.FileId);
+            return thumbnailBase64;
         }
     }
 }

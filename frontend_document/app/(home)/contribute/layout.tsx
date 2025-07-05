@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "Contribute SPIT",
+    title: "Đóng góp tài liệu",
     description: "Document SPIT",
 };
 

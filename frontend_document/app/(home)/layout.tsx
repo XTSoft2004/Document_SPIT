@@ -8,7 +8,7 @@ import Footer from "@/layout/Footer";
 import React, { useState, useEffect } from "react";
 
 export const metadata: Metadata = {
-  title: "Trang chủ SPIT",
+  title: "Trang chủ",
   description: "Trang chủ của SPIT - Nơi chia sẻ tài liệu học tập và đóng góp kiến thức",
   icons: {
     icon: "/logo/logo-500x500.png",

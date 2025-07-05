@@ -92,7 +92,7 @@ export default function RankingCard({ ranking, position }: RankingCardProps) {
                             <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <span className="text-gray-600">
-                            <span className="hidden sm:inline">Top contributor</span>
+                            <span className="hidden sm:inline">Người đóng góp</span>
                             <span className="sm:hidden">Top</span>
                         </span>
                     </div>

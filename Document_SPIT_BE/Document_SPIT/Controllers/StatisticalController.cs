@@ -23,5 +23,14 @@ namespace Document_SPIT_BE.Controllers
             var response = await _statistical.GetRanking();
             return response.ToActionResult();
         }
+        [HttpGet("parameter-document")]
+        public async Task<IActionResult> ParameterDocument()
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+
+            var response = await _statistical.ParameterDocument();
+            return response.ToActionResult();
+        }
     }
 }

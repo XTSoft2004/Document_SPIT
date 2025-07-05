@@ -14,5 +14,10 @@ namespace Domain.Interfaces.Services
         /// </summary>
         /// <returns></returns>
         Task<HttpResponse> GetRanking();
+        /// <summary>
+        /// Lấy các thông số thống kê về tài liệu được đóng góp
+        /// </summary>
+        /// <returns></returns>
+        Task<HttpResponse> ParameterDocument();
     }
 }

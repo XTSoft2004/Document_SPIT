@@ -1,9 +1,15 @@
 export interface IStar {
-    userId: number;
-    documentId: number;
+  userId: number
+  documentId: number
 }
 
 export interface IRanking {
-    fullname: string;
-    totalUpload: number;
+  fullname: string
+  totalUpload: number
+}
+
+export interface IParameterDocument {
+  totalDocumentShare: number
+  totalUserContribute: number
+  totalCourseShare: number
 }

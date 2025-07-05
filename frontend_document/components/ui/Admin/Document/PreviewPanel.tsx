@@ -30,12 +30,6 @@ const PreviewPanel = ({
         setLoading(true);
         setImageError(false);
     }, [codeView]);
-
-    useEffect(() => {
-        console.log("Document: ", selectedItem);
-        console.log("Codeview: ", codeView);
-    }, [])
-
     // Reset loading state khi selectedItem thay đổi
     useEffect(() => {
         setLoading(true);

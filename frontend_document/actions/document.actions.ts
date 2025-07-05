@@ -164,7 +164,7 @@ export const getCodeView = async (documentId: number) => {
   )
 
   const data = await response.json()
-  console.log(data)
+  console.log(`${globalConfig.baseUrl}/document/${documentId}`)
   return {
     ok: response.ok,
     status: response.status,

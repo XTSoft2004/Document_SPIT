@@ -9,6 +9,7 @@ import ActivityRight from "@/components/ui/Admin/Dashboard/activity-right";
 import DraggerUpload from "@/components/ui/Admin/Dashboard/dragger-upload";
 import RightSidebar, { RightSidebarMobile } from "@/components/ui/Admin/Dashboard/right-sidebar";
 import { GlobalPageLoader } from "@/components/ui/page-transition-loader";
+import { AuthProvider } from '@/context/AuthContext';
 
 export const metadata = {
     title: "Trang chủ | Quản trị",
@@ -24,34 +25,36 @@ export default function RootLayout({
         <html lang="vi">
             <body>
                 <SidebarProvider>
-                    <GlobalPageLoader />
-                    <div className="w-full h-screen flex overflow-hidden bg-gray-50 text-gray-800">
-                        {/* Sidebar */}
-                        <AppSidebar />
+                    <AuthProvider>
+                        <GlobalPageLoader />
+                        <div className="w-full h-screen flex overflow-hidden bg-gray-50 text-gray-800">
+                            {/* Sidebar */}
+                            <AppSidebar />
 
-                        {/* Main content area */}
-                        <div className="flex flex-col flex-1 overflow-hidden">
-                            {/* Header */}
-                            <header className="sticky top-0 z-20 bg-white shadow-sm w-full">
-                                <SiteHeader />
-                            </header>
+                            {/* Main content area */}
+                            <div className="flex flex-col flex-1 overflow-hidden">
+                                {/* Header */}
+                                <header className="sticky top-0 z-20 bg-white shadow-sm w-full">
+                                    <SiteHeader />
+                                </header>
 
-                            {/* Content body */}
-                            <div className="flex flex-1 overflow-hidden">
-                                {/* Main content scrollable */}
-                                <main className="flex-1 overflow-y-auto overflow-x-auto p-2 md:p-3 lg:p-5 space-y-6">
-                                    <div className="min-w-full">
-                                        {children}
-                                    </div>
+                                {/* Content body */}
+                                <div className="flex flex-1 overflow-hidden">
+                                    {/* Main content scrollable */}
+                                    <main className="flex-1 overflow-y-auto overflow-x-auto p-2 md:p-3 lg:p-5 space-y-6">
+                                        <div className="min-w-full">
+                                            {children}
+                                        </div>
 
-                                    <RightSidebarMobile />
-                                </main>
+                                        <RightSidebarMobile />
+                                    </main>
 
-                                {/* Right-side widget (desktop) */}
-                                <RightSidebar />
+                                    {/* Right-side widget (desktop) */}
+                                    <RightSidebar />
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </AuthProvider>
                 </SidebarProvider>
             </body>
         </html>

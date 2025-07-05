@@ -1,10 +1,51 @@
+'use client'
 import Footer from "@/layout/Footer";
 import Header from "@/layout/Header";
 import ContributeForm from "@/components/ui/Contribute/ContributeForm";
 import RecentContributions from "@/components/ui/Contribute/RecentContributions";
 import ContributeFAQ from "@/components/ui/Contribute/ContributeFAQ";
+import { useState, useEffect, useMemo } from "react";
+import { IParameterDocument } from "@/types/statistical";
+import { getParameterDocument } from "@/actions/statistical.actions";
 
-export default async function ContributePage() {
+export default function ContributePage() {
+    const [parameters, setParameters] = useState<IParameterDocument>();
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchParameters = async () => {
+            try {
+                setLoading(true);
+                const response = await getParameterDocument();
+                if (response.ok && response.data) {
+                    setParameters(response.data);
+                }
+            } catch (error) {
+                console.error('Error fetching parameters:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchParameters();
+    }, []);
+
+    const statsData = useMemo(() => {
+        if (!parameters) {
+            return {
+                totalDocumentShare: 0,
+                totalUserContribute: 0,
+                totalCourseShare: 0
+            };
+        }
+
+        return {
+            totalDocumentShare: parameters.totalDocumentShare || 0,
+            totalUserContribute: parameters.totalUserContribute || 0,
+            totalCourseShare: parameters.totalCourseShare || 0
+        };
+    }, [parameters]);
+
     return (
         <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
             <main className="flex-1 w-full">
@@ -65,10 +106,22 @@ export default async function ContributePage() {
                                         </svg>
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                        <p className="text-lg sm:text-xl font-bold text-gray-900 mb-0.5">1,234</p>
-                                        <p className="text-xs sm:text-sm text-gray-600 font-medium">
-                                            Tài liệu đã chia sẻ
-                                        </p>
+                                        {loading ? (
+                                            <div className="animate-pulse">
+                                                <div className="h-6 bg-gray-200 rounded mb-1"></div>
+                                                <div className="h-4 bg-gray-200 rounded w-24"></div>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <span className="text-lg sm:text-xl font-bold text-gray-900 mb-0.5">
+                                                    {statsData.totalDocumentShare}
+                                                </span>
+                                                <span className="font-semibold"> tài liệu</span>
+                                                <p className="text-xs sm:text-sm text-gray-600 font-medium">
+                                                    Tài liệu đã chia sẻ
+                                                </p>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -82,27 +135,51 @@ export default async function ContributePage() {
                                         </svg>
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                        <p className="text-lg sm:text-xl font-bold text-gray-900 mb-0.5">567</p>
-                                        <p className="text-xs sm:text-sm text-gray-600 font-medium">
-                                            Người đóng góp
-                                        </p>
+                                        {loading ? (
+                                            <div className="animate-pulse">
+                                                <div className="h-6 bg-gray-200 rounded mb-1"></div>
+                                                <div className="h-4 bg-gray-200 rounded w-24"></div>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <span className="text-lg sm:text-xl font-bold text-gray-900 mb-0.5">
+                                                    {statsData.totalUserContribute}
+                                                </span>
+                                                <span className="font-semibold"> người</span>
+                                                <p className="text-xs sm:text-sm text-gray-600 font-medium">
+                                                    Người đóng góp
+                                                </p>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                             </div>
 
                             {/* Subjects Card */}
-                            <div className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 hover:scale-[1.02] group">
+                            <div className="bg-white rou`nded-lg sm:rounded-xl p-3 sm:p-4 shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 hover:scale-[1.02] group">
                                 <div className="flex items-center space-x-2 sm:space-x-3">
-                                    <div className="p-2 bg-gradient-to-br from-purple-100 to-purple-200 rounded-lg group-hover:from-purple-200 group-hover:to-purple-300 transition-all duration-300 flex-shrink-0">
+                                    `                                    <div className="p-2 bg-gradient-to-br from-purple-100 to-purple-200 rounded-lg group-hover:from-purple-200 group-hover:to-purple-300 transition-all duration-300 flex-shrink-0">
                                         <svg className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
                                         </svg>
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                        <p className="text-lg sm:text-xl font-bold text-gray-900 mb-0.5">89</p>
-                                        <p className="text-xs sm:text-sm text-gray-600 font-medium">
-                                            Môn học
-                                        </p>
+                                        {loading ? (
+                                            <div className="animate-pulse">
+                                                <div className="h-6 bg-gray-200 rounded mb-1"></div>
+                                                <div className="h-4 bg-gray-200 rounded w-24"></div>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <span className="text-lg sm:text-xl font-bold text-gray-900 mb-0.5">
+                                                    {statsData.totalCourseShare}
+                                                </span>
+                                                <span className="font-semibold"> môn học</span>
+                                                <p className="text-xs sm:text-sm text-gray-600 font-medium">
+                                                    Môn học được đóng góp
+                                                </p>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                             </div>

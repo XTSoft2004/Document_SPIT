@@ -44,7 +44,7 @@ export default function SidebarTrees({
         <>
             {/* Tree sidebar */}
             <div className={`ml-3 hidden md:flex h-full transition-all duration-300 ease-in-out ${showTree ? 'w-64 min-w-[200px] max-w-[300px]' : 'w-0 min-w-0 max-w-0'} overflow-hidden`}>
-                <div className={`w-64 min-w-[200px] max-w-[300px] flex-shrink-0 h-full max-h-full overflow-hidden relative flex flex-col pt-4 transition-transform duration-300 ease-in-out ${showTree ? 'translate-x-0' : '-translate-x-full'}`}>
+                <div className={`w-64 min-w-[200px] max-w-[300px] flex-shrink-0 h-full max-h-full overflow-hidden relative flex flex-col transition-transform duration-300 ease-in-out ${showTree ? 'translate-x-0' : '-translate-x-full'}`}>
                     {/* Header */}
                     <div className="sticky top-0 z-10 flex flex-col p-2 pl-0">
                         <div className="flex items-center mb-3">
@@ -56,7 +56,7 @@ export default function SidebarTrees({
                             >
                                 <ChevronLeft className="w-5 h-5 text-blue-600" />
                             </button>
-                            <span className="font-medium text-gray-700 flex-1 pl-2">Document SPIT</span>
+                            <span className="font-medium text-gray-700 flex-1 pl-2">Tài liệu học tập</span>
                         </div>
                         <div className="flex items-center ml-4">
                             <Search allItems={allItems} onResult={onSearchResult} />

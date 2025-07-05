@@ -81,5 +81,11 @@ namespace Domain.Interfaces.Services
         /// <param name="number"></param>
         /// <returns></returns>
         Task<HttpResponse> GetRecentDocuments(int number);
+        /// <summary>
+        /// Lấy ảnh thu nhỏ của tài liệu theo IdDocument
+        /// </summary>
+        /// <param name="IdDocument"></param>
+        /// <returns></returns>
+        Task<string> GetThumbnailBase64(long IdDocument);
     }
 }

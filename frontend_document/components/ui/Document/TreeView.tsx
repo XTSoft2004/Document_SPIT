@@ -45,7 +45,7 @@ const TreeNode = ({ node, level, selectedKeys, expandedKeys, onSelect, onExpand 
     };
 
     const handleSelect = () => {
-        onSelect([node.key], { node });
+        onSelect([node.idDocument], { node });
     };
 
     return (

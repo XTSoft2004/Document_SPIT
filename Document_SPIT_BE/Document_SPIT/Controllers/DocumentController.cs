@@ -40,6 +40,20 @@ namespace Document_SPIT_BE.Controllers
             var response = await _services.ReviewAsync(IdDocument, documentReview);
             return response.ToActionResult();
         }
+        [HttpGet("thumbnail/{DocumentId}")]
+        public async Task<IActionResult> GetThumbnailBase64(long DocumentId)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+            var thumbnailBase64 = await _services.GetThumbnailBase64(DocumentId);
+            if (string.IsNullOrEmpty(thumbnailBase64))
+                return NotFound(new { Message = "Không tồn tại file, vui lòng kiểm tra lại" });
+
+            // Convert base64 string to byte array
+            byte[] imageBytes = Convert.FromBase64String(thumbnailBase64);
+            // Set content type to image/png (or adjust if you know the actual type)
+            return File(imageBytes, "image/png");
+        }
 
         [Authorize(Roles = "Admin")]
         [HttpPatch("{IdDocument}")]

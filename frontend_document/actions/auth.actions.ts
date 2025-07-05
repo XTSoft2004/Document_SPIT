@@ -58,7 +58,7 @@ export const loginAccount = async (formData: ILoginRequest) => {
     ok: response.ok,
     status: response.status,
     ...data,
-  } as IIndexResponse<ILoginResponse>
+  } as IShowResponse<ILoginResponse>
 }
 
 export const logoutAccount = async () => {

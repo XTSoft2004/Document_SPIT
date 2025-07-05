@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "Ranking SPIT",
+    title: "Bảng xếp hạng chia sẻ tài liệu",
     description: "Document SPIT",
 };
 

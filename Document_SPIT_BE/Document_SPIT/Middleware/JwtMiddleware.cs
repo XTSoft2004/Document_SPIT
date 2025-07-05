@@ -48,6 +48,7 @@ namespace Server_Manager.Middleware
                 "/document/preview",
                 "/document/recent",
                 "/statistical/ranking",
+                "/statistical/parameter-document",
                 "/user/profile",
                 "/server",
             };

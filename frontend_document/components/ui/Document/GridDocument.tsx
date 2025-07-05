@@ -90,7 +90,7 @@ export default function GridDocument({ data, content, slug, path, treeData, mobi
         if (!node) return;
 
         if (node.isLeaf) {
-            setPreviewFile({ fileName: node.title, documentId: node.key });
+            setPreviewFile({ fileName: node.title, documentId: node.idDocument });
         } else {
 
             router.push(`/document/${node.path.join('/')}`);
@@ -206,8 +206,8 @@ export default function GridDocument({ data, content, slug, path, treeData, mobi
                 <div className="xs:hidden flex items-center justify-between mb-2 px-1">
                     <button
                         className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${path.length > 0
-                                ? 'text-blue-600 hover:bg-blue-50 active:bg-blue-100'
-                                : 'text-gray-400 cursor-not-allowed'
+                            ? 'text-blue-600 hover:bg-blue-50 active:bg-blue-100'
+                            : 'text-gray-400 cursor-not-allowed'
                             }`}
                         onClick={() => {
                             if (path.length > 0) {

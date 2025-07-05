@@ -1,4 +1,5 @@
 export interface ITreeNode {
+  idDocument: number
   title: string
   key: string
   isLeaf: boolean

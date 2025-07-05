@@ -12,8 +12,8 @@ namespace Domain.Entities
     {
         public string Code { get; set; }
         public string FileId { get; set; }
-        public long UserId { get; set; }
+        public long? UserId { get; set; }
         [ForeignKey("UserId")]
-        public User User { get; set; }
+        public User? User { get; set; }
     }
 }

@@ -3,19 +3,24 @@ import { IRanking } from "@/types/statistical";
 import { getRanking } from "@/actions/statistical.actions";
 import { useEffect, useState } from "react";
 import RankingList from "./RankingList";
+import { Skeleton } from "antd";
 
 export default function RankingPageClient() {
     const [rankings, setRankings] = useState<IRanking[]>([]);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchRankings = async () => {
             try {
+                setLoading(true);
                 const response = await getRanking();
                 setRankings(response.data);
             } catch (err) {
                 setError('Có lỗi xảy ra khi tải dữ liệu');
                 console.error('Error fetching rankings:', err);
+            } finally {
+                setLoading(false);
             }
         };
 
@@ -55,11 +60,20 @@ export default function RankingPageClient() {
                             </svg>
                         </div>
                         <div className="ml-3 sm:ml-4 min-w-0 flex-1">
-                            <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 truncate">{totalContributors}</p>
-                            <p className="text-xs sm:text-sm text-gray-600">
-                                <span className="hidden sm:inline">Tổng người đóng góp</span>
-                                <span className="sm:hidden">Người đóng góp</span>
-                            </p>
+                            {loading ? (
+                                <div className="space-y-2">
+                                    <Skeleton.Input active size="small" className="w-16 h-8" />
+                                    <Skeleton.Input active size="small" className="w-24 h-4" />
+                                </div>
+                            ) : (
+                                <>
+                                    <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 truncate">{totalContributors}</p>
+                                    <p className="text-xs sm:text-sm text-gray-600">
+                                        <span className="hidden sm:inline">Tổng người đóng góp</span>
+                                        <span className="sm:hidden">Người đóng góp</span>
+                                    </p>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -73,11 +87,20 @@ export default function RankingPageClient() {
                             </svg>
                         </div>
                         <div className="ml-3 sm:ml-4 min-w-0 flex-1">
-                            <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 truncate">{totalDocuments}</p>
-                            <p className="text-xs sm:text-sm text-gray-600">
-                                <span className="hidden sm:inline">Tổng tài liệu</span>
-                                <span className="sm:hidden">Tài liệu</span>
-                            </p>
+                            {loading ? (
+                                <div className="space-y-2">
+                                    <Skeleton.Input active size="small" className="w-16 h-8" />
+                                    <Skeleton.Input active size="small" className="w-24 h-4" />
+                                </div>
+                            ) : (
+                                <>
+                                    <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 truncate">{totalDocuments}</p>
+                                    <p className="text-xs sm:text-sm text-gray-600">
+                                        <span className="hidden sm:inline">Tổng tài liệu</span>
+                                        <span className="sm:hidden">Tài liệu</span>
+                                    </p>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -91,11 +114,20 @@ export default function RankingPageClient() {
                             </svg>
                         </div>
                         <div className="ml-3 sm:ml-4 min-w-0 flex-1">
-                            <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 truncate">{topContributor}</p>
-                            <p className="text-xs sm:text-sm text-gray-600">
-                                <span className="hidden sm:inline">Người đóng góp nhiều nhất</span>
-                                <span className="sm:hidden">Nhiều nhất</span>
-                            </p>
+                            {loading ? (
+                                <div className="space-y-2">
+                                    <Skeleton.Input active size="small" className="w-16 h-8" />
+                                    <Skeleton.Input active size="small" className="w-24 h-4" />
+                                </div>
+                            ) : (
+                                <>
+                                    <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 truncate">{topContributor}</p>
+                                    <p className="text-xs sm:text-sm text-gray-600">
+                                        <span className="hidden sm:inline">Người đóng góp nhiều nhất</span>
+                                        <span className="sm:hidden">Nhiều nhất</span>
+                                    </p>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -103,7 +135,7 @@ export default function RankingPageClient() {
 
             {/* Rankings List with responsive wrapper */}
             <div className="w-full overflow-hidden">
-                <RankingList rankings={rankings} />
+                <RankingList rankings={rankings} loading={loading} />
             </div>
         </div>
     );

@@ -23,6 +23,7 @@ export default function PreviewFile({ open, onClose, fileName, documentId }: Pre
     const [isLoading, setIsLoading] = useState(false);
     const [codeView, setCodeView] = useState<string | null>(null);
     const [isLoadingCodeView, setIsLoadingCodeView] = useState(false);
+    const [isIframeLoading, setIsIframeLoading] = useState(false);
 
     const isImage = /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(fileName);
 
@@ -69,13 +70,18 @@ export default function PreviewFile({ open, onClose, fileName, documentId }: Pre
             setIsLoading(true);
             setIsLoadingCodeView(true);
             setCodeView(null);
+            setIsIframeLoading(false);
 
             (async () => {
                 try {
                     const response = await getCodeView(documentId);
-                    NotificationService.info({ message: response.message });
+                    // NotificationService.info({ message: response.message });
                     if (response.ok) {
                         setCodeView(response.data.code);
+                        // Nếu không phải là image thì set iframe loading
+                        if (!isImage) {
+                            setIsIframeLoading(true);
+                        }
                     } else {
                         setCodeView(null);
                     }
@@ -91,7 +97,7 @@ export default function PreviewFile({ open, onClose, fileName, documentId }: Pre
                 }
             })();
         }
-    }, [open, documentId]);
+    }, [open, documentId, isImage]);
 
     useEffect(() => {
         if (!open) {
@@ -100,6 +106,7 @@ export default function PreviewFile({ open, onClose, fileName, documentId }: Pre
             setIsLoading(false);
             setIsLoadingCodeView(false);
             setCodeView(null);
+            setIsIframeLoading(false);
         }
     }, [open]);
 
@@ -374,12 +381,37 @@ export default function PreviewFile({ open, onClose, fileName, documentId }: Pre
                         </div>
                     ) : (
                         <div className="w-full h-full relative">
+                            {/* Iframe Loading Overlay */}
+                            {isIframeLoading && (
+                                <div className="absolute inset-0 bg-white/90 backdrop-blur-sm flex items-center justify-center z-10 rounded-lg">
+                                    <div className="flex flex-col items-center space-y-4">
+                                        <div className="relative">
+                                            <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+                                            <div className="absolute inset-0 w-12 h-12 border-4 border-transparent border-t-blue-400 rounded-full animate-ping"></div>
+                                        </div>
+                                        <div className="text-center space-y-2">
+                                            <div className="text-base font-medium text-gray-900">
+                                                Đang tải nội dung...
+                                            </div>
+                                            <div className="text-sm text-gray-500">Vui lòng đợi trong giây lát</div>
+                                        </div>
+                                        <div className="w-48">
+                                            <div className="bg-gray-200 rounded-full h-1.5 overflow-hidden">
+                                                <div className="bg-gradient-to-r from-blue-500 to-purple-500 h-full rounded-full animate-pulse"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
                             <iframe
                                 src={`${globalConfig.baseUrl}/document/view/${codeView}#toolbar=0&navpanes=0&scrollbar=0`}
                                 className="w-full h-full border-0 rounded-lg"
                                 style={{ minHeight: '80vh', height: '100%' }}
+                                onLoad={() => setIsIframeLoading(false)}
                                 onError={() => {
                                     console.error('Error loading iframe');
+                                    setIsIframeLoading(false);
                                 }}
                             />
                         </div>

@@ -32,6 +32,7 @@ export function convertToTreeData(
   })
 
   return sortedData.map((item) => ({
+    idDocument: item.documentId,
     title: item.name,
     key: item.folderId,
     isLeaf: !item.isFolder,

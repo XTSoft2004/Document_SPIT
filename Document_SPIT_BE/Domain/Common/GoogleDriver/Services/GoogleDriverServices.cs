@@ -358,12 +358,15 @@ namespace Domain.Common.GoogleDriver.Services
                 var items = JsonConvert.DeserializeObject<List<DriveFileItem>>(content["files"]?.ToString() ?? "[]");
                 if (items != null)
                 {
-                    foreach (var item in items)
+                    var documents = _document.All().ToList();
+                    var itemExists = items.Where(w => documents.Select(s => s.FileId).Contains(w.Id)).ToList();
+                    foreach(var item in itemExists)
                     {
                         var document = _document.Find(d => d.FileId == item.Id);
                         if (document != null)
                         {
                             string? typeFile = item.Name.Split('.')[item.Name.Split('.').Length - 1];
+                            item.DocumentId = document.Id;
                             item.Name = $"{document.Name}.{typeFile}";
                             var detailDocument = _detailDocument.Find(dd => dd.Id == document.DetaiDocumentId);
                             if (detailDocument != null)
@@ -384,12 +387,14 @@ namespace Domain.Common.GoogleDriver.Services
         }
         public async Task<List<TreeDocumentResponse>> BuildDriveTree(List<DriveFileItem> allItems, string rootFolderId)
         {
+            var documentExists = _document.ListBy(d => allItems.Select(s => s.Id).Contains(d.FileId)).ToList();
+
             var treeMap = new Dictionary<string, TreeDocumentResponse>();
             foreach (var item in allItems)
             {
                 treeMap[item.Id] = new TreeDocumentResponse
                 {
-                    DocumentId = item.DocumentId,
+                    DocumentId = documentExists.Where(w => w.FileId == item.Id).FirstOrDefault()?.Id,
                     Name = item.Name,
                     FolderId = item.Id,
                     IsFolder = item.MimeType == "application/vnd.google-apps.folder",

@@ -51,5 +51,23 @@ namespace Domain.Services
                 data: ranking
             );
         }
+        public async Task<HttpResponse> ParameterDocument()
+        {
+            var documents = _document.All().ToList();
+
+            long? totalDocument = documents.Count;
+            long? totalUserContribute = documents.Select(d => d.UserId).Distinct().Count();
+            long? totalCourse = documents.Select(d => d.CourseId).Distinct().Count();
+
+            return HttpResponse.OK(
+                message: "Lấy thông tin tài liệu thành công.",
+                data: new ParameterDocumentResponse
+                {
+                    TotalDocumentShare = totalDocument,
+                    TotalUserContribute = totalUserContribute,
+                    TotalCourseShare = totalCourse
+                }
+            );
+        }
     }
 }
