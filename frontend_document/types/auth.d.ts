@@ -8,6 +8,9 @@ export interface ILoginResponse {
   userId: number
   username: string
   fullname: string
+  roleName: string
+  email?: string
+  avatarUrl?: string
   isLocked: boolean
   accessToken: string
   expiresAt: DateTime
@@ -19,4 +22,13 @@ export interface IRegisterRequest {
   username: string
   password: string
   fullname: string
+}
+
+export interface IInfoUserResponse {
+  userId: number
+  username: string
+  fullname: string
+  roleName: string
+  email?: string
+  avatarUrl?: string
 }

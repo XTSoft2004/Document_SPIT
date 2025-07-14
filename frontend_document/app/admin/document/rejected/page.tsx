@@ -24,8 +24,6 @@ import ConfirmRestoreModal from "@/components/ui/Admin/Document/Modal/ConfirmRes
 // import SimpleConfirmDeleteModal from "@/components/ui/Admin/Document/Modal/SimpleConfirmDeleteModal"; // Uncomment để dùng modal đơn giản
 
 
-
-
 export default function DocumentRejectedPage() {
     const [selectedDocument, setSelectedDocument] = useState<IDocumentResponse>();
     const [isShowModalUpdate, setIsShowModalUpdate] = useState(false);

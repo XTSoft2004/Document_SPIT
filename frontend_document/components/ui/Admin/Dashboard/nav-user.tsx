@@ -28,6 +28,8 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/shadcn-ui/sidebar"
+import { useAuth } from "@/context/AuthContext"
+import { use, useEffect } from "react"
 
 export function NavUser({
   user,
@@ -39,7 +41,8 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
-
+  const { getInfo } = useAuth();
+  const info = getInfo();
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -50,13 +53,13 @@ export function NavUser({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground border shadow rounded-xl"
             >
               <Avatar className="h-8 w-8 rounded-lg grayscale">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarImage className="object-cover" src={info?.avatarUrl} alt={info?.username} />
+                <AvatarFallback className="rounded-lg">{info?.fullname.slice(0, 2)}</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
+                <span className="truncate font-medium">{info?.username}</span>
                 <span className="truncate text-xs text-muted-foreground">
-                  {user.email}
+                  {info?.email || "No email provided"}
                 </span>
               </div>
               <MoreVerticalIcon className="ml-auto size-4" />
@@ -71,13 +74,13 @@ export function NavUser({
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  <AvatarImage className="object-cover" src={info?.avatarUrl} alt={info?.username} />
+                  <AvatarFallback className="rounded-lg">{info?.fullname.slice(0, 2)}</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
+                  <span className="truncate font-medium">{info?.username}</span>
                   <span className="truncate text-xs text-muted-foreground">
-                    {user.email}
+                    {info?.email || "No email provided"}
                   </span>
                 </div>
               </div>

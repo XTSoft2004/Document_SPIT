@@ -17,6 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
@@ -78,17 +79,19 @@ namespace Domain.Services
             User? user = null;
 
             // Kiểm tra thông tin đăng nhập có hợp lệ ở server CLB SPIT hay không
-            var response = await HttpRequest._client.PostAsync("auth/login", jsonData);
+            var response = await HttpRequest._client.PostAsync("auth/login-document", jsonData);
             if (response.IsSuccessStatusCode)
             {
                 string jsonReponse = HttpRequest.GetResponse(response);
                 var dataJson = JObject.Parse(jsonReponse)["data"];
                 if (dataJson != null)
                 {
-                    string username = dataJson["username"]?.ToString() ?? string.Empty;
-                    string Fullname = dataJson["studentName"]?.ToString() ?? string.Empty;
                     long userId = dataJson["id"]?.ToObject<long>() ?? 0;
+                    string username = dataJson["userName"]?.ToString() ?? string.Empty;
+                    string fullName = dataJson["fullName"]?.ToString() ?? string.Empty;
                     bool isLocked = dataJson["isLocked"]?.ToObject<bool>() ?? false;
+                    string avatarUrl = dataJson["avatarUrl"]?.ToString() ?? string.Empty;
+                    string email = dataJson["email"]?.ToString() ?? string.Empty;
 
                     user = await _user!.FindAsync(f => f.Username == username.Trim(), "Role");
                     if(user == null)
@@ -97,10 +100,21 @@ namespace Domain.Services
                         {
                             Username = username.Trim(),
                             Password = loginRequest.Password!.Trim(),
-                            Fullname = Fullname.Trim()
+                            Fullname = fullName.Trim()
                         });
 
                         await _userServices.SetRole(username, "Admin");
+                    }
+                    else 
+                    {
+                        user.Fullname = !string.IsNullOrEmpty(fullName) ? fullName : user.Fullname;
+                        if (user.isLocked != isLocked)
+                            user.isLocked = isLocked;
+                        user.AvatarUrl = !string.IsNullOrEmpty(avatarUrl) ? avatarUrl : user.AvatarUrl;
+                        user.Email = !string.IsNullOrEmpty(email) ? email : user.Email;
+
+                        _user.Update(user);
+                        await UnitOfWork.CommitAsync();
                     }
                 }
             }
@@ -137,6 +151,9 @@ namespace Domain.Services
                 UserId = user.Id,
                 Username = user.Username,
                 Fullname = user.Fullname,
+                RoleName = user.Role.DisplayName,
+                Email = user.Email,
+                AvatarUrl = user.AvatarUrl,
                 isLocked = user.isLocked,
                 AccessToken = tokenResponse.AccessToken,
                 ExpiresAt = tokenResponse.ExpiresAt,

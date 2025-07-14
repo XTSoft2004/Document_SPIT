@@ -18,8 +18,9 @@ namespace Domain.Entities
         [Required, StringLength(250)]
         public string? Password { get; set; }
         public string? Fullname { get; set; }    
+        public string? Email { get; set; }
+        public string? AvatarUrl { get; set; }
         public bool isLocked { get; set; }
-
 
         /// Role information
         public long? RoleId { get; set; }

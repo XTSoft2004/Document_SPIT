@@ -1,7 +1,12 @@
 'use server'
 import globalConfig from '@/app.config'
 import { IIndexResponse, IShowResponse } from '@/types/global'
-import { IParameterDocument, IRanking } from '@/types/statistical'
+import {
+  ILineChartDate,
+  IParameterDocument,
+  IRanking,
+} from '@/types/statistical'
+import { cookies, headers } from 'next/headers'
 
 export const getRanking = async () => {
   const response = await fetch(`${globalConfig.baseUrl}/statistical/ranking`, {
@@ -37,4 +42,25 @@ export const getParameterDocument = async () => {
     status: response.status,
     ...data,
   } as IShowResponse<IParameterDocument>
+}
+
+export const getLineChartDate = async () => {
+  const response = await fetch(
+    `${globalConfig.baseUrl}/statistical/line-chart-date?numberDay=15`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization:
+          headers().get('Authorization') ||
+          `Bearer ${cookies().get('accessToken')?.value || ' '}`,
+      },
+    },
+  )
+  const data = await response.json()
+  return {
+    ok: response.ok,
+    status: response.status,
+    ...data,
+  } as IIndexResponse<ILineChartDate>
 }

@@ -1,30 +1,59 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { FolderFilled, InboxOutlined } from '@ant-design/icons';
-import type { UploadProps } from 'antd';
-import { message, Modal, Form, Input, Button } from 'antd';
+import { InboxOutlined } from '@ant-design/icons';
+import type { UploadProps, UploadFile } from 'antd';
+import { message } from 'antd';
 import Dragger from 'antd/es/upload/Dragger';
-import ModalSelectFolder from './Modal/ModalSelectFolder';
-import { FoldHorizontal } from 'lucide-react';
-import { IFileInfo } from '@/types/driver';
-import { set } from 'react-hook-form';
+import ModalUploadFileDashboard from './Modal/ModalUploadFileDashboard';
 
 export default function DraggerUpload() {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [fileList, setFileList] = useState<any[]>([]);
+    const [selectedFile, setSelectedFile] = useState<UploadFile | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-    const [fileType, setFileType] = useState<string | null>(null);
-    const [form] = Form.useForm();
-    const [isModalOpenFolder, setIsModalOpenFolder] = useState(false);
-    const [selectedFolderId, setSelectedFolderId] = useState<IFileInfo | null>(null);
-    const [breadcrumb, setBreadcrumb] = useState<string>('');
 
     const props: UploadProps = {
         name: 'file',
         multiple: false,
+        maxCount: 1,
+        accept: '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.webp,.txt',
         beforeUpload: (file) => {
-            setFileList([file]);
-            setFileType(file.type);
+            // Validate file type
+            const allowedTypes = [
+                'application/pdf',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'application/vnd.ms-excel',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'application/vnd.ms-powerpoint',
+                'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                'image/jpeg',
+                'image/png',
+                'image/gif',
+                'image/webp',
+                'text/plain',
+            ];
+
+            if (!allowedTypes.includes(file.type)) {
+                message.error('Loại file không được hỗ trợ!');
+                return false;
+            }
+
+            if (file.size / 1024 / 1024 > 50) {
+                message.error('File phải nhỏ hơn 50MB!');
+                return false;
+            }
+
+            // Tạo UploadFile object với originFileObj
+            const uploadFile: UploadFile = {
+                uid: `${Date.now()}`,
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                originFileObj: file,
+                status: 'done',
+            };
+
+            setSelectedFile(uploadFile);
 
             // Tạo URL preview cho file
             const url = URL.createObjectURL(file);
@@ -36,60 +65,36 @@ export default function DraggerUpload() {
         showUploadList: false,
     };
 
-    const handleOk = async () => {
-        try {
-            const values = await form.validateFields();
-
-            const formData = new FormData();
-            formData.append('file', fileList[0]);
-            formData.append('description', values.description);
-
-            const response = await fetch('https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload', {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (response.ok) {
-                message.success(`${fileList[0].name} uploaded successfully with description.`);
-                setFileList([]);
-                setPreviewUrl(null); // Xóa URL preview
-                setFileType(null);
-                form.resetFields();
-                setIsModalOpen(false);
-            } else {
-                message.error(`${fileList[0].name} upload failed.`);
-            }
-        } catch (error) {
-            console.error('Validation failed:', error);
-        }
-    };
-
     const handleCancel = () => {
         setIsModalOpen(false);
-        setFileList([]);
-        setPreviewUrl(null); // Xóa URL preview
-        setFileType(null);
-        form.resetFields();
-    };
+        setSelectedFile(null);
+        setPreviewUrl(null);
 
-    // Hàm để render preview dựa trên loại file
-    const renderPreview = () => {
-        if (!previewUrl || !fileType) return null;
-
-        if (fileType.startsWith('image/')) {
-            return <img src={previewUrl} alt="Preview" style={{ maxWidth: '100%', maxHeight: '500px' }} />;
-        } else if (fileType === 'application/pdf') {
-            return (
-                <iframe
-                    src={`${previewUrl}#toolbar=0`}
-                    style={{ width: '100%', height: '400px', border: 'none' }}
-                    title="PDF Preview"
-                />
-            );
-        } else {
-            return <p>🚨 Tài liệu này không hỗ trợ xem trước <b>{fileList[0]?.name}</b></p>;
+        // Cleanup preview URL to prevent memory leaks
+        if (previewUrl) {
+            URL.revokeObjectURL(previewUrl);
         }
     };
+
+    const handleSuccess = () => {
+        setIsModalOpen(false);
+        setSelectedFile(null);
+        setPreviewUrl(null);
+
+        // Cleanup preview URL to prevent memory leaks
+        if (previewUrl) {
+            URL.revokeObjectURL(previewUrl);
+        }
+    };
+
+    // Cleanup on component unmount
+    useEffect(() => {
+        return () => {
+            if (previewUrl) {
+                URL.revokeObjectURL(previewUrl);
+            }
+        };
+    }, [previewUrl]);
 
     return (
         <>
@@ -97,74 +102,18 @@ export default function DraggerUpload() {
                 <p className="ant-upload-drag-icon">
                     <InboxOutlined />
                 </p>
-                <p className="ant-upload-text">Click or drag file to this area to upload</p>
+                <p className="ant-upload-text">Chọn hoặc kéo thả file vào để tải lên tài liệu</p>
                 <p className="ant-upload-hint">
-                    Support for a single file upload. You need to provide additional information before upload.
+                    Chỉ hỗ trợ tải lên một tệp. Bạn cần cung cấp thêm thông tin trước khi tải lên.
                 </p>
             </Dragger>
 
-            <Modal
-                title="Tải lên tài liệu"
-                open={isModalOpen}
-                onOk={handleOk}
+            <ModalUploadFileDashboard
+                visible={isModalOpen}
+                file={selectedFile}
                 onCancel={handleCancel}
-                okText="Upload"
-                width={900} // Tăng kích thước modal
-            >
-                <div style={{ display: 'flex', gap: 24 }}>
-                    <div style={{ flex: 1 }}>
-                        <Form form={form} layout="vertical">
-                            <Form.Item
-                                name="name"
-                                label="Tên tài liệu"
-                                rules={[{ required: true, message: 'Vui lòng nhập tên tài liệu' }]}
-                            >
-                                <Input placeholder="Tên tài liệu" />
-                            </Form.Item>
-
-                            <Form.Item
-                                name="folderId"
-                                label="Chọn thư mục"
-                                rules={[{ required: true, message: 'Vui lòng chọn thư mục' }]}
-                            >
-                                <Button
-                                    type="primary"
-                                    onClick={() => setIsModalOpenFolder(true)}
-                                    block
-                                >
-                                    Chọn thư mục
-                                </Button>
-                                <ModalSelectFolder
-                                    open={isModalOpenFolder}
-                                    onClose={() => {
-                                        setIsModalOpenFolder(false)
-                                    }}
-                                    onSelectFolder={(folder: IFileInfo, breadcrumb: string) => {
-                                        setIsModalOpenFolder(false);
-                                        setSelectedFolderId(folder);
-                                        setBreadcrumb(breadcrumb);
-                                        // Cập nhật giá trị cho trường folderId trong form
-                                        form.setFieldsValue({ folderId: folder.id });
-                                    }}
-                                />
-                                <div className='flex items-center mt-2 '>
-                                    <FolderFilled className="text-xl" style={{ color: '#faad14' }} />
-                                    {selectedFolderId ? (
-                                        <span className="ml-2 text-black truncate max-w-xs" title={breadcrumb}>{breadcrumb}</span>
-                                    ) : (
-                                        <span className="ml-2 text-black">Chưa chọn thư mục</span>
-                                    )}
-                                </div>
-                            </Form.Item>
-                        </Form>
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start' }}>
-                        <div style={{ width: '100%', maxWidth: 350, minHeight: 120, border: '1px solid #eee', borderRadius: 8, padding: 12, background: '#fafafa', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            {renderPreview()}
-                        </div>
-                    </div>
-                </div>
-            </Modal>
+                onSuccess={handleSuccess}
+            />
         </>
     );
 }

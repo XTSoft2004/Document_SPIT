@@ -12,7 +12,7 @@ function RightSidebar() {
     if (!isDashboard) return null
 
     return (
-        <aside className="hidden md:flex sticky top-[72px] self-start flex-col w-1/4 max-w-xs p-4 space-y-4 bg-white dark:bg-gray-800 shadow-md rounded-xl mr-4 border border-gray-100 dark:border-gray-700">
+        <aside className="hidden lg:flex sticky top-[72px] self-start flex-col w-1/4 max-w-xs p-4 space-y-4 bg-white dark:bg-gray-800 shadow-md rounded-xl mr-4 border border-gray-100 dark:border-gray-700">
             <ChartRadialStacked />
             <hr className="border-gray-200 dark:border-gray-600" />
             <ActivityRight />
@@ -27,7 +27,7 @@ export function RightSidebarMobile() {
     if (!isDashboard) return null
 
     return (
-        <div className="md:hidden px-4 lg:px-6 space-y-4 overflow-x-auto">
+        <div className="lg:hidden px-4 lg:px-6 space-y-4 overflow-x-auto">
             <ChartRadialStacked />
             <hr className="border-gray-200 dark:border-gray-600" />
             <ActivityRight />

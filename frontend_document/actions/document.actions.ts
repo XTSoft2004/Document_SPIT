@@ -94,8 +94,8 @@ export const updateDocument = async (
 }
 
 export const deleteDocument = async (id: string): Promise<IBaseResponse> => {
-  const response = await fetch(`${globalConfig.baseUrl}/document/delete`, {
-    method: 'POST',
+  const response = await fetch(`${globalConfig.baseUrl}/document/${id}`, {
+    method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${cookies().get('accessToken')?.value || ''}`,

@@ -41,7 +41,7 @@ export default function RootLayout({
                                 {/* Content body */}
                                 <div className="flex flex-1 overflow-hidden">
                                     {/* Main content scrollable */}
-                                    <main className="flex-1 overflow-y-auto overflow-x-auto p-2 md:p-3 lg:p-5 space-y-6">
+                                    <main className="flex-1 overflow-y-auto overflow-x-auto p-1 md:p-2 xlF:p-3 space-y-6">
                                         <div className="min-w-full">
                                             {children}
                                         </div>

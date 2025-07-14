@@ -19,5 +19,10 @@ namespace Domain.Interfaces.Services
         /// </summary>
         /// <returns></returns>
         Task<HttpResponse> ParameterDocument();
+        /// <summary>
+        /// Trả về biểu đồ đường thể hiện số lượng tài liệu được tạo theo ngày.
+        /// </summary>
+        /// <returns></returns>
+        Task<HttpResponse> LineChartDate(int numberDay = 15);
     }
 }

@@ -11,6 +11,9 @@ namespace Domain.Model.Response.Auth
         public long? UserId { get; set; }
         public string? Username { get; set; } 
         public string? Fullname { get; set; }
+        public string? RoleName { get; set; }
+        public string? Email { get; set; }
+        public string? AvatarUrl { get; set; }
         public bool? isLocked { get; set; }
         public string? AccessToken { get; set; }
         public DateTime? ExpiresAt { get; set; }

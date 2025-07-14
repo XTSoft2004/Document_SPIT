@@ -294,7 +294,7 @@ const ResponsiveHeroSection = () => {
                                     </svg>
                                 ),
                                 color: 'bg-gradient-to-r from-blue-400 to-cyan-400',
-                                text: '📄 Xem trực tuyến',
+                                text: '📄 Xem trực tuyến tài liệu',
                                 desc: 'Xem tài liệu không cần tải'
                             },
                             {

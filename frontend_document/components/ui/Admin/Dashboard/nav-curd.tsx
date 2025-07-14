@@ -15,7 +15,7 @@ import {
 
 import { AirVent, ChartNoAxesGantt, Book, UserRound, History, Bell, ChartColumnStacked, Loader2, ChevronRight, ChevronDown } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useRef, useEffect } from 'react';
 
 interface MenuItem {
     name: string;
@@ -171,9 +171,9 @@ export function NavCRUD() {
                                 handleNavigation(item.url);
                             }
                         }}
-                        className={`flex items-center gap-2 w-full text-left transition-all duration-200 ${isActive
-                            ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 font-medium"
-                            : "hover:bg-gray-50 dark:hover:bg-gray-700"
+                        className={`flex items-center gap-2 w-full text-left transition-all duration-200 hover:scale-[1.01] group ${isActive
+                            ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 font-medium shadow-sm"
+                            : "hover:bg-gray-50 dark:hover:bg-gray-700 hover:translate-x-1"
                             } ${isLoading(item.url) ? "opacity-70" : ""} ${item.url === "#" ? "opacity-50 cursor-not-allowed" : ""
                             }`}
                         disabled={isLoading(item.url) || item.url === "#"}
@@ -181,17 +181,17 @@ export function NavCRUD() {
                         {isLoading(item.url) ? (
                             <Loader2 className="animate-spin" />
                         ) : (
-                            item.icon && <item.icon />
+                            item.icon && <item.icon className="transition-transform duration-200 group-hover:scale-110" />
                         )}
-                        <span>{item.name}</span>
+                        <span className="transition-all duration-200">{item.name}</span>
 
-                        {/* Children indicator */}
+                        {/* Children indicator with rotation animation */}
                         {hasChildren && (
-                            <div className="ml-auto">
+                            <div className="ml-auto transition-transform duration-200 ease-in-out">
                                 {isOpen ? (
-                                    <ChevronDown className="h-4 w-4" />
+                                    <ChevronDown className="h-4 w-4 transform rotate-0" />
                                 ) : (
-                                    <ChevronRight className="h-4 w-4" />
+                                    <ChevronRight className="h-4 w-4 transform rotate-0" />
                                 )}
                             </div>
                         )}
@@ -203,62 +203,80 @@ export function NavCRUD() {
                             </div>
                         )}
 
-                        {/* Current page indicator */}
+                        {/* Current page indicator with glow effect */}
                         {!hasChildren && isCurrentPage(item.url) && !isLoading(item.url) && (
-                            <div className="ml-auto w-2 h-2 bg-blue-500 rounded-full"></div>
+                            <div className="ml-auto w-2 h-2 bg-blue-500 rounded-full shadow-lg shadow-blue-500/50 animate-pulse"></div>
                         )}
 
-                        {/* Disabled indicator */}
+                        {/* Disabled indicator with pulse */}
                         {!hasChildren && item.url === "#" && (
-                            <div className="ml-auto text-xs text-gray-400 dark:text-gray-500">Soon</div>
+                            <div className="ml-auto text-xs text-gray-400 dark:text-gray-500 animate-pulse">Soon</div>
                         )}
                     </button>
                 </SidebarMenuButton>
 
-                {/* Children menu */}
-                {hasChildren && isOpen && (
-                    <SidebarMenuSub>
-                        {item.children!.map((child) => (
-                            <SidebarMenuSubItem key={child.name}>
-                                <SidebarMenuSubButton asChild>
-                                    <button
-                                        type="button"
-                                        onClick={() => handleNavigation(child.url)}
-                                        className={`flex items-center gap-2 w-full text-left transition-all duration-200 ${isCurrentPage(child.url)
-                                            ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 font-medium"
-                                            : "hover:bg-gray-50 dark:hover:bg-gray-700"
-                                            } ${isLoading(child.url) ? "opacity-70" : ""} ${child.url === "#" ? "opacity-50 cursor-not-allowed" : ""
-                                            }`}
-                                        disabled={isLoading(child.url) || child.url === "#"}
-                                    >
-                                        {isLoading(child.url) ? (
-                                            <Loader2 className="animate-spin h-4 w-4" />
-                                        ) : (
-                                            child.icon && <child.icon className="h-4 w-4" />
-                                        )}
-                                        <span>{child.name}</span>
+                {/* Children menu with smooth animation */}
+                {hasChildren && (
+                    <div 
+                        className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                            isOpen 
+                                ? 'max-h-96 opacity-100' 
+                                : 'max-h-0 opacity-0'
+                        }`}
+                    >
+                        <SidebarMenuSub className="animate-in slide-in-from-top-2 duration-200">
+                            {item.children!.map((child, index) => (
+                                <SidebarMenuSubItem 
+                                    key={child.name}
+                                    className={`transition-all duration-200 ease-out ${
+                                        isOpen 
+                                            ? 'translate-x-0 opacity-100' 
+                                            : '-translate-x-2 opacity-0'
+                                    }`}
+                                    style={{
+                                        transitionDelay: isOpen ? `${index * 50}ms` : '0ms'
+                                    }}
+                                >
+                                    <SidebarMenuSubButton asChild>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleNavigation(child.url)}
+                                            className={`flex items-center gap-2 w-full text-left transition-all duration-200 hover:scale-[1.02] ${isCurrentPage(child.url)
+                                                ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 font-medium shadow-sm"
+                                                : "hover:bg-gray-50 dark:hover:bg-gray-700 hover:translate-x-1"
+                                                } ${isLoading(child.url) ? "opacity-70" : ""} ${child.url === "#" ? "opacity-50 cursor-not-allowed" : ""
+                                                }`}
+                                            disabled={isLoading(child.url) || child.url === "#"}
+                                        >
+                                            {isLoading(child.url) ? (
+                                                <Loader2 className="animate-spin h-4 w-4" />
+                                            ) : (
+                                                child.icon && <child.icon className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
+                                            )}
+                                            <span className="transition-all duration-200">{child.name}</span>
 
-                                        {/* Loading indicator */}
-                                        {isLoading(child.url) && (
-                                            <div className="ml-auto">
-                                                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                                            </div>
-                                        )}
+                                            {/* Loading indicator with pulse */}
+                                            {isLoading(child.url) && (
+                                                <div className="ml-auto">
+                                                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                                                </div>
+                                            )}
 
-                                        {/* Current page indicator */}
-                                        {isCurrentPage(child.url) && !isLoading(child.url) && (
-                                            <div className="ml-auto w-2 h-2 bg-blue-500 rounded-full"></div>
-                                        )}
+                                            {/* Current page indicator with glow */}
+                                            {isCurrentPage(child.url) && !isLoading(child.url) && (
+                                                <div className="ml-auto w-2 h-2 bg-blue-500 rounded-full shadow-lg shadow-blue-500/50 animate-pulse"></div>
+                                            )}
 
-                                        {/* Disabled indicator */}
-                                        {child.url === "#" && (
-                                            <div className="ml-auto text-xs text-gray-400 dark:text-gray-500">Soon</div>
-                                        )}
-                                    </button>
-                                </SidebarMenuSubButton>
-                            </SidebarMenuSubItem>
-                        ))}
-                    </SidebarMenuSub>
+                                            {/* Disabled indicator */}
+                                            {child.url === "#" && (
+                                                <div className="ml-auto text-xs text-gray-400 dark:text-gray-500 animate-pulse">Soon</div>
+                                            )}
+                                        </button>
+                                    </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                            ))}
+                        </SidebarMenuSub>
+                    </div>
                 )}
             </SidebarMenuItem>
         );

@@ -13,3 +13,8 @@ export interface IParameterDocument {
   totalUserContribute: number
   totalCourseShare: number
 }
+
+export interface ILineChartDate {
+  date: string
+  file: number
+}

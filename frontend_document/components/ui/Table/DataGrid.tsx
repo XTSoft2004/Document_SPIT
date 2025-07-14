@@ -99,7 +99,7 @@ const DataGrid = <T extends object>({
 
     return (
         <>
-            <div className="flex flex-col md:flex-row justify-between items-stretch gap-2">
+            <div className="flex flex-col md:flex-row justify-between items-stretch gap-2 mb-2">
                 {btnAddInfo && (
                     <div className="w-full md:w-auto flex items-center gap-2">
                         <Button className="w-full md:w-auto flex items-center gap-2" onClick={btnAddInfo?.onClick}>

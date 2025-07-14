@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import NotificationService from '@/components/ui/Notification/NotificationService';
 import { motion } from 'framer-motion';
+import { useAuth } from '@/context/AuthContext';
 
 export default function PageLogin() {
     const {
@@ -20,6 +21,8 @@ export default function PageLogin() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
 
+    const { loginUser, getInfo } = useAuth();
+
     const onSubmit = async (data: any) => {
         setLoading(true);
         const deviceId = getOrCreateDeviceId();
@@ -28,20 +31,22 @@ export default function PageLogin() {
             password: data.password,
             deviceId: deviceId,
         };
-
-        const login = await loginAccount(loginRequest);
-        if (login.ok) {
-            router.push('/admin/dashboard');
-            NotificationService.success({
-                message: 'Đăng nhập thành công',
-                description: `Chào mừng bạn ${data.username} đã đăng nhập thành công!`,
-            });
-            return;
-        }
-        setLoading(false);
-        NotificationService.error({
-            message: login.message || 'Đăng nhập thất bại',
+        NotificationService.info({
+            message: 'Đang đăng nhập...',
+            description: 'Vui lòng đợi trong giây lát.',
         });
+
+        await loginUser(loginRequest);
+
+        const info = getInfo();
+        if (info?.roleName === 'Admin') {
+            router.push('/admin/dashboard');
+        }
+        else {
+            router.push('/');
+        }
+
+        setLoading(false);
     };
 
     return (
