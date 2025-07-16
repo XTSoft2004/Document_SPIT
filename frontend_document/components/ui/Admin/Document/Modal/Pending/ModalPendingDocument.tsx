@@ -36,19 +36,17 @@ export default function ModalPendingDocument({
     const [loadingCourses, setLoadingCourses] = useState(false);
     const [courses, setCourses] = useState<ICourseResponse[]>([]);
     const handleSearchCourse = async (search: string) => {
-        if (search && search.trim() !== '') {
-            setLoadingCourses(true);
-            const response = await getCourse(search, 1, 20);
-            if (response.ok) {
-                setCourses(response.data);
-                console.log(response.data);
-            }
-            setLoadingCourses(false);
+        setLoadingCourses(true);
+        const response = await getCourse(search, 1, 20);
+        if (response.ok) {
+            setCourses(response.data);
         }
+        setLoadingCourses(false);
     }
 
     // Reset form khi modal mở/đóng
     useEffect(() => {
+        handleSearchCourse('');
         if (visible) {
             form.resetFields();
             setFileList([]);
@@ -163,14 +161,14 @@ export default function ModalPendingDocument({
             const response = await createDocument(documentPending);
             if (response.ok) {
                 NotificationService.success({
-                    message: 'Upload tài liệu thành công',
-                    description: 'Tài liệu đã được upload và đang chờ duyệt.',
+                    message: 'Tải tài liệu thành công',
+                    description: 'Tài liệu đã được thêm vào danh sách chờ và đang chờ duyệt.',
                 });
                 handleCancel();
                 onSuccess?.();
             } else {
                 NotificationService.error({
-                    message: response.message || 'Upload tài liệu thất bại',
+                    message: response.message || 'Tải lên tài liệu thất bại',
                 });
             }
 
@@ -202,7 +200,7 @@ export default function ModalPendingDocument({
 
     return (
         <Modal
-            title="Upload tài liệu mới"
+            title="Tải lên tài liệu mới"
             open={visible}
             onCancel={handleCancel}
             width={1000} // Giảm width từ 1200 xuống 1000
@@ -226,7 +224,7 @@ export default function ModalPendingDocument({
                     size="middle"
                     className="bg-blue-500 text-white hover:bg-blue-600 border-none rounded-md"
                 >
-                    Upload tài liệu
+                    Tải lên tài liệu
                 </Button>,
             ]}
         >
@@ -290,10 +288,10 @@ export default function ModalPendingDocument({
                         </Form.Item>
 
                         <div className="bg-blue-50 p-3 rounded-lg"> {/* Giảm padding */}
-                            <p className="text-xs text-blue-700 mb-1"> {/* Giảm text size */}
+                            <p className="text-sm text-blue-700 mb-1"> {/* Giảm text size */}
                                 <strong>📋 Hướng dẫn upload:</strong>
                             </p>
-                            <ul className="text-xs text-blue-600 space-y-0.5"> {/* Giảm text size và spacing */}
+                            <ul className="text-sm text-blue-600 space-y-0.5"> {/* Giảm text size và spacing */}
                                 <li>• Chọn file từ máy tính</li>
                                 <li>• Điền tên tài liệu rõ ràng</li>
                                 <li>• Chọn môn học phù hợp</li>

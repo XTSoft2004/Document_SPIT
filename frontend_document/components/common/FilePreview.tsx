@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Eye, FileText, Image as ImageIcon, Smartphone } from "lucide-react";
+import Image from "next/image";
 
 interface FilePreviewProps {
     src: string | null;
@@ -10,6 +11,9 @@ interface FilePreviewProps {
 const FilePreview: React.FC<FilePreviewProps> = ({ src, type, isMobile }) => {
     const [imageLoading, setImageLoading] = useState(true);
     const [imageError, setImageError] = useState(false);
+
+    // Kiểm tra xem src có phải là base64 không
+    const isBase64 = src?.startsWith('data:') || false;
 
     if (!src || type === "unsupported") return null;
 
@@ -62,21 +66,50 @@ const FilePreview: React.FC<FilePreviewProps> = ({ src, type, isMobile }) => {
                                 <div className="flex flex-col items-center gap-2 text-gray-500 dark:text-gray-400">
                                     <ImageIcon className="w-12 h-12" />
                                     <span className="text-sm">Không thể tải hình ảnh</span>
+                                    <span className="text-xs text-gray-400">
+                                        {isBase64 ? 'Base64 format' : 'URL format'}
+                                    </span>
                                 </div>
                             </div>
                         ) : (
-                            <div className="relative overflow-hidden rounded-lg bg-gray-50 dark:bg-gray-700">
-                                <img
-                                    src={src}
-                                    alt="Preview"
-                                    className={`w-full max-h-[60vh] object-contain transition-all duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'
-                                        } group-hover:scale-[1.02]`}
-                                    onLoad={() => setImageLoading(false)}
-                                    onError={() => {
-                                        setImageLoading(false);
-                                        setImageError(true);
-                                    }}
-                                />
+                            <div className="relative overflow-hidden rounded-lg bg-gray-50 dark:bg-gray-700 min-h-[200px]">
+                                {isBase64 ? (
+                                    // Sử dụng img tag cho base64
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img
+                                        src={src}
+                                        alt="Preview"
+                                        className={`w-full max-h-[60vh] object-contain transition-all duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'
+                                            } group-hover:scale-[1.02]`}
+                                        onLoad={() => setImageLoading(false)}
+                                        onError={() => {
+                                            setImageLoading(false);
+                                            setImageError(true);
+                                        }}
+                                        style={{
+                                            objectFit: "contain",
+                                            maxWidth: "100%",
+                                            height: "auto"
+                                        }}
+                                    />
+                                ) : (
+                                    // Sử dụng Next.js Image cho URL thường
+                                    <Image
+                                        src={src}
+                                        alt="Preview"
+                                        fill
+                                        className={`w-full max-h-[60vh] object-contain transition-all duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'
+                                            } group-hover:scale-[1.02]`}
+                                        onLoad={() => setImageLoading(false)}
+                                        onError={() => {
+                                            setImageLoading(false);
+                                            setImageError(true);
+                                        }}
+                                        sizes="100vw"
+                                        style={{ objectFit: "contain" }}
+                                        unoptimized
+                                    />
+                                )}
 
                                 {/* Overlay gradient */}
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -125,7 +158,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({ src, type, isMobile }) => {
                 <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                     <span className="flex items-center gap-1">
                         <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                        Đã tải thành công
+                        {isBase64 ? 'Ảnh đã tải được tải lên' : 'Đã tải thành công'}
                     </span>
                     {type === "image" && (
                         <span>Nhấp để phóng to</span>

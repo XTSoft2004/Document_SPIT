@@ -8,6 +8,7 @@ using Domain.Entities;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
 using Domain.Model.Request.Document;
+using Domain.Model.Request.History;
 using Domain.Model.Response.Document;
 using Domain.Model.Response.User;
 using Microsoft.AspNetCore.Mvc;
@@ -24,6 +25,7 @@ namespace Domain.Services
 {
     public class DocumentServices : BaseService, IDocumentServices
     {
+        private readonly IHistoryServices _historyServices;
         private readonly IRepositoryBase<Document>? _document;
         private readonly IRepositoryBase<DocumentCategory>? _documentCategory;
         private readonly IRepositoryBase<CategoryType>? _catetoryType;
@@ -37,7 +39,7 @@ namespace Domain.Services
         private readonly IRepositoryBase<OneTimeToken>? _oneTimeToken;
         private UserTokenResponse? userMeToken;
 
-        public DocumentServices(IRepositoryBase<Document>? document, IRepositoryBase<User>? user, IGoogleDriverServices? googleDriverServices, IRepositoryBase<DetailDocument>? detailDocument, ITokenServices? tokenServices, IRepositoryBase<OneTimeToken>? oneTimeToken, IRepositoryBase<Course>? course, ICategoryTypeServices? categoryTypeServices, IRepositoryBase<CategoryType>? catetoryType, IRepositoryBase<DocumentCategory>? documentCategory)
+        public DocumentServices(IRepositoryBase<Document>? document, IRepositoryBase<User>? user, IGoogleDriverServices? googleDriverServices, IRepositoryBase<DetailDocument>? detailDocument, ITokenServices? tokenServices, IRepositoryBase<OneTimeToken>? oneTimeToken, IRepositoryBase<Course>? course, ICategoryTypeServices? categoryTypeServices, IRepositoryBase<CategoryType>? catetoryType, IRepositoryBase<DocumentCategory>? documentCategory, IHistoryServices historyServices)
         {
             _document = document;
             _user = user;
@@ -52,6 +54,7 @@ namespace Domain.Services
             var envPath = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.Parent.FullName, ".env");
             DotNetEnv.Env.Load(envPath);
             _documentCategory = documentCategory;
+            _historyServices = historyServices;
         }
 
         public async Task<HttpResponse> CreatePending(DocumentPendingRequest documentCreatePending)
@@ -172,6 +175,15 @@ namespace Domain.Services
                 documentPending.DetaiDocumentId = detailDocument.Id;
                 _detailDocument.Update(detailDocument);
                 await UnitOfWork.CommitAsync();
+
+                await _historyServices.CreateAsync(new HistoryRequest
+                {
+                    Title = "Duyệt tài liệu",
+                    Description = $"Tài liệu {documentPending.Name} đã được duyệt.",
+                    function_status = Function_Enum.Review_Document,
+                    UserId = userMeToken.Id ?? -1
+                });
+
                 return HttpResponse.OK(message: "Duyệt tài liệu thành công.");
             }
 
@@ -286,7 +298,15 @@ namespace Domain.Services
             _document.Update(document);
             await UnitOfWork.CommitAsync();
 
-            return HttpResponse.OK(message: "Cập nhật tài liệu thành công.");
+            await _historyServices.CreateAsync(new HistoryRequest
+            {
+                Title = "Cập nhật tài liệu",
+                Description = $"Tài liệu {document.Name} đã được cập nhật.",
+                function_status = Function_Enum.Update_Document,
+                UserId = userMeToken.Id ?? -1
+            });
+
+            return HttpResponse.OK(message: "Cập nh ật tài liệu thành công.");
         }
         // Xoá tài liệu theo IdDocument
         public async Task<HttpResponse> DeleteAsync(long IdDocument)
@@ -294,6 +314,8 @@ namespace Domain.Services
             var document = _document!.Find(f => f.Id == IdDocument);
             if (document == null)
                 return HttpResponse.Error("Tài liệu không tồn tại.", System.Net.HttpStatusCode.NotFound);
+
+            await DeleteDetailDocument(document.DetaiDocumentId ?? -1);
 
             _document.Delete(document);
             await UnitOfWork.CommitAsync();
@@ -308,6 +330,15 @@ namespace Domain.Services
             };
 
             return HttpResponse.OK(message: "Xoá tài liệu thành công.");
+        }
+        private async Task DeleteDetailDocument(long IdDocument)
+        {
+            var detailDocument = _detailDocument!.Find(f => f.Id == IdDocument);
+            if (detailDocument != null)
+            {
+                _detailDocument.Delete(detailDocument);
+                await UnitOfWork.CommitAsync();
+            }
         }
         public async Task ViewFile(string FileId)
         {

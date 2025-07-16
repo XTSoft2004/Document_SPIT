@@ -110,7 +110,7 @@ export const getTree = async () => {
       },
       next: {
         tags: ['driver.tree'],
-        revalidate: 60,
+        revalidate: 5,
       },
     },
   )

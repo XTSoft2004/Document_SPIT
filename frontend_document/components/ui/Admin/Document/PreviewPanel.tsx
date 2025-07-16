@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "antd";
-import { Tag, XCircle, RefreshCw, File, Image as ImageIcon, FileText, Download, Eye } from "lucide-react";
+import { XCircle, RefreshCw, Image as ImageIcon, FileText, Download, Eye } from "lucide-react";
 import { IDocumentResponse } from "@/types/document";
 import globalConfig from "@/app.config";
 import { getCodeView } from "@/actions/document.actions";
-import NotificationService from "../../Notification/NotificationService";
+import Image from "next/image";
 
 interface PreviewPanelProps {
     selectedItem: IDocumentResponse;
@@ -37,7 +37,7 @@ const PreviewPanel = ({
         if (selectedItem?.fileId) {
             fetchDocumentCode(selectedItem);
         }
-    }, [selectedItem?.fileId]);
+    }, [selectedItem, selectedItem?.fileId]);
 
     const fetchDocumentCode = async (document: IDocumentResponse) => {
         const response = await getCodeView(document.id);
@@ -182,7 +182,9 @@ const PreviewPanel = ({
                             {/* Image */}
                             {!imageError && (
                                 <div className="h-full overflow-hidden rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600">
-                                    <img
+                                    <Image
+                                        width={800}
+                                        height={600}
                                         src={codeView ? `${globalConfig.baseUrl}/document/view/${codeView}` : ''}
                                         alt="Xem trước ảnh"
                                         className={`w-full h-full object-contain transition-all duration-500 ${loading ? 'opacity-0 scale-95' : 'opacity-100 scale-100'} group-hover:scale-105`}

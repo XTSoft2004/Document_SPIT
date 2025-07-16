@@ -106,14 +106,14 @@ export default function ModalUploadFileDashboard({
             const response = await createDocument(documentPending);
             if (response.ok) {
                 NotificationService.success({
-                    message: 'Upload tài liệu thành công',
-                    description: 'Tài liệu đã được upload và đang chờ duyệt.',
+                    message: 'Tải lên tài liệu thành công',
+                    description: 'Tài liệu đã được vào hàng đợi và đang chờ duyệt.',
                 });
                 handleCancel();
                 onSuccess?.();
             } else {
                 NotificationService.error({
-                    message: response.message || 'Upload tài liệu thất bại',
+                    message: response.message || 'Tải lên tài liệu thất bại',
                 });
             }
 
@@ -138,7 +138,7 @@ export default function ModalUploadFileDashboard({
 
     return (
         <Modal
-            title="Upload tài liệu từ Dashboard"
+            title="Tải lên tài liệu từ trang chủ"
             open={visible}
             onCancel={handleCancel}
             width={1000}
@@ -162,7 +162,7 @@ export default function ModalUploadFileDashboard({
                     size="middle"
                     className="bg-blue-500 text-white hover:bg-blue-600 border-none rounded-md"
                 >
-                    Upload tài liệu
+                    Tải lên tài liệu
                 </Button>,
             ]}
         >
@@ -190,9 +190,8 @@ export default function ModalUploadFileDashboard({
                                         </p>
                                     </div>
                                     <div className="text-right">
-                                        <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                            file ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
-                                        }`}>
+                                        <div className={`px-3 py-1 rounded-full text-xs font-medium ${file ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+                                            }`}>
                                             {file ? 'Đã chọn' : 'Chưa chọn'}
                                         </div>
                                     </div>

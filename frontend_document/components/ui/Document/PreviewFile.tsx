@@ -1,9 +1,7 @@
 import globalConfig from '@/app.config';
 import React, { useRef, useState, useEffect } from 'react';
-import { Card, Skeleton } from 'antd';
-import LoadingSkeleton from '../Loading/LoadingSkeleton';
 import { getCodeView } from '@/actions/document.actions';
-import NotificationService from '../Notification/NotificationService';
+import Image from 'next/image';
 
 interface PreviewFilePopupProps {
     open: boolean;
@@ -27,12 +25,12 @@ export default function PreviewFile({ open, onClose, fileName, documentId }: Pre
 
     const isImage = /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(fileName);
 
-    const handleZoomIn = () => setScale((s) => Math.min(s + 0.2, 5));
-    const handleZoomOut = () => setScale((s) => Math.max(s - 0.2, 0.2));
-    const handleReset = () => {
+    const handleZoomIn = React.useCallback(() => setScale((s) => Math.min(s + 0.2, 5)), []);
+    const handleZoomOut = React.useCallback(() => setScale((s) => Math.max(s - 0.2, 0.2)), []);
+    const handleReset = React.useCallback(() => {
         setScale(1);
         setTranslate({ x: 0, y: 0 });
-    };
+    }, []);
 
     const handleMouseDown = (e: React.MouseEvent) => {
         setIsPanning(true);
@@ -49,7 +47,7 @@ export default function PreviewFile({ open, onClose, fileName, documentId }: Pre
 
     const handleMouseUp = () => setIsPanning(false);
 
-    const handleFullscreen = () => {
+    const handleFullscreen = React.useCallback(() => {
         if (containerRef.current) {
             if (!isFullscreen) {
                 if (containerRef.current.requestFullscreen) {
@@ -63,7 +61,7 @@ export default function PreviewFile({ open, onClose, fileName, documentId }: Pre
                 setIsFullscreen(false);
             }
         }
-    };
+    }, [isFullscreen]);
 
     useEffect(() => {
         if (open && documentId) {
@@ -339,7 +337,7 @@ export default function PreviewFile({ open, onClose, fileName, documentId }: Pre
                         </div>
                     ) : isImage ? (
                         <div className="relative w-full h-full flex items-center justify-center p-4">
-                            <img
+                            <Image
                                 ref={imgRef}
                                 src={`${globalConfig.baseUrl}/document/view/${codeView}`}
                                 alt={fileName}

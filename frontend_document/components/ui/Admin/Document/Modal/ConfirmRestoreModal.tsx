@@ -101,12 +101,12 @@ const ConfirmRestoreModal: React.FC<ConfirmRestoreModalProps> = ({
 
                 NotificationService.error({
                     message: 'Xác nhận tên tài liệu',
-                    description: `Vui lòng gõ chính xác tên tài liệu: "${document?.name}" để xác nhận`
+                    description: `Vui lòng gõ chính xác tên tài liệu: &quot;${document?.name}" để xác nhận`
                 });
 
                 notification.error({
                     message: 'Xác nhận tên tài liệu',
-                    description: `Vui lòng gõ chính xác tên tài liệu: "${document?.name}" để xác nhận`,
+                    description: `Vui lòng gõ chính xác tên tài liệu: &quot;${document?.name}" để xác nhận`,
                     placement: 'topRight',
                     duration: 4
                 });
@@ -226,7 +226,7 @@ const ConfirmRestoreModal: React.FC<ConfirmRestoreModalProps> = ({
                             </p>
                             <div className="bg-gray-50 p-3 rounded-md border-l-4 border-green-400">
                                 <Text strong className="text-green-600">
-                                    "{document?.name}"
+                                    &quot;{document?.name}&quot;
                                 </Text>
                                 <br />
                                 <Text type="secondary" className="text-sm">
@@ -238,7 +238,7 @@ const ConfirmRestoreModal: React.FC<ConfirmRestoreModalProps> = ({
                                 </Text>
                             </div>
                             <p className="mt-3 mb-0 text-green-600">
-                                <strong>Lưu ý:</strong> Tài liệu sẽ được khôi phục về trạng thái "Đã duyệt" và hiển thị công khai.
+                                <strong>Lưu ý:</strong> Tài liệu sẽ được khôi phục về trạng thái &quot;Đã duyệt&quot; và hiển thị công khai.
                             </p>
                         </div>
                     }
@@ -248,13 +248,12 @@ const ConfirmRestoreModal: React.FC<ConfirmRestoreModalProps> = ({
                 />
 
                 {/* Document name confirmation */}
-                <div className={`mb-4 p-3 rounded-md border ${
-                    hasSubmitted && canRestore && !documentNameConfirmed 
-                        ? 'border-yellow-300 bg-yellow-50' 
-                        : documentNameConfirmed 
-                            ? 'border-green-300 bg-green-50' 
-                            : 'border-gray-300 bg-gray-50'
-                }`}>
+                <div className={`mb-4 p-3 rounded-md border ${hasSubmitted && canRestore && !documentNameConfirmed
+                    ? 'border-yellow-300 bg-yellow-50'
+                    : documentNameConfirmed
+                        ? 'border-green-300 bg-green-50'
+                        : 'border-gray-300 bg-gray-50'
+                    }`}>
                     <Form.Item
                         label={
                             <div className="flex items-center gap-2">
@@ -321,26 +320,24 @@ const ConfirmRestoreModal: React.FC<ConfirmRestoreModalProps> = ({
                 </Form>
 
                 {/* Confirmation checkbox */}
-                <div className={`mb-4 p-3 rounded-md border ${
-                    hasSubmitted && canRestore && !confirmationChecked 
-                        ? 'border-yellow-300 bg-yellow-50' 
-                        : confirmationChecked 
-                            ? 'border-green-300 bg-green-50' 
-                            : 'border-gray-300 bg-gray-50'
-                }`}>
+                <div className={`mb-4 p-3 rounded-md border ${hasSubmitted && canRestore && !confirmationChecked
+                    ? 'border-yellow-300 bg-yellow-50'
+                    : confirmationChecked
+                        ? 'border-green-300 bg-green-50'
+                        : 'border-gray-300 bg-gray-50'
+                    }`}>
                     <Checkbox
                         checked={confirmationChecked}
                         onChange={(e) => setConfirmationChecked(e.target.checked)}
                         disabled={loading}
                         className={confirmationChecked ? 'text-green-700' : hasSubmitted && canRestore ? 'text-yellow-700' : 'text-gray-700'}
                     >
-                        <Text className={`text-sm ${
-                            confirmationChecked 
-                                ? 'text-green-700' 
-                                : hasSubmitted && canRestore 
-                                    ? 'text-yellow-700' 
-                                    : 'text-gray-700'
-                        }`}>
+                        <Text className={`text-sm ${confirmationChecked
+                            ? 'text-green-700'
+                            : hasSubmitted && canRestore
+                                ? 'text-yellow-700'
+                                : 'text-gray-700'
+                            }`}>
                             Tôi hiểu rằng tài liệu sẽ được khôi phục và hiển thị công khai
                         </Text>
                     </Checkbox>
@@ -362,7 +359,7 @@ const ConfirmRestoreModal: React.FC<ConfirmRestoreModalProps> = ({
                                 Sau khi khôi phục:
                             </Text>
                             <ul className="mt-2 mb-0 text-sm text-green-600 space-y-1">
-                                <li>• Tài liệu sẽ có trạng thái "Đã duyệt"</li>
+                                <li>• Tài liệu sẽ có trạng thái &quot;Đã duyệt&quot;</li>
                                 <li>• Người dùng có thể tìm kiếm và tải xuống</li>
                                 <li>• Tài liệu sẽ hiển thị trong danh sách công khai</li>
                             </ul>

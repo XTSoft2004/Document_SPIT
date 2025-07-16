@@ -1,21 +1,16 @@
 'use client';
 
-import { useEffect, useState } from "react";
-import { Button, message, TableColumnType } from "antd";
-import { CheckCircle, Clock, XCircle, EarthLock, Earth, Pen } from "lucide-react";
+import { useEffect, useState, useMemo } from "react";
+import { Button, TableColumnType, Tooltip } from "antd";
+import { Pen } from "lucide-react";
 
-import { getDocuments, updateDocument } from "@/actions/document.actions";
+import { getDocuments } from "@/actions/document.actions";
 import ModalCreateDocument from "@/components/ui/Admin/Document/Modal/All/ModalCreateDocument";
 import DataGrid from "@/components/ui/Table/DataGrid";
 import { IDocumentResponse } from "@/types/document";
 import PreviewPanel from "@/components/ui/Admin/Document/PreviewPanel";
-import { Tooltip } from "antd";
-import { mutateTable, reloadTable } from "@/utils/swrReload";
+import { reloadTable } from "@/utils/swrReload";
 import ModalUpdateDocument from "@/components/ui/Admin/Document/Modal/All/ModalUpdateDocument";
-import { mutate } from "swr";
-import { ICourseResponse } from "@/types/course";
-import { getCourse } from "@/actions/course.action";
-import { set } from "react-hook-form";
 import { getFilteredColumnsTableDocument } from "@/components/ui/Admin/Document/ColumnsTableDocument";
 
 export default function DocumentPage() {
@@ -23,36 +18,32 @@ export default function DocumentPage() {
     const [isShowModalCreate, setIsShowModalCreate] = useState(false);
     const [isShowModalUpdate, setIsShowModalUpdate] = useState(false);
     const [selectedItem, setSelectedItem] = useState<IDocumentResponse>();
-    const [loading, setLoading] = useState(true);
 
     const listColumn = getFilteredColumnsTableDocument(['name', 'courseName', 'statusDocument', 'totalDownloads', 'totalViews', 'fullNameUser', 'isPrivate']);
-    const [columns, setColumns] = useState<TableColumnType<IDocumentResponse>[]>(listColumn);
 
-    useEffect(() => {
-        setColumns([
-            ...columns,
-            {
-                title: 'Thao tác',
-                key: 'actions',
-                width: 90,
-                align: 'center',
-                render: (_, record) => (
-                    <Tooltip title="Chỉnh sửa">
-                        <Button
-                            type="text"
-                            icon={<Pen size={18} />}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedDocument(record);
-                                setIsShowModalUpdate(true);
-                            }}
-                            className="hover:bg-blue-50"
-                        />
-                    </Tooltip>
-                ),
-            },
-        ]);
-    }, []);
+    const columns = useMemo<TableColumnType<IDocumentResponse>[]>(() => [
+        ...listColumn,
+        {
+            title: 'Thao tác',
+            key: 'actions',
+            width: 90,
+            align: 'center',
+            render: (_, record) => (
+                <Tooltip title="Chỉnh sửa">
+                    <Button
+                        type="text"
+                        icon={<Pen size={18} />}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedDocument(record);
+                            setIsShowModalUpdate(true);
+                        }}
+                        className="hover:bg-blue-50"
+                    />
+                </Tooltip>
+            ),
+        },
+    ], [listColumn]);
 
 
     return (

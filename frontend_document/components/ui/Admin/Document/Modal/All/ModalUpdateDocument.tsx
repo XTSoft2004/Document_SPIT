@@ -137,7 +137,7 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
 
         fetchInitialCourse();
         fetchCategories();
-    }, [visible, form]);
+    }, [visible, form, Document]);
 
     useEffect(() => {
         if (visible && Document) {
@@ -159,7 +159,7 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
             // Reset khi mở modal mà không có Document
             resetAllStates();
         }
-    }, [visible, Document, form, courses]);
+    }, [visible, Document, form, courses, resetAllStates, updateFolderFromCourse]);
 
     const handleSubmit = async () => {
         try {
@@ -462,7 +462,7 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
                             <ul className="text-sm text-blue-600 space-y-0.5"> {/* Giảm text size và spacing */}
                                 <li>• Chỉnh sửa tên tài liệu</li>
                                 <li>• Chọn môn học và thư mục</li>
-                                <li>• Nhấn <span className="font-bold">"Cập nhật"</span></li>
+                                <li>• Nhấn <span className="font-bold">&quot;Cập nhật&quot;</span></li>
                             </ul>
                         </div>
                     </Form>

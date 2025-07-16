@@ -1,23 +1,16 @@
 'use client';
 
 import { use, useEffect, useState } from "react";
-import { Button, message, TableColumnType } from "antd";
-import { CheckCircle, Clock, XCircle, EarthLock, Earth, Pen } from "lucide-react";
+import { Button, TableColumnType } from "antd";
 
 import { getDocuments, updateDocument } from "@/actions/document.actions";
-import ModalCreateDocument from "@/components/ui/Admin/Document/Modal/All/ModalCreateDocument";
 import DataGrid from "@/components/ui/Table/DataGrid";
 import { IDocumentResponse } from "@/types/document";
-import PreviewPanel from "@/components/ui/Admin/Document/PreviewPanel";
 import { Tooltip } from "antd";
-import { mutateTable, reloadTable } from "@/utils/swrReload";
-import ModalUpdateDocument from "@/components/ui/Admin/Document/Modal/All/ModalUpdateDocument";
-import { mutate } from "swr";
 import ModalReviewDocument from "@/components/ui/Admin/Document/Modal/Pending/ModalReviewDocument";
-import { ICourseResponse } from "@/types/course";
-import { getCourse } from "@/actions/course.action";
 import ModalPendingDocument from "@/components/ui/Admin/Document/Modal/Pending/ModalPendingDocument";
 import { getFilteredColumnsTableDocument } from "@/components/ui/Admin/Document/ColumnsTableDocument";
+import { reloadTable } from "@/utils/swrReload";
 
 
 
@@ -30,35 +23,31 @@ export default function DocumentPendingPage() {
     const [selectedItem, setSelectedItem] = useState<IDocumentResponse>();
     const [loading, setLoading] = useState(true);
 
-    const listColumn = getFilteredColumnsTableDocument(['name', 'statusDocument', 'fullNameUser', 'courseName', 'isPrivate']);
-    const [columns, setColumns] = useState<TableColumnType<IDocumentResponse>[]>(listColumn);
-    useEffect(() => {
-        setColumns([
-            ...columns,
-            {
-                title: 'Thao tác',
-                key: 'actions',
-                width: 150,
-                render: (_, record) => (
-                    <div className="flex gap-2">
-                        <Tooltip title="Duyệt tài liệu">
-                            <Button
-                                type="primary"
-                                size="small"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedDocument(record);
-                                    setIsShowModalReview(true);
-                                }}
-                            >
-                                Duyệt
-                            </Button>
-                        </Tooltip>
-                    </div>
-                ),
-            },
-        ]);
-    }, []);
+    const columns: TableColumnType<IDocumentResponse>[] = [
+        ...getFilteredColumnsTableDocument(['name', 'statusDocument', 'fullNameUser', 'courseName', 'isPrivate']),
+        {
+            title: 'Thao tác',
+            key: 'actions',
+            width: 150,
+            render: (_, record) => (
+                <div className="flex gap-2">
+                    <Tooltip title="Duyệt tài liệu">
+                        <Button
+                            type="primary"
+                            size="small"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedDocument(record);
+                                setIsShowModalReview(true);
+                            }}
+                        >
+                            Duyệt
+                        </Button>
+                    </Tooltip>
+                </div>
+            ),
+        },
+    ];
 
     return (
         <>

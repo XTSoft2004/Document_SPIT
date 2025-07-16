@@ -38,12 +38,11 @@ export default function DocumentRejectedPage() {
     const [restoreLoading, setRestoreLoading] = useState(false);
 
     // Hàm xử lý xóa tài liệu với kiểm tra mật khẩu
-    const handleDeleteDocument = async (password: string) => {
+    const handleDeleteDocument = async () => {
         if (!documentToDelete) return;
 
         try {
             setDeleteLoading(true);
-
             // Gọi API xóa tài liệu
             const response = await deleteDocument(documentToDelete.id.toString());
 
@@ -79,7 +78,7 @@ export default function DocumentRejectedPage() {
     };
 
     // Hàm xử lý khôi phục tài liệu với kiểm tra mật khẩu
-    const handleRestoreDocument = async (password: string) => {
+    const handleRestoreDocument = async () => {
         if (!documentToRestore) return;
 
         try {
@@ -119,61 +118,57 @@ export default function DocumentRejectedPage() {
         }
     };
 
-    const listColumn = getFilteredColumnsTableDocument(['name', 'statusDocument', 'fullNameUser', 'courseName', 'isPrivate']);
-    const [columns, setColumns] = useState<TableColumnType<IDocumentResponse>[]>(listColumn);
-    useEffect(() => {
-        setColumns([
-            ...columns,
-            {
-                title: 'Thao tác',
-                key: 'actions',
-                width: 180,
-                render: (_, record) => (
-                    <div className="flex gap-2">
-                        <Tooltip title="Khôi phục tài liệu">
-                            <Button
-                                type="text"
-                                size="middle"
-                                icon={
-                                    <Clock
-                                        size={18}
-                                        style={{ color: "#22c55e" }} // Màu xanh (tailwind: green-500)
-                                    />
-                                }
-                                onClick={async (e) => {
-                                    e.stopPropagation();
-                                    // Hiển thị modal xác nhận khôi phục
-                                    setDocumentToRestore(record);
-                                    setIsShowConfirmRestore(true);
-                                }}
-                                style={{ color: "#22c55e" }} // Đảm bảo màu cho icon
-                            />
-                        </Tooltip>
+    const columns: TableColumnType<IDocumentResponse>[] = [
+        ...getFilteredColumnsTableDocument(['name', 'statusDocument', 'fullNameUser', 'courseName', 'isPrivate']),
+        {
+            title: 'Thao tác',
+            key: 'actions',
+            width: 180,
+            render: (_, record) => (
+                <div className="flex gap-2">
+                    <Tooltip title="Khôi phục tài liệu">
+                        <Button
+                            type="text"
+                            size="middle"
+                            icon={
+                                <Clock
+                                    size={18}
+                                    style={{ color: "#22c55e" }} // Màu xanh (tailwind: green-500)
+                                />
+                            }
+                            onClick={async (e) => {
+                                e.stopPropagation();
+                                // Hiển thị modal xác nhận khôi phục
+                                setDocumentToRestore(record);
+                                setIsShowConfirmRestore(true);
+                            }}
+                            style={{ color: "#22c55e" }} // Đảm bảo màu cho icon
+                        />
+                    </Tooltip>
 
-                        <Tooltip title="Xoá tài liệu">
-                            <Button
-                                type="text"
-                                size="middle"
-                                icon={
-                                    <Trash2
-                                        size={18}
-                                    // Màu đỏ (tailwind: red-500)
-                                    />
-                                }
-                                onClick={async (e) => {
-                                    e.stopPropagation();
-                                    // Hiển thị modal xác nhận xóa
-                                    setDocumentToDelete(record);
-                                    setIsShowConfirmDelete(true);
-                                }}
-                                style={{ color: "#ef4444" }} // Đảm bảo màu cho icon
-                            />
-                        </Tooltip>
-                    </div>
-                ),
-            },
-        ]);
-    }, []);
+                    <Tooltip title="Xoá tài liệu">
+                        <Button
+                            type="text"
+                            size="middle"
+                            icon={
+                                <Trash2
+                                    size={18}
+                                // Màu đỏ (tailwind: red-500)
+                                />
+                            }
+                            onClick={async (e) => {
+                                e.stopPropagation();
+                                // Hiển thị modal xác nhận xóa
+                                setDocumentToDelete(record);
+                                setIsShowConfirmDelete(true);
+                            }}
+                            style={{ color: "#ef4444" }} // Đảm bảo màu cho icon
+                        />
+                    </Tooltip>
+                </div>
+            ),
+        },
+    ];
 
     return (
         <>

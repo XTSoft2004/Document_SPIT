@@ -31,6 +31,7 @@ namespace Domain.Common
     public enum Function_Enum
     {
         Create_Document,
+        Review_Document,
         Update_Document,
         Delete_Document,
     }

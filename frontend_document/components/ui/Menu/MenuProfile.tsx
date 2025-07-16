@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
     HomeOutlined,
     LogoutOutlined,
@@ -22,6 +22,12 @@ const MenuProfile = ({ onClose }: MenuProfileProps) => {
         setIsVisible(true);
     }, []);
 
+    const handleClose = useCallback(() => {
+        setIsClosing(true);
+        setTimeout(() => {
+            onClose?.();
+        }, 200);
+    }, [onClose]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -34,7 +40,7 @@ const MenuProfile = ({ onClose }: MenuProfileProps) => {
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, []);
+    }, [handleClose]);
 
 
     useEffect(() => {
@@ -48,16 +54,9 @@ const MenuProfile = ({ onClose }: MenuProfileProps) => {
         return () => {
             document.removeEventListener('keydown', handleEscKey);
         };
-    }, []);
+    }, [handleClose]);
 
-    const handleClose = () => {
-        setIsClosing(true);
-        setTimeout(() => {
-            onClose?.();
-        }, 200);
-    };
-
-    const handleLogout = async () => {
+    const handleLogout = useCallback(async () => {
         try {
             handleClose();
             await logoutAccount();
@@ -67,12 +66,12 @@ const MenuProfile = ({ onClose }: MenuProfileProps) => {
             NotificationService.error({ message: 'Đăng xuất thất bại' });
             console.error('Logout failed:', error);
         }
-    };
+    }, [handleClose]);
 
-    const handleGoHome = () => {
+    const handleGoHome = useCallback(() => {
         handleClose();
         router.push('/');
-    };
+    }, [handleClose, router]);
 
     return (
         <div

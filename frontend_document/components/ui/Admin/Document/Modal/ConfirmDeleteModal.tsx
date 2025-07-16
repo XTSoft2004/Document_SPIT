@@ -201,7 +201,7 @@ const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
                             </p>
                             <div className="bg-gray-50 p-3 rounded-md border-l-4 border-red-400">
                                 <Text strong className="text-red-600">
-                                    "{document?.name}"
+                                    &quot;{document?.name}&quot;
                                 </Text>
                                 <br />
                                 <Text type="secondary" className="text-sm">

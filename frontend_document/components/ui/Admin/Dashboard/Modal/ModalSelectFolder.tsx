@@ -45,9 +45,9 @@ const ModalSelectFolder: React.FC<ModalSelectFolderProps> = ({
     defaultFolderId
 }) => {
     // Lấy folder ID với fallback
-    const getFolderId = () => {
+    const getFolderId = React.useCallback(() => {
         return folderIdCurrent || defaultFolderId || '';
-    };
+    }, [folderIdCurrent, defaultFolderId]);
 
     // Khởi tạo với lazy initialization
     const [currentFolderId, setCurrentFolderId] = useState(() => getFolderId());
@@ -56,7 +56,7 @@ const ModalSelectFolder: React.FC<ModalSelectFolderProps> = ({
     useEffect(() => {
         const newFolderId = getFolderId();
         setCurrentFolderId(newFolderId);
-    }, [folderIdCurrent, defaultFolderId]);
+    }, [getFolderId]);
 
     // Khởi tạo path với lazy initialization
     const [path, setPath] = useState<IFileInfo[]>(() => [
@@ -96,7 +96,7 @@ const ModalSelectFolder: React.FC<ModalSelectFolderProps> = ({
             setIsCreatingFolder(false);
             setFolderNameError(null);
         }
-    }, [open, folderIdCurrent, defaultFolderId]);
+    }, [open, folderIdCurrent, defaultFolderId, getFolderId]);
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -107,11 +107,7 @@ const ModalSelectFolder: React.FC<ModalSelectFolderProps> = ({
     const [isCreatingFolder, setIsCreatingFolder] = useState(false);
     const [folderNameError, setFolderNameError] = useState<string | null>(null);
 
-    useEffect(() => {
-        fetchFolder();
-    }, [currentFolderId]);
-
-    const fetchFolder = async () => {
+    const fetchFolder = React.useCallback(async () => {
         setLoading(true);
         setError(null);
         setItems([]);
@@ -124,7 +120,11 @@ const ModalSelectFolder: React.FC<ModalSelectFolderProps> = ({
         } finally {
             setLoading(false);
         }
-    };
+    }, [currentFolderId]);
+
+    useEffect(() => {
+        fetchFolder();
+    }, [fetchFolder]);
 
     const handleCreateFolder = async () => {
         if (!newFolderName.trim() || isCreatingFolder) return;

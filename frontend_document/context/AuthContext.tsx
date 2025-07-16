@@ -77,6 +77,9 @@ export const AuthProvider: React.FC<{
     };
 
     const getInfo = (): IInfoUserResponse | null => {
+        if (localStorage.getItem('isLoggedIn') === 'false')
+            return null;
+
         const user = localStorage.getItem('user');
         const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
         if (user && isLoggedIn) {

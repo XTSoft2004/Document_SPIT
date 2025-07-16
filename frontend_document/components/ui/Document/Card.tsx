@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { IDriveItem } from '@/types/driver';
 import globalConfig from '@/app.config';
 import convertSlug from '@/utils/convertSlug';
+import Image from 'next/image';
 
 interface FileCardProps {
     item: IDriveItem;
@@ -36,16 +37,18 @@ export const FileCard: React.FC<FileCardProps> = ({ item, onPreviewFile }) => {
                         <Spin />
                     </div>
                 )}
-                <img
+                <Image
+                    width={700}
+                    height={300}
                     src={`${globalConfig.baseUrl}/document/thumbnail/${item.documentId}`}
-                    className="w-full h-42 object-cover rounded border z-10"
                     alt={item.name}
                     onLoad={() => setLoading(false)}
                     onError={() => setLoading(false)}
+                    style={{ width: '100%', height: '168px', objectFit: 'cover', borderRadius: 'inherit', border: 'inherit', zIndex: 10 }}
                 />
             </div>
             <div
-                className="font-medium text-xs text-center w-full mb-2 line-clamp-2 break-words"
+                className="font-medium text-xs text-center w-full mb-2 line-clamp-2 break-words mt-5F"
             >
                 {item.name}
             </div>

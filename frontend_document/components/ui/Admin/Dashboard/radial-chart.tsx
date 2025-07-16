@@ -55,8 +55,6 @@ export function ChartRadialStacked() {
                     // getClasses(),
                 ])
                 setInfoGoogleDrive(infoGoogleDrive)
-                chartData[0].limit = infoGoogleDrive?.limit || 0
-                chartData[0].usage = infoGoogleDrive?.usage || 0
             } finally {
                 setIsLoad(false)
             }

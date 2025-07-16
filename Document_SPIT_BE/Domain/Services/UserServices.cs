@@ -166,8 +166,8 @@ namespace Domain.Services
                 RoleId = role.Id,
             };
             _user!.Insert(user);
-            await UnitOfWork.CommitAsync()
-                ;
+            await UnitOfWork.CommitAsync();
+
             return HttpResponse.OK(message: "Tạo người dùng thành công.");
         }
         public async Task<HttpResponse> GetProfileToken()
