@@ -4,6 +4,7 @@ using Domain.Common.Http;
 using Domain.Entities;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
+using Domain.Model.Request.History;
 using Domain.Model.Request.User;
 using Domain.Model.Response.Token;
 using Domain.Model.Response.Statistical;
@@ -29,13 +30,15 @@ namespace Domain.Services
         private readonly IRepositoryBase<StarDocument>? _startDocument;
         private readonly IRepositoryBase<Document>? _document;
         private readonly ITokenServices _tokenServices;
+        private readonly IHistoryServices _historyServices;
         private UserTokenResponse? userMeToken;
-        public UserServices(IRepositoryBase<User>? user, IRepositoryBase<Role>? role, ITokenServices tokenServices, IRepositoryBase<History>? history, IRepositoryBase<StarDocument>? startDocument, IRepositoryBase<Document>? document)
+        public UserServices(IRepositoryBase<User>? user, IRepositoryBase<Role>? role, ITokenServices tokenServices, IRepositoryBase<History>? history, IRepositoryBase<StarDocument>? startDocument, IRepositoryBase<Document>? document, IHistoryServices historyServices)
         {
             _user = user;
             _role = role;
             _history = history;
             _tokenServices = tokenServices;
+            _historyServices = historyServices;
             userMeToken = _tokenServices.GetTokenBrowser();
             _startDocument = startDocument;
             _document = document;
@@ -53,6 +56,15 @@ namespace Domain.Services
             user.ModifiedDate = DateTime.Now;
 
             await UnitOfWork.CommitAsync();
+            
+            await _historyServices.CreateAsync(new HistoryRequest 
+            { 
+                Title = "Cập nhật người dùng", 
+                Description = $"Người dùng {user.Username} vừa được cập nhật.", 
+                function_status = Function_Enum.Update_User, 
+                UserId = userMeToken?.Id ?? -1 
+            });
+            
             return HttpResponse.OK(message: "Cập nhật người dùng thành công.");
         }
         public async Task<HttpResponse> GetMe()
@@ -84,6 +96,15 @@ namespace Domain.Services
                 user.RoleId = role.Id;
                 user.Role = role;
                 await UnitOfWork.CommitAsync();
+                
+                await _historyServices.CreateAsync(new HistoryRequest 
+                { 
+                    Title = "Cập nhật quyền", 
+                    Description = $"Quyền của người dùng {user.Username} vừa được cập nhật thành {role.DisplayName}.", 
+                    function_status = Function_Enum.Set_Role, 
+                    UserId = userMeToken?.Id ?? -1 
+                });
+                
                 return HttpResponse.OK(message: $"Cập nhật role {role.DisplayName} thành công!");
             }
 
@@ -145,6 +166,15 @@ namespace Domain.Services
             user.isLocked = !user.isLocked;
             user.ModifiedDate = DateTime.Now;
             await UnitOfWork.CommitAsync();
+            
+            await _historyServices.CreateAsync(new HistoryRequest 
+            { 
+                Title = user.isLocked ? "Khóa tài khoản" : "Mở khóa tài khoản", 
+                Description = $"Tài khoản {user.Username} vừa được {(user.isLocked ? "khóa" : "mở khóa")}.", 
+                function_status = Function_Enum.Ban_User, 
+                UserId = userMeToken?.Id ?? -1 
+            });
+            
             return HttpResponse.OK(message: user.isLocked ? "Khoá tài khoản thành công." : "Mở khoá tài khoản thành công.");
         }
         public async Task<HttpResponse> CreateAsync(UserCreateRequest userRequest)
@@ -167,6 +197,14 @@ namespace Domain.Services
             };
             _user!.Insert(user);
             await UnitOfWork.CommitAsync();
+
+            await _historyServices.CreateAsync(new HistoryRequest 
+            { 
+                Title = "Tạo người dùng", 
+                Description = $"Người dùng {user.Username} vừa được tạo.", 
+                function_status = Function_Enum.Create_User, 
+                UserId = userMeToken?.Id ?? -1 
+            });
 
             return HttpResponse.OK(message: "Tạo người dùng thành công.");
         }
@@ -213,7 +251,7 @@ namespace Domain.Services
             if (f != null)
             {
                 _startDocument.Delete(f);
-                await UnitOfWork.CommitAsync();
+                await UnitOfWork.CommitAsync(); 
             }
             // nếu chưa thì thêm sao
             else
@@ -227,6 +265,14 @@ namespace Domain.Services
                 _startDocument.Insert(star);
                 await UnitOfWork.CommitAsync();
             }
+
+            await _historyServices.CreateAsync(new HistoryRequest 
+            { 
+                Title = "Cập nhật trạng thái sao", 
+                Description = f != null ? "Đã bỏ sao tài liệu." : "Đã đánh sao tài liệu.", 
+                function_status = Function_Enum.Update_Status_Star, 
+                UserId = userMeToken?.Id ?? -1 
+            });
 
             return HttpResponse.OK(message: "Cập nhật trạng thái sao thành công.");
         }

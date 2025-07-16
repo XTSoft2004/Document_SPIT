@@ -89,7 +89,7 @@ const Header = () => {
                                     </button>
                                     {showProfileMenu && (
                                         <div className="absolute right-0 top-full mt-2 z-50">
-                                            <MenuProfile onClose={() => setShowProfileMenu(false)} />
+                                            <MenuProfile onClose={() => setShowProfileMenu(false)} user={user} />
                                         </div>
                                     )}
                                 </div>

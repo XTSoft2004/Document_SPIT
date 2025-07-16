@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import HeaderDocument from "@/components/ui/Document/Header";
-import Header from "@/layout/Header";
+import { useState, useEffect, useMemo } from 'react';
 import GridDocument from "@/components/ui/Document/GridDocument";
 import { IDriveResponse, IDriveItem } from "@/types/driver";
 import { ITreeNode } from "@/types/tree";
 import { flattenData } from "@/utils/flattenData";
-import Footer from '@/layout/Footer';
+import { useTreeData } from "@/hooks/useTreeData";
+import getContent from "@/utils/getContent";
+import { convertToTreeData } from "@/utils/convertToTreeData";
 
 interface DocumentPageClientProps {
     data: IDriveResponse[];
@@ -18,15 +18,31 @@ interface DocumentPageClientProps {
 }
 
 export default function DocumentPageClient({
-    data,
-    content,
+    data: initialData,
+    content: initialContent,
     slug,
-    path,
-    treeData
+    path: initialPath,
+    treeData: initialTreeData
 }: DocumentPageClientProps) {
     const [mobileSearchResults, setMobileSearchResults] = useState<IDriveItem[] | null>(null);
     const [isMobile, setIsMobile] = useState(false);
-    const allItems = flattenData(data);
+
+    const { data: freshData, isLoading } = useTreeData();
+
+    const currentData = freshData || initialData;
+
+    const { content, path, treeData, allItems } = useMemo(() => {
+        const contentResult = getContent(currentData, slug);
+        const treeDataResult = convertToTreeData(currentData);
+        const allItemsResult = flattenData(currentData);
+
+        return {
+            content: contentResult.items,
+            path: contentResult.path,
+            treeData: treeDataResult,
+            allItems: allItemsResult
+        };
+    }, [currentData, slug]);
 
     useEffect(() => {
         const checkIsMobile = () => {
@@ -41,7 +57,7 @@ export default function DocumentPageClient({
         <div className="flex flex-col h-full min-h-0">
             <div className="flex-1 min-h-0 overflow-hidden mb-3">
                 <GridDocument
-                    data={data}
+                    data={currentData}
                     content={content}
                     slug={slug}
                     path={path}
@@ -49,9 +65,6 @@ export default function DocumentPageClient({
                     mobileSearchResults={mobileSearchResults}
                 />
             </div>
-            {/* <div className="flex-shrink-0">
-                <Footer />
-            </div> */}
         </div>
     );
 }

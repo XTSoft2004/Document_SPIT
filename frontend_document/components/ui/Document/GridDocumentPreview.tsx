@@ -13,6 +13,9 @@ interface GridDocumentPreviewProps {
     onPreviewFile?: (file: IDriveItem) => void;
     onFolderClick?: () => void;
     loading?: boolean;
+    isLogin?: boolean;
+    starDocument?: number[];
+    onStarredUpdate?: (starDocument: number[]) => void;
 }
 
 export default function GridDocumentPreview({
@@ -21,6 +24,9 @@ export default function GridDocumentPreview({
     onPreviewFile,
     onFolderClick,
     loading = false,
+    isLogin = false,
+    starDocument = [],
+    onStarredUpdate,
 }: GridDocumentPreviewProps) {
     const router = useRouter();
     const folders = content.filter(i => i.isFolder);

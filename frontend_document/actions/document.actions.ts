@@ -33,6 +33,7 @@ export const createDocument = async (
 
   const data = await response.json()
   revalidateTag('document.index')
+  revalidateTag('driver.tree')
 
   return {
     ok: response.ok,
@@ -85,6 +86,7 @@ export const updateDocument = async (
   const data = await response.json()
 
   revalidateTag('document.index')
+  revalidateTag('driver.tree')
 
   return {
     ok: response.ok,
@@ -107,6 +109,7 @@ export const deleteDocument = async (id: string): Promise<IBaseResponse> => {
 
   revalidateTag('document.index')
   revalidateTag('document.show')
+  revalidateTag('driver.tree')
 
   return {
     ok: response.ok,
@@ -196,4 +199,28 @@ export const getRecentDocuments = async (number: number) => {
     status: response.status,
     ...data,
   } as IIndexResponse<IDocumentRecentResponse>
+}
+
+export const getCodeDocument = async (documentId: number) => {
+  const response = await fetch(
+    `${globalConfig.baseUrl}/document/${documentId}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization:
+          headers().get('Authorization') ||
+          `Bearer ${cookies().get('accessToken')?.value || ' '}`,
+      },
+    },
+  )
+
+  const data = await response.json()
+  revalidateTag('document.index')
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    ...data,
+  } as IShowResponse<{ code: string }>
 }

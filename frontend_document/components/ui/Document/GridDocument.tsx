@@ -2,6 +2,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { ListIcon, LayoutGridIcon } from 'lucide-react';
+import { getStars } from '@/actions/user.action';
 import PathFolder from './PathFolder';
 import GridDocumentList from './GridDocumentList';
 import Back from './Back';
@@ -13,6 +14,8 @@ import { IDriveItem, IDriveResponse } from '@/types/driver';
 import { ITreeNode } from '@/types/tree';
 import Search from './Search';
 import convertSlug from '@/utils/convertSlug';
+import { set } from 'zod';
+import { getMe } from '@/actions/user.action';
 
 interface GridDocumentProps {
     data: IDriveResponse[]
@@ -31,6 +34,8 @@ export default function GridDocument({ data, content, slug, path, treeData, mobi
     const [showTree, setShowTree] = useState(true);
     const [filtered, setFiltered] = useState<IDriveItem[] | null>(null);
     const [mode, setMode] = useState<'list' | 'preview'>('list');
+    const [starDocument, setStarDocument] = useState<number[]>([]);
+    const [isLogin, setIsLogin] = useState(false);
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -39,6 +44,41 @@ export default function GridDocument({ data, content, slug, path, treeData, mobi
                 setMode(savedMode as 'list' | 'preview');
             }
         }
+    }, []);
+
+    useEffect(() => {
+        const loadStarredDocuments = async () => {
+            try {
+                const response = await getStars();
+                if (response.ok && response.data) {
+                    setStarDocument(response.data);
+                }
+            } catch (error) {
+                console.error('Error loading starDocument documents:', error);
+            }
+        };
+
+        loadStarredDocuments();
+    }, []);
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const response = await getMe();
+                if (response.ok && response.data) {
+                    setIsLogin(true);
+                } else {
+                    setIsLogin(false);
+                }
+            }
+            catch (error) {
+                console.error('Error fetching user data:', error);
+                setIsLogin(false);
+            }
+        }
+
+        fetchUserData();
+
     }, []);
 
     const allItems = useMemo(() => flattenData(data), [data]);
@@ -92,7 +132,6 @@ export default function GridDocument({ data, content, slug, path, treeData, mobi
         if (node.isLeaf) {
             setPreviewFile({ fileName: node.title, documentId: node.idDocument });
         } else {
-
             router.push(`/document/${node.path.join('/')}`);
         }
     }, [router]);
@@ -185,6 +224,9 @@ export default function GridDocument({ data, content, slug, path, treeData, mobi
                             url={url}
                             onPreviewFile={file => setPreviewFile({ fileName: file.name, documentId: file.documentId })}
                             onFolderClick={() => setLoading(true)}
+                            isLogin={isLogin}
+                            starDocument={starDocument}
+                            onStarredUpdate={setStarDocument}
                         />
                     ) : (
                         <GridDocumentPreview
@@ -193,6 +235,9 @@ export default function GridDocument({ data, content, slug, path, treeData, mobi
                             onPreviewFile={file => setPreviewFile({ fileName: file.name, documentId: file.documentId })}
                             onFolderClick={() => setLoading(true)}
                             loading={loading}
+                            isLogin={isLogin}
+                            starDocument={starDocument}
+                            onStarredUpdate={setStarDocument}
                         />
                     )}
                     <PreviewFile

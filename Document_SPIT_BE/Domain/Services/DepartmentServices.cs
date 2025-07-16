@@ -7,7 +7,10 @@ using Domain.Entities;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
 using Domain.Model.Request.Department;
+using Domain.Model.Request.History;
 using Domain.Model.Response.Department;
+using Domain.Model.Response.Token;
+using Domain.Model.Response.User;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,10 +23,17 @@ namespace Domain.Services
     {
         private readonly IRepositoryBase<Department> _department;
         private readonly IGoogleDriverServices _googleDriverServices;
-        public DepartmentServices(IRepositoryBase<Department> department, IGoogleDriverServices googleDriverServices)
+        private readonly IHistoryServices _historyServices;
+        private readonly ITokenServices _tokenServices;
+        private UserTokenResponse? userMeToken;
+        
+        public DepartmentServices(IRepositoryBase<Department> department, IGoogleDriverServices googleDriverServices, IHistoryServices historyServices, ITokenServices tokenServices)
         {
             _department = department;
             _googleDriverServices = googleDriverServices;
+            _historyServices = historyServices;
+            _tokenServices = tokenServices;
+            userMeToken = _tokenServices.GetTokenBrowser();
             var envPath = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.Parent.FullName, ".env");
             DotNetEnv.Env.Load(envPath);
         }
@@ -49,6 +59,14 @@ namespace Domain.Services
             _department.Update(department);
             await UnitOfWork.CommitAsync();
 
+            await _historyServices.CreateAsync(new HistoryRequest 
+            { 
+                Title = "Tạo khoa", 
+                Description = $"Khoa {department.Name} vừa được tạo.", 
+                function_status = Function_Enum.Create_Department, 
+                UserId = userMeToken?.Id ?? -1 
+            });
+
             return HttpResponse.OK(message: "Tạo khoa thành công.");
         }
 
@@ -65,6 +83,14 @@ namespace Domain.Services
             _department.Update(department);
             await UnitOfWork.CommitAsync();
 
+            await _historyServices.CreateAsync(new HistoryRequest 
+            { 
+                Title = "Cập nhật khoa", 
+                Description = $"Khoa {department.Name} vừa được cập nhật.", 
+                function_status = Function_Enum.Update_Department, 
+                UserId = userMeToken?.Id ?? -1 
+            });
+
             return HttpResponse.OK(message: "Cập nhật khoa thành công.");
         }
 
@@ -73,8 +99,18 @@ namespace Domain.Services
             var department = _department.Find(f => f.Id == id);
             if (department == null)
                 return HttpResponse.Error(message: "Khoa không tồn tại.");
+            
             _department.TotallyDelete(department);
             await UnitOfWork.CommitAsync();
+            
+            await _historyServices.CreateAsync(new HistoryRequest 
+            { 
+                Title = "Xóa khoa", 
+                Description = $"Khoa {department.Name} vừa được xóa.", 
+                function_status = Function_Enum.Delete_Department, 
+                UserId = userMeToken?.Id ?? -1 
+            });
+            
             return HttpResponse.OK(message: "Xoá khoa thành công.");
         }
 

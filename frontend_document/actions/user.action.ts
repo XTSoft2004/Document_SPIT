@@ -169,3 +169,50 @@ export const getMe = async () => {
     ...data,
   } as IShowResponse<IUserResponse>
 }
+
+export const getStars = async () => {
+  const response = await fetch(`${globalConfig.baseUrl}/user/stars`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization:
+        headers().get('Authorization') ||
+        `Bearer ${cookies().get('accessToken')?.value || ' '}`,
+    },
+    next: {
+      tags: ['user.stars'],
+    },
+  })
+
+  const data = await response.json()
+  return {
+    ok: response.ok,
+    status: response.status,
+    ...data,
+  } as IIndexResponse<number>
+}
+
+export const changeStatusStar = async (documentId: number) => {
+  const response = await fetch(
+    `${globalConfig.baseUrl}/user/change-status-star/${documentId}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization:
+          headers().get('Authorization') ||
+          `Bearer ${cookies().get('accessToken')?.value || ' '}`,
+      },
+    },
+  )
+
+  const data = await response.json()
+
+  revalidateTag('user.stars')
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    ...data,
+  }
+}

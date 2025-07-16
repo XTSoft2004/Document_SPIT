@@ -118,6 +118,14 @@ namespace Domain.Services
             await UnitOfWork.CommitAsync();
             var listDocument = _document.All().ToList();
 
+            await _historyServices.CreateAsync(new HistoryRequest
+            {
+                Title = "Tạo tài liệu chờ duyệt",
+                Description = $"Tài liệu chờ duyệt {documentCreate.Name} đã được tạo.",
+                function_status = Function_Enum.Create_Document,
+                UserId = userMeToken.Id ?? -1
+            });
+
             return HttpResponse.OK(message: "Tạo tài liệu thành công, đang chờ xét duyệt.");
         }
         public async Task<HttpResponse> ReviewAsync(long? Id, DocumentReviewRequest documentRequest)
@@ -320,14 +328,13 @@ namespace Domain.Services
             _document.Delete(document);
             await UnitOfWork.CommitAsync();
 
-            // Cập nhật lịch sử của tài liệu
-            var history = new UserHistoryResponse
+            await _historyServices.CreateAsync(new HistoryRequest
             {
                 Title = "Xoá tài liệu",
+                Description = $"Tài liệu {document.Name} đã được xoá.",
                 function_status = Function_Enum.Delete_Document,
-                UserId = document.UserId,
-                Fullname = _user.Find(f => f.Id == document.UserId)?.Fullname,
-            };
+                UserId = userMeToken.Id ?? -1
+            });
 
             return HttpResponse.OK(message: "Xoá tài liệu thành công.");
         }
@@ -346,11 +353,11 @@ namespace Domain.Services
             if (document == null)
                 return;
 
-            var itemReacted = _detailDocument.Find(f => f.Id == document.Id);
+            var itemReacted = _detailDocument.Find(f => f.DocumentId == document.Id);
             if (itemReacted == null)
                 return;
 
-            itemReacted.TotalView += 1;
+            itemReacted.TotalView = itemReacted.TotalView == null ? 1 : itemReacted.TotalView + 1;
             _detailDocument.Update(itemReacted);
             await UnitOfWork.CommitAsync();
         }
@@ -360,11 +367,11 @@ namespace Domain.Services
             if (document == null)
                 return (null, null, null);
 
-            var itemReacted = _detailDocument.Find(f => f.Id == document.Id);
+            var itemReacted = _detailDocument.Find(f => f.DocumentId == document.Id);
             if (itemReacted == null)
                 return (null, null, null);
 
-            itemReacted.TotalDownload += 1;
+            itemReacted.TotalDownload = itemReacted.TotalDownload == null ? 1 : itemReacted.TotalDownload + 1;
             _detailDocument.Update(itemReacted);
             await UnitOfWork.CommitAsync();
 

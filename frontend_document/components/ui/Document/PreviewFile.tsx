@@ -1,6 +1,6 @@
 import globalConfig from '@/app.config';
 import React, { useRef, useState, useEffect } from 'react';
-import { getCodeView } from '@/actions/document.actions';
+import { getCodeDocument } from '@/actions/document.actions';
 import Image from 'next/image';
 
 interface PreviewFilePopupProps {
@@ -72,7 +72,7 @@ export default function PreviewFile({ open, onClose, fileName, documentId }: Pre
 
             (async () => {
                 try {
-                    const response = await getCodeView(documentId);
+                    const response = await getCodeDocument(documentId);
                     // NotificationService.info({ message: response.message });
                     if (response.ok) {
                         setCodeView(response.data.code);

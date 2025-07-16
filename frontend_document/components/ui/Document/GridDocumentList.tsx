@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { IDriveItem } from '@/types/driver';
 import LoadingSkeleton from '../Loading/LoadingSkeleton';
 import NotFound from '../NotFound';
+import HeartButton from './HeartButton';
+import globalConfig from '@/app.config';
 
 interface GridDocumentListProps {
     content: IDriveItem[];
@@ -12,6 +14,9 @@ interface GridDocumentListProps {
     onPreviewFile?: (file: IDriveItem) => void;
     onFolderClick?: () => void;
     loading?: boolean;
+    isLogin?: boolean;
+    starDocument?: number[];
+    onStarredUpdate?: (starDocument: number[]) => void;
 }
 
 const getFileIcon = (name: string, isFolder: boolean) => {
@@ -27,6 +32,9 @@ export default function GridDocumentList({
     onPreviewFile,
     onFolderClick,
     loading = false,
+    isLogin = false,
+    starDocument = [],
+    onStarredUpdate,
 }: GridDocumentListProps) {
     const router = useRouter();
 
@@ -69,7 +77,7 @@ export default function GridDocumentList({
                             <div className="font-semibold text-base truncate group-hover:text-blue-700">{item.name}</div>
                         </div>
                         {!item.isFolder && (
-                            <div className="flex items-center gap-3">
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
                                 <div className="flex items-center gap-4 text-sm text-gray-500">
                                     <span className="flex items-center gap-1">
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -85,18 +93,34 @@ export default function GridDocumentList({
                                         {item.totalViews || 0}
                                     </span>
                                 </div>
-                                <button
-                                    className="p-2 hover:bg-blue-100 rounded-lg transition-colors"
-                                    title="Tải xuống"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onPreviewFile?.(item);
-                                    }}
-                                >
-                                    <svg className="w-5 h-5 text-gray-500 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                </button>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        className="p-1 hover:bg-blue-100 rounded transition-colors"
+                                        title="Tải xuống"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            const downloadUrl = `${globalConfig.baseUrl}/document/download/${item.documentId}`;
+                                            const link = document.createElement('a');
+                                            link.href = downloadUrl;
+                                            link.download = item.name || 'document';
+                                            link.style.display = 'none';
+                                            document.body.appendChild(link);
+                                            link.click();
+                                            document.body.removeChild(link);
+                                        }}
+                                    >
+                                        <svg className="w-4 h-4 text-gray-500 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                    </button>
+                                    {isLogin && (
+                                        <HeartButton
+                                            documentId={item.documentId}
+                                            starDocument={starDocument}
+                                            onStarredUpdate={onStarredUpdate}
+                                        />
+                                    )}
+                                </div>
                             </div>
                         )}
                     </div>

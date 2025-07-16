@@ -38,6 +38,9 @@ namespace Domain.Services
                 Title = historyRequest.Title,
                 Description = historyRequest.Description,
                 function_status = historyRequest.function_status,
+                UserId = historyRequest.UserId,
+                CreatedDate = DateTime.Now,
+                ModifiedDate = DateTime.Now,
             };
 
             _history.Insert(history);
@@ -59,6 +62,8 @@ namespace Domain.Services
             history.Title = historyRequest.Title ?? history.Title;
             history.Description = historyRequest.Description ?? history.Description;
             history.function_status = historyRequest.function_status ?? history.function_status;
+            history.UserId = historyRequest.UserId;
+            history.ModifiedDate = DateTime.Now;
 
             _history.Update(history);
             await UnitOfWork.CommitAsync();
@@ -85,12 +90,18 @@ namespace Domain.Services
                 .Take(sizePage)
                 .Select(s => new HistoryResponse()
                 {
+                    Id = s.Id,
                     Title = s.Title,
                     Description = s.Description,
                     FunctionStatus = s.function_status.HasValue ? s.function_status.ToString() : null,
-                    UserId = s.UserId
+                    UserId = s.UserId,
+                    Fullname = "",
+                    ModifiedDate = s.ModifiedDate
                 })
                 .ToList();
+
+            foreach (var item in histories)
+                item.Fullname = _user.Find(u => u.Id == item.UserId).Fullname;
 
             return HttpResponse.OK(histories, "Lấy lịch sử thành công!");
         }
