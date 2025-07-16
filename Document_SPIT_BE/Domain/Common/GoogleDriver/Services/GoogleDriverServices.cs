@@ -359,10 +359,22 @@ namespace Domain.Common.GoogleDriver.Services
                 if (items != null)
                 {
                     var documents = _document.All().ToList();
-                    var itemExists = items.Where(w => documents.Select(s => s.FileId).Contains(w.Id)).ToList();
-                    foreach(var item in itemExists)
+                    var itemIndexExists = items
+                        .Where(w => documents.Select(s => s.FileId)
+                        .Contains(w.Id))
+                        .Select((s, index) => index)
+                        .ToList();
+
+                    foreach(var index in itemIndexExists)
                     {
+                        var item = items[index];
                         var document = _document.Find(d => d.FileId == item.Id);
+                        if(document.IsPrivate == true)
+                        {
+                            items.RemoveAt(index);
+                            continue;
+                        }
+
                         if (document != null)
                         {
                             string? typeFile = item.Name.Split('.')[item.Name.Split('.').Length - 1];
@@ -403,7 +415,6 @@ namespace Domain.Common.GoogleDriver.Services
                     Children = new List<TreeDocumentResponse>()
                 };
             }
-            ;
 
             bool checkEmptyFolder(TreeDocumentResponse node)
             {
@@ -433,8 +444,8 @@ namespace Domain.Common.GoogleDriver.Services
                         roots.Add(rootNode);
                 }
             }
-
-            return roots.Select(r => treeMap[r.FolderId!]).ToList();
+            var rootsFolder = roots.Select(r => treeMap[r.FolderId!]).ToList();
+            return rootsFolder;
         }
         public async Task<List<TreeDocumentResponse>> GetTreeDocument(string rootFolderId)
         {

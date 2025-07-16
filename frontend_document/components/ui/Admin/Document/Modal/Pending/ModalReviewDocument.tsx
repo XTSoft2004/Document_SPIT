@@ -213,18 +213,24 @@ export default function ModalReviewDocument({
                         >
                             <Select
                                 showSearch
-                                placeholder="Chọn môn học"
+                                placeholder={loadingCourses ? "Đang tải môn học..." : "Chọn môn học"}
                                 optionFilterProp="children"
                                 filterOption={(input, option) =>
                                     (`${option?.label ?? ''}`).toLowerCase().includes(input.toLowerCase())
                                 }
-                                options={courses.map(course => ({
-                                    value: course.id,
-                                    label: `${course.code} - ${course.name}`
-                                }))}
+                                options={
+                                    loadingCourses
+                                        ? [{ value: -1, label: 'Đang tải môn học...' }]
+                                        : courses.map(course => ({
+                                            value: course.id,
+                                            label: `${course.code} - ${course.name}`
+                                        }))
+                                }
                                 notFoundContent={loadingCourses ? 'Đang tìm kiếm...' : 'Không tìm thấy môn học'}
                                 onChange={handleCourseChange}
                                 onSearch={handleSearchCourse}
+                                disabled={loadingCourses}
+                                value={loadingCourses ? '' : undefined}
                             />
                         </Form.Item>
 
