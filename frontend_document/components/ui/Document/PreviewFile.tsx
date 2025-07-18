@@ -404,7 +404,7 @@ export default function PreviewFile({ open, onClose, fileName, documentId }: Pre
 
                             <iframe
                                 src={`${globalConfig.baseUrl}/document/view/${codeView}#toolbar=0&navpanes=0&scrollbar=0`}
-                                className="w-full h-full border-0 rounded-lg"
+                                className="w-full h-full border-0"
                                 style={{ minHeight: '80vh', height: '100%' }}
                                 onLoad={() => setIsIframeLoading(false)}
                                 onError={() => {

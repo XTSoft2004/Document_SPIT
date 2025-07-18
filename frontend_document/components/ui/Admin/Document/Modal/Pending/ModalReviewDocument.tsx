@@ -27,20 +27,16 @@ export default function ModalReviewDocument({
 }: ModalReviewDocumentProps) {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
+    const [loadingInfo, setLoadingInfo] = useState(false);
     const [selectedFolderId, setSelectedFolderId] = useState<IFileInfo | null>(null);
     const [previewKey, setPreviewKey] = useState(0);
     const [currentFolderId, setCurrentFolderId] = useState<string>('');
 
-    const [loadingCourses, setLoadingCourses] = useState(false);
     const [courses, setCourses] = useState<ICourseResponse[]>([]);
-    const handleSearchCourse = async (search: string) => {
-        if (search && search.trim() !== '') {
-            setLoadingCourses(true);
-            const response = await getCourse(search, 1, 20);
-            if (response.ok) {
-                setCourses(response.data);
-            }
-            setLoadingCourses(false);
+    const handleSearchCourse = async (search: string = '') => {
+        const response = await getCourse(search, 1, 20);
+        if (response.ok) {
+            setCourses(response.data);
         }
     }
 
@@ -49,23 +45,23 @@ export default function ModalReviewDocument({
     useEffect(() => {
         const fetchInitialCourse = async () => {
             if (visible && Document) {
-                form.setFieldsValue({
-                    name: Document.name,
-                    courseId: Document.courseId,
-                    folderId: undefined, // Để user phải chọn thư mục
-                });
+                setCourses([]);
+                try {
+                    const initialCourse = await getCourseById(Document.courseId);
+                    if (initialCourse?.data) {
+                        setCourses(pre => [...pre, initialCourse.data]);
+                        const courseFolderId = initialCourse.data.folderId || '';
+                        setCurrentFolderId(courseFolderId);
 
-                const initialCourse = await getCourseById(Document.courseId);
-                setCourses(pre => [...pre, initialCourse.data]);
-
-                const courseFolderId = initialCourse?.data?.folderId || '';
-                setCurrentFolderId(courseFolderId);
-
-                if (courseFolderId) {
-                    setSelectedFolderId({
-                        id: courseFolderId,
-                        name: initialCourse?.data?.name || 'Course Folder'
-                    });
+                        if (courseFolderId) {
+                            setSelectedFolderId({
+                                id: courseFolderId,
+                                name: initialCourse.data.name || 'Thư mục khoá học',
+                            });
+                        }
+                    }
+                } catch (error) {
+                    // handle error if needed
                 }
             } else if (visible) {
                 setCurrentFolderId('');
@@ -74,16 +70,37 @@ export default function ModalReviewDocument({
         };
 
         const fetchCategories = async () => {
-            const response = await getCategory();
-            if (response.ok) {
-                setCategories(response.data);
+            try {
+                const response = await getCategory();
+                if (response.ok) {
+                    setCategories(response.data);
+                }
+            } catch (error) {
+                // handle error if needed
             }
         };
 
-        fetchInitialCourse();
-        fetchCategories();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [visible]);
+        const fetchData = async () => {
+            setLoadingInfo(true);
+            await Promise.all([
+                fetchInitialCourse(),
+                fetchCategories(),
+                handleSearchCourse(''),
+            ]);
+
+            form.setFieldsValue({
+                name: Document?.name,
+                courseId: Document?.courseId,
+                folderId: undefined, // Để user phải chọn thư mục
+            });
+
+            setLoadingInfo(false);
+        };
+
+        if (visible) {
+            fetchData();
+        }
+    }, [visible, Document]);
 
     const handleSubmit = async (statusDocument: string) => {
         try {
@@ -203,7 +220,7 @@ export default function ModalReviewDocument({
                                 { min: 3, message: 'Tên tài liệu phải có ít nhất 3 ký tự' },
                             ]}
                         >
-                            <Input placeholder="Nhập tên tài liệu" size="middle" />
+                            <Input placeholder={loadingInfo ? "Đang tải tên tài liệu..." : "Nhập tên tài liệu"} disabled={loadingInfo} size="middle" />
                         </Form.Item>
 
                         <Form.Item
@@ -213,24 +230,20 @@ export default function ModalReviewDocument({
                         >
                             <Select
                                 showSearch
-                                placeholder={loadingCourses ? "Đang tải môn học..." : "Chọn môn học"}
+                                placeholder={loadingInfo ? "Đang tải môn học..." : "Tìm kiếm và chọn môn học..."}
+                                size="middle"
                                 optionFilterProp="children"
-                                filterOption={(input, option) =>
-                                    (`${option?.label ?? ''}`).toLowerCase().includes(input.toLowerCase())
-                                }
-                                options={
-                                    loadingCourses
-                                        ? [{ value: -1, label: 'Đang tải môn học...' }]
-                                        : courses.map(course => ({
-                                            value: course.id,
-                                            label: `${course.code} - ${course.name}`
-                                        }))
-                                }
-                                notFoundContent={loadingCourses ? 'Đang tìm kiếm...' : 'Không tìm thấy môn học'}
+                                filterOption={false}
+                                loading={loadingInfo}
+                                allowClear
+                                notFoundContent={loadingInfo ? 'Đang tải...' : 'Không tìm thấy môn học'}
+                                options={courses.map(course => ({
+                                    value: course.id,
+                                    label: `${course.code} - ${course.name}`
+                                }))}
                                 onChange={handleCourseChange}
                                 onSearch={handleSearchCourse}
-                                disabled={loadingCourses}
-                                value={loadingCourses ? '' : undefined}
+                                disabled={loadingInfo}
                             />
                         </Form.Item>
 
@@ -242,7 +255,7 @@ export default function ModalReviewDocument({
                             <Select
                                 mode="multiple"
                                 showSearch
-                                placeholder="Chọn loại danh mục"
+                                placeholder={loadingInfo ? "Đang tải danh mục..." : "Chọn loại danh mục"}
                                 optionFilterProp="children"
                                 filterOption={(input, option) =>
                                     (`${option?.label ?? ''}`).toLowerCase().includes(input.toLowerCase())
@@ -258,7 +271,7 @@ export default function ModalReviewDocument({
                                         )
                                     }))
                                 }
-                                notFoundContent={'Không tìm thấy loại danh mục'}
+                                notFoundContent={loadingInfo ? 'Đang tải...' : 'Không tìm thấy loại danh mục'}
                                 className="custom-multi-select"
                                 maxTagCount="responsive"
                                 maxTagPlaceholder={omittedValues => `+${omittedValues.length} loại`}
@@ -276,6 +289,7 @@ export default function ModalReviewDocument({
                                     </div>
                                 )}
                                 style={{ width: '100%' }}
+                                disabled={loadingInfo}
                             />
                         </Form.Item>
 
@@ -292,35 +306,37 @@ export default function ModalReviewDocument({
                     </Form>
                 </div>
 
-                <div className="w-full lg:w-[320px] border-t lg:border-t-0 lg:border-l border-gray-200 pt-3 lg:pt-0 lg:pl-4 mt-3 lg:mt-0">
-                    {Document ? (
-                        <div className="h-[300px] lg:h-[400px]">
-                            <PreviewPanel
-                                key={`preview-${Document.id}-${previewKey}`}
-                                selectedItem={Document}
-                                onClose={() => { }}
-                                className="ml-0 h-full"
-                                showCloseButton={false}
-                            />
-                        </div>
-                    ) : (
-                        <div className="h-[300px] lg:h-[400px] flex items-center justify-center bg-gray-50 rounded-md">
-                            <div className="text-center p-4">
-                                <div className="w-12 h-12 mx-auto mb-3 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl flex items-center justify-center">
-                                    <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                    </svg>
-                                </div>
-                                <h3 className="text-sm font-semibold text-gray-700 mb-1">
-                                    Xem trước tài liệu
-                                </h3>
-                                <p className="text-xs text-gray-500">
-                                    Chọn tài liệu để xem trước
-                                </p>
+                <div className="w-[350px] border-l border-gray-200 pl-4">
+                    <div className="h-full">
+                        {Document ? (
+                            <div className="h-full">
+                                <PreviewPanel
+                                    key={`preview-${Document.id}-${previewKey}`}
+                                    selectedItem={Document}
+                                    onClose={() => { }}
+                                    className="ml-0 h-full"
+                                    showCloseButton={false}
+                                />
                             </div>
-                        </div>
-                    )}
+                        ) : (
+                            <div className="h-full flex items-center justify-center bg-gray-50 rounded-lg">
+                                <div className="text-center p-4">
+                                    <div className="w-12 h-12 mx-auto mb-3 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl flex items-center justify-center">
+                                        <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                    </div>
+                                    <h3 className="text-base font-semibold text-gray-700 mb-1">
+                                        Xem trước tài liệu
+                                    </h3>
+                                    <p className="text-xs text-gray-500">
+                                        Chọn tài liệu để xem trước
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </Modal>

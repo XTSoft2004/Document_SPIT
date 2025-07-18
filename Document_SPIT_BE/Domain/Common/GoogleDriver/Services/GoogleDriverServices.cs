@@ -172,16 +172,6 @@ namespace Domain.Common.GoogleDriver.Services
             }
             return false;
         }
-        public async Task<bool> DeleteFile(string fileId)
-        {
-            await GetAccessToken();
-            var response = await _request.DeleteAsync($"https://www.googleapis.com/drive/v3/files/{fileId}");
-            if (response.IsSuccessStatusCode)
-            {
-                return true;
-            }
-            return false;
-        }
         public async Task<string> GetAccessToken()
         {
             TokenInfoGoogleResponse InfoToken = await GetInfoToken(TokenDriverStore.Access_Token);
@@ -315,6 +305,16 @@ namespace Domain.Common.GoogleDriver.Services
 
             return HttpResponse.Error("Lỗi khi tạo thư mục trong Google Drive.");
         }
+        public async Task<HttpResponse> DeleteFile(string fileId)
+        {
+            await GetAccessToken();
+            var response = await _request.DeleteAsync($"https://www.googleapis.com/drive/v3/files/{fileId}?supportsAllDrives=true");
+            if (response.IsSuccessStatusCode)
+            {
+                return HttpResponse.OK(message: "Xoá file thành công.");
+            }
+            return HttpResponse.Error("Lỗi khi xoá file trong Google Drive.");
+        }
         public async Task<InfoGoogleDriverResponse?> GetInfoGoogleDriver()
         {
             await GetAccessToken();
@@ -358,34 +358,47 @@ namespace Domain.Common.GoogleDriver.Services
                 var items = JsonConvert.DeserializeObject<List<DriveFileItem>>(content["files"]?.ToString() ?? "[]");
                 if (items != null)
                 {
-                    var documents = _document.All().ToList();
-                    var itemIndexExists = items
-                        .Where(w => documents.Select(s => s.FileId)
-                        .Contains(w.Id))
-                        .Select((s, index) => index)
-                        .ToList();
+                    var documentDict = _document.All()
+                        .Select(s => new
+                        {
+                            s.FileId,
+                            s.Name,
+                        }).ToList(); // Map FileId -> Name
 
-                    foreach(var index in itemIndexExists)
+                    var itemIndexExists = items
+                       .Select((item, index) => new { item, index })
+                       .Where(x => documentDict.Select(s => s.FileId).Contains(x.item.Id))
+                       .Select(x => new
+                       {
+                           Id = x.item.Id,
+                           Index = x.index
+                       })
+                       .ToList();
+
+                    for (int i = itemIndexExists.Count - 1; i >= 0; i--)
                     {
+                        var match = itemIndexExists[i];
+                        var index = match.Index;
                         var item = items[index];
                         var document = _document.Find(d => d.FileId == item.Id);
-                        if(document.IsPrivate == true)
-                        {
-                            items.RemoveAt(index);
-                            continue;
-                        }
 
                         if (document != null)
                         {
-                            string? typeFile = item.Name.Split('.')[item.Name.Split('.').Length - 1];
+                            if (document.IsPrivate == true)
+                            {
+                                items.RemoveAt(index);
+                                continue;
+                            }
+
+                            string? typeFile = Path.GetExtension(item.Name)?.TrimStart('.');
                             item.DocumentId = document.Id;
                             item.Name = $"{document.Name}.{typeFile}";
+
                             var detailDocument = _detailDocument.Find(dd => dd.Id == document.DetaiDocumentId);
                             if (detailDocument != null)
                             {
                                 item.TotalViews = detailDocument.TotalView;
                                 item.TotalDownloads = detailDocument.TotalDownload;
-                                item.DocumentId = document.Id;
                             }
                         }
                     }

@@ -320,6 +320,9 @@ namespace Domain.Services
             _document.Delete(document);
             await UnitOfWork.CommitAsync();
 
+            string FOLDER_RECYCLE = Environment.GetEnvironmentVariable("FOLDER_RECYCLE");
+            await _googleDriverServices.CutFile(document.FileId, FOLDER_RECYCLE, document.FolderId);
+
             // Cập nhật lịch sử của tài liệu
             var history = new UserHistoryResponse
             {
@@ -379,6 +382,7 @@ namespace Domain.Services
         {
             var query = _document!.All()
                 .Include(d => d.User)
+                .Include(d => d.DocumentCategories)
                 .Include(d => d.Course)
                 .AsQueryable();
 
@@ -440,7 +444,7 @@ namespace Domain.Services
                     FolderId = s.FolderId,
                     CourseId = s.CourseId,
                     CourseName = s.Course != null ? s.Course.Name : string.Empty,
-                    CategoryIds = _documentCategory.ListBy(l => l.DocumentId == s.Id).Select(s => s.Id).ToList(),
+                    CategoryIds = s.DocumentCategories.Select(s => s.CategoryId).ToList(),
                     CreatedDate = s.CreatedDate,
                     ModifiedDate = s.ModifiedDate
                 }).ToList();
@@ -491,7 +495,7 @@ namespace Domain.Services
             }
             // Lấy thông tin tài liệu từ FileId
             var document = _document.Find(f => f.FileId == oneTimeToken.FileId);
-            if (document == null)
+            if (document == null || document.IsPrivate == true)
                 return null;
             // Xoá token sau khi sử dụng
             //_oneTimeToken.Delete(oneTimeToken);
