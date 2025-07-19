@@ -3,12 +3,14 @@ import { Eye, FileText, Image as ImageIcon, Smartphone } from "lucide-react";
 import Image from "next/image";
 
 interface FilePreviewDashboardProps {
+    isHeader?: boolean;
+    isFooter?: boolean;
     src: string | null;
     type: "image" | "pdf" | "unsupported" | null;
     isMobile: boolean;
 }
 
-const FilePreviewDashboard: React.FC<FilePreviewDashboardProps> = ({ src, type, isMobile }) => {
+const FilePreviewDashboard: React.FC<FilePreviewDashboardProps> = ({ isHeader = false, isFooter = false, src, type, isMobile }) => {
 
     const [imageLoading, setImageLoading] = useState(true);
     const [imageError, setImageError] = useState(false);
@@ -29,28 +31,32 @@ const FilePreviewDashboard: React.FC<FilePreviewDashboardProps> = ({ src, type, 
     }
 
     return (
-        <div className="w-full h-full border border-gray-200 dark:border-gray-700 rounded-2xl bg-white dark:bg-gray-800 shadow-lg overflow-hidden transition-all duration-200 hover:shadow-xl flex flex-col">
+        <div className="w-full h-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg overflow-hidden transition-all duration-200 hover:shadow-xl flex flex-col">
             {/* Header PreviewPanel */}
-            <div className="px-6 py-4 bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-gray-700 dark:to-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center gap-3">
-                <div className="p-2 bg-white dark:bg-gray-900 rounded-xl shadow flex items-center">
-                    {type === "image" ? (
-                        <ImageIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                    ) : (
-                        <FileText className="w-5 h-5 text-red-600 dark:text-red-400" />
+
+            {isHeader &&
+                (<div className="px-6 py-4 bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-gray-700 dark:to-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center gap-3">
+                    <div className="p-2 bg-white dark:bg-gray-900 rounded-xl shadow flex items-center">
+                        {type === "image" ? (
+                            <ImageIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                        ) : (
+                            <FileText className="w-5 h-5 text-red-600 dark:text-red-400" />
+                        )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Eye className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                        <span className="text-base font-bold text-gray-700 dark:text-gray-200">PreviewPanel</span>
+                    </div>
+                    <div className="flex-1"></div>
+                    {type === "pdf" && (
+                        <span className="px-3 py-1 text-xs font-semibold bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-full">PDF</span>
                     )}
-                </div>
-                <div className="flex items-center gap-2">
-                    <Eye className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                    <span className="text-base font-bold text-gray-700 dark:text-gray-200">PreviewPanel</span>
-                </div>
-                <div className="flex-1"></div>
-                {type === "pdf" && (
-                    <span className="px-3 py-1 text-xs font-semibold bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-full">PDF</span>
-                )}
-                {type === "image" && (
-                    <span className="px-3 py-1 text-xs font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full">Hình ảnh</span>
-                )}
-            </div>
+                    {type === "image" && (
+                        <span className="px-3 py-1 text-xs font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full">Hình ảnh</span>
+                    )}
+                </div>)
+            }
+
 
             {/* Content PreviewPanel */}
             <div className="flex-1 flex items-center justify-center p-4 min-h-[250px]">
@@ -139,7 +145,7 @@ const FilePreviewDashboard: React.FC<FilePreviewDashboardProps> = ({ src, type, 
             </div>
 
             {/* Footer PreviewPanel */}
-            <div className="px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-600">
+            {isFooter && (<div className="px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-600">
                 <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                     <span className="flex items-center gap-2">
                         <div className={`w-2 h-2 rounded-full animate-pulse ${type === 'image' ? 'bg-blue-500' : type === 'pdf' ? 'bg-red-500' : 'bg-gray-400'}`}></div>
@@ -149,7 +155,8 @@ const FilePreviewDashboard: React.FC<FilePreviewDashboardProps> = ({ src, type, 
                         <span className="font-medium text-blue-500 dark:text-blue-400">Nhấp để phóng to</span>
                     )}
                 </div>
-            </div>
+            </div>)
+            }
         </div>
     );
 };
