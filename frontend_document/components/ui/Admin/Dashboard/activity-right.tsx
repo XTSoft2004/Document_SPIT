@@ -69,7 +69,7 @@ export default function ActivityRight() {
     useEffect(() => {
         const fetchActivity = async () => {
             try {
-                const response = await getHistory();
+                const response = await getHistory('', 1, 10, false, false);
                 setActivity(response.data);
             } catch (error) {
                 console.error("Failed to fetch activity:", error);

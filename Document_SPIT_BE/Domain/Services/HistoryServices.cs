@@ -1,4 +1,5 @@
 ﻿using Domain.Base.Services;
+using Domain.Common;
 using Domain.Common.Http;
 using Domain.Entities;
 using Domain.Interfaces.Repositories;
@@ -83,11 +84,37 @@ namespace Domain.Services
             return HttpResponse.OK(message: "Xoá lịch sử thành công!");
         }
 
-        public async Task<HttpResponse> GetHistory(int sizePage = 10)
+        public List<HistoryResponse> GetHistory(string search, int pageNumber, int pageSize, out int totalRecords, bool isLogin = false, bool isActivity = false)
         {
-            var histories = _history.All()
-                .OrderByDescending(h => h.CreatedDate)
-                .Take(sizePage)
+            var query = _history.All()
+                .AsQueryable();
+
+            if (isLogin)
+                query = query.Where(s => s.function_status == Function_Enum.Login || s.function_status == Function_Enum.Logout);
+
+            if (isActivity)
+                query = query.Where(s => s.function_status != Function_Enum.Login && s.function_status != Function_Enum.Logout);
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                string searchLower = search.ToLower();
+                query = query.Where(s =>
+                    (s.Title != null && s.Title.ToLower().Contains(searchLower)) ||
+                    (s.Description != null && s.Description.ToLower().Contains(searchLower)) ||
+                    (s.UserId != null && s.User.Fullname.ToLower().Contains(searchLower)) ||
+                    (s.function_status.HasValue && s.function_status.ToString().ToLower().Contains(searchLower))
+                );
+            }
+
+            totalRecords = query.Count();
+
+            var pagedQuery = query
+                    .OrderByDescending(s => s.CreatedDate)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize);
+
+            var histories = pagedQuery
+                .AsEnumerable()
                 .Select(s => new HistoryResponse()
                 {
                     Id = s.Id,
@@ -100,10 +127,12 @@ namespace Domain.Services
                 })
                 .ToList();
 
-            foreach (var item in histories)
-                item.Fullname = _user.Find(u => u.Id == item.UserId).Fullname;
+            var users = _user.All().ToList();
 
-            return HttpResponse.OK(histories, "Lấy lịch sử thành công!");
+            foreach (var item in histories)
+                item.Fullname = users.FirstOrDefault(u => u.Id == item.UserId)?.Fullname ?? string.Empty;
+
+            return histories;
         }
     }
 }

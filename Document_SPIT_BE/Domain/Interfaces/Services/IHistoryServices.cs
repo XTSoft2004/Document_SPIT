@@ -1,5 +1,6 @@
 ﻿using Domain.Common.Http;
 using Domain.Model.Request.History;
+using Domain.Model.Response.History;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,10 +31,15 @@ namespace Domain.Interfaces.Services
         /// <returns></returns>
         Task<HttpResponse> DeleteAsync(long historyId);
         /// <summary>
-        /// Lấy danh sách lịch sử, lấy 10 lịch sử gần nhất
+        /// 
         /// </summary>
-        /// <param name="sizePage"></param>
+        /// <param name="search"></param>
+        /// <param name="pageNumber"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="totalRecords"></param>
+        /// <param name="isLogin"></param>
+        /// <param name="isActivity"></param>
         /// <returns></returns>
-        Task<HttpResponse> GetHistory(int sizePage = 10);
+        List<HistoryResponse> GetHistory(string search, int pageNumber, int pageSize, out int totalRecords, bool isLogin = false, bool isActivity = false);
     }
 }

@@ -1,4 +1,5 @@
-﻿using Domain.Interfaces.Services;
+﻿using Domain.Common.Http;
+using Domain.Interfaces.Services;
 using Domain.Model.Request.Report;
 using Domain.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -17,14 +18,17 @@ namespace Document_SPIT_BE.Controllers
             _historyServices = historyServices;
         }
 
-        [HttpGet("{sizePage}")]
-        public async Task<IActionResult> GetHistory(int sizePage = 10)
+        [HttpGet]
+        public async Task<IActionResult> GetHistory(string search = "", int pageNumber = -1, int pageSize = -1, bool isLogin = false, bool isActivity = false)
         {
             if (!ModelState.IsValid)
                 return BadRequest(DefaultString.INVALID_MODEL);
 
-            var repsonse = await _historyServices.GetHistory(sizePage);
-            return repsonse.ToActionResult();
+            var response = _historyServices.GetHistory(search, pageNumber, pageSize, out int totalRecords, isLogin, isActivity);
+            
+            var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+
+            return Ok(ResponseArray.ResponseList(response, totalRecords, totalPages, pageNumber, pageSize));
         }
     }
 }

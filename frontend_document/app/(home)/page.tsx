@@ -20,7 +20,6 @@ export default function PageHome() {
       if (response.ok) {
         setDoc(response.data);
       }
-      // Thêm delay nhỏ để animation mượt hơn
       setTimeout(() => {
         setIsLoading(false);
       }, 300);
@@ -105,13 +104,12 @@ export default function PageHome() {
                     </div>
 
                     {/* Document Preview - Responsive */}
-                    <div className="space-y-2">
+                    <div className="space-y-2 min-h-[132px] sm:min-h-[156px]">
                       {isLoading ? (
-                        // Loading skeleton với animation
                         [...Array(3)].map((_, index) => (
                           <div
                             key={index}
-                            className={`flex items-center gap-2 sm:gap-3 p-2 bg-gray-100 rounded-lg sm:rounded-xl transform translate-y-4 opacity-0 animate-slide-up`}
+                            className={`flex items-center gap-2 sm:gap-3 p-2 bg-gray-100 rounded-lg sm:rounded-xl transform translate-y-4 opacity-0 animate-slide-up h-10 sm:h-12`}
                             style={{
                               animationDelay: `${index * 100}ms`,
                               animationFillMode: 'forwards'
@@ -124,43 +122,58 @@ export default function PageHome() {
                             </div>
                           </div>
                         ))
-                      ) : (
-                        // Dữ liệu thực với animation
-                        doc.slice(0, 3).map((item, index) => (
-                          <div
-                            key={item.id}
-                            className={`flex items-center gap-2 sm:gap-3 p-2 bg-gray-50 rounded-lg sm:rounded-xl hover:bg-blue-50 transition-all duration-500 group cursor-pointer transform translate-y-4 opacity-0 animate-slide-up`}
-                            style={{
-                              animationDelay: `${index * 200}ms`,
-                              animationFillMode: 'forwards'
-                            }}
-                            onClick={() => router.push('/document')}
-                          >
-                            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-md sm:rounded-lg flex items-center justify-center flex-shrink-0">
-                              <svg className="w-3 h-3 sm:w-4 sm:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                              </svg>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="text-xs sm:text-sm font-semibold text-gray-900 truncate">{item.name}</div>
-                              <div className="text-xs text-gray-500 hidden sm:block">
-                                Cập nhật lúc:
-                                <span className="ml-1">{new Date(item.modifiedDate).toLocaleString('vi-VN', {
-                                  day: '2-digit',
-                                  month: '2-digit',
-                                  year: 'numeric',
-                                  hour: '2-digit',
-                                  minute: '2-digit',
-                                  hour12: false
-                                })}</span>
-                              </div>
-                              <div className="text-xs text-gray-500 sm:hidden">
-                                {new Date(item.modifiedDate).toLocaleDateString('vi-VN')}
-                              </div>
-                            </div>
-                            <div className="w-2 h-2 bg-green-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      ) : doc.length === 0 ? (
+                        <div className="flex items-center justify-center h-32 sm:h-36">
+                          <div className="text-center transform translate-y-4 opacity-0 animate-slide-up" style={{ animationDelay: '100ms', animationFillMode: 'forwards' }}>
+                            <svg className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <p className="text-xs sm:text-sm text-gray-500">Không có tài liệu nào được cập nhật</p>
                           </div>
-                        ))
+                        </div>
+                      ) : (
+                        <>
+                          {doc.slice(0, 3).map((item, index) => (
+                            <div
+                              key={item.id}
+                              className={`flex items-center gap-2 sm:gap-3 p-2 bg-gray-50 rounded-lg sm:rounded-xl hover:bg-blue-50 transition-all duration-500 group cursor-pointer transform translate-y-4 opacity-0 animate-slide-up h-10 sm:h-12`}
+                              style={{
+                                animationDelay: `${index * 200}ms`,
+                                animationFillMode: 'forwards'
+                              }}
+                              onClick={() => router.push('/document')}
+                            >
+                              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-md sm:rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg className="w-3 h-3 sm:w-4 sm:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="text-xs sm:text-sm font-semibold text-gray-900 truncate">{item.name}</div>
+                                <div className="text-xs text-gray-500 hidden sm:block">
+                                  Cập nhật lúc:
+                                  <span className="ml-1">{new Date(item.modifiedDate).toLocaleString('vi-VN', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    hour12: false
+                                  })}</span>
+                                </div>
+                                <div className="text-xs text-gray-500 sm:hidden">
+                                  {new Date(item.modifiedDate).toLocaleDateString('vi-VN')}
+                                </div>
+                              </div>
+                              <div className="w-2 h-2 bg-green-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            </div>
+                          ))}
+                          {doc.length < 3 && (
+                            [...Array(3 - doc.length)].map((_, index) => (
+                              <div key={`placeholder-${index}`} className="h-10 sm:h-12"></div>
+                            ))
+                          )}
+                        </>
                       )}
                     </div>
                   </div>
