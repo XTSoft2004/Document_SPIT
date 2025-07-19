@@ -314,7 +314,7 @@ namespace Domain.Services
                 UserId = userMeToken.Id ?? -1
             });
 
-            return HttpResponse.OK(message: "Cập nh ật tài liệu thành công.");
+            return HttpResponse.OK(message: "Cập nhật tài liệu thành công.");
         }
         // Xoá tài liệu theo IdDocument
         public async Task<HttpResponse> DeleteAsync(long IdDocument)

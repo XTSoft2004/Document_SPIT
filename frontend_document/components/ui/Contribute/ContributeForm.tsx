@@ -5,6 +5,8 @@ import { ICourseResponse } from '@/types/course';
 import CourseSelector from './CourseSelector';
 import FileUploader from './FileUploader';
 import FormActions from './FormActions';
+import ImagePreviewModal from './ImagePreviewModal';
+import { convertImagesToPDF, ImageFile } from '@/utils/pdfUtils';
 import {
     ContributeFormData,
     createEmptyFormData,
@@ -15,7 +17,9 @@ import NotificationService from '../Notification/NotificationService';
 
 export default function ContributeForm() {
     const [formData, setFormData] = useState<ContributeFormData>(createEmptyFormData());
+    const [images, setImages] = useState<ImageFile[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showPreviewModal, setShowPreviewModal] = useState(false);
 
     const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData(prev => ({ ...prev, name: e.target.value }));
@@ -33,28 +37,68 @@ export default function ContributeForm() {
         setFormData(prev => ({ ...prev, file }));
     };
 
+    const handleImagesChange = (newImages: ImageFile[]) => {
+        setImages(newImages);
+        if (newImages.length > 1) {
+            setShowPreviewModal(true);
+        }
+    };
+
+    const handlePreviewSave = (reorderedImages: ImageFile[]) => {
+        setImages(reorderedImages);
+    };
+
     const handleCancel = () => {
         setFormData(createEmptyFormData());
+        setImages([]);
+        setShowPreviewModal(false);
     };
 
     const handleSubmit = async () => {
         setIsSubmitting(true);
 
         try {
-            await uploadDocument(formData);
+            let fileToUpload = formData.file;
 
-            NotificationService.success({ message: 'Tài liệu đã được gửi thành công!', description: 'Chúng tôi sẽ xem xét và phê duyệt trong thời gian sớm nhất.' });
+            if (images.length > 1 && !formData.file) {
+                NotificationService.info({ 
+                    message: 'Đang chuyển đổi ảnh thành PDF...', 
+                    description: 'Vui lòng đợi trong giây lát.' 
+                });
+
+                fileToUpload = await convertImagesToPDF(images, formData.name);
+            }
+
+            if (!fileToUpload) {
+                throw new Error('Vui lòng chọn file hoặc ảnh để upload');
+            }
+
+            const uploadFormData = {
+                ...formData,
+                file: fileToUpload
+            };
+
+            await uploadDocument(uploadFormData);
+
+            NotificationService.success({ 
+                message: 'Tài liệu đã được gửi thành công!', 
+                description: 'Chúng tôi sẽ xem xét và phê duyệt trong thời gian sớm nhất.' 
+            });
 
             setFormData(createEmptyFormData());
+            setImages([]);
         } catch (error) {
             const errorMessage = (error instanceof Error && error.message) ? error.message : 'Đã xảy ra lỗi';
-            NotificationService.error({ message: errorMessage, description: 'Vui lòng thử lại sau.' });
+            NotificationService.error({ 
+                message: errorMessage, 
+                description: 'Vui lòng thử lại sau.' 
+            });
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    const isFormValid = validateForm(formData);
+    const isFormValid = validateForm(formData) || (images.length > 0 && formData.name.trim() !== '' && formData.courseId > 0);
 
     return (
         <div className="bg-white rounded-lg sm:rounded-xl lg:rounded-2xl shadow-lg border border-gray-200 p-4 sm:p-6 lg:p-8">
@@ -102,8 +146,27 @@ export default function ContributeForm() {
                 <div className="w-full">
                     <FileUploader
                         file={formData.file}
+                        images={images}
                         onFileChange={handleFileChange}
+                        onImagesChange={handleImagesChange}
                     />
+                    
+                    {/* Preview Button chỉ hiện khi có nhiều ảnh */}
+                    {images.length > 1 && (
+                        <div className="mt-4">
+                            <button
+                                type="button"
+                                onClick={() => setShowPreviewModal(true)}
+                                className="w-full px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium flex items-center justify-center space-x-2"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                <span>Preview & Sắp xếp ảnh ({images.length})</span>
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 {/* Form Actions with responsive wrapper */}
@@ -117,35 +180,14 @@ export default function ContributeForm() {
                 </div>
             </form>
 
-            {/* Guidelines with responsive design */}
-            <div className="mt-6 sm:mt-8 p-4 sm:p-6 bg-blue-50 rounded-lg border border-blue-200">
-                <h3 className="font-semibold text-blue-900 mb-2 sm:mb-3 text-sm sm:text-base">
-                    <span className="hidden sm:inline">Hướng dẫn đóng góp</span>
-                    <span className="sm:hidden">Hướng dẫn</span>
-                </h3>
-                <ul className="text-xs sm:text-sm text-blue-800 space-y-1 sm:space-y-2">
-                    <li className="flex items-start">
-                        <span className="text-blue-600 mr-2 flex-shrink-0">•</span>
-                        <span className="hidden sm:inline">Tài liệu phải có nội dung phù hợp với môn học được chọn</span>
-                        <span className="sm:hidden">Nội dung phù hợp với môn học</span>
-                    </li>
-                    <li className="flex items-start">
-                        <span className="text-blue-600 mr-2 flex-shrink-0">•</span>
-                        <span className="hidden sm:inline">Không đăng tải tài liệu có bản quyền mà không có sự cho phép</span>
-                        <span className="sm:hidden">Không vi phạm bản quyền</span>
-                    </li>
-                    <li className="flex items-start">
-                        <span className="text-blue-600 mr-2 flex-shrink-0">•</span>
-                        <span className="hidden sm:inline">Tên tài liệu nên mô tả rõ ràng nội dung</span>
-                        <span className="sm:hidden">Tên tài liệu mô tả rõ ràng</span>
-                    </li>
-                    <li className="flex items-start">
-                        <span className="text-blue-600 mr-2 flex-shrink-0">•</span>
-                        <span className="hidden sm:inline">Tài liệu sẽ được kiểm duyệt trước khi công khai</span>
-                        <span className="sm:hidden">Sẽ được kiểm duyệt trước</span>
-                    </li>
-                </ul>
-            </div>
+            {/* Image Preview Modal */}
+            <ImagePreviewModal
+                isOpen={showPreviewModal}
+                images={images}
+                documentName={formData.name}
+                onClose={() => setShowPreviewModal(false)}
+                onSave={handlePreviewSave}
+            />
         </div>
     );
 }

@@ -141,7 +141,6 @@ export default function PageHome() {
                                 animationDelay: `${index * 200}ms`,
                                 animationFillMode: 'forwards'
                               }}
-                              onClick={() => router.push('/document')}
                             >
                               <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-md sm:rounded-lg flex items-center justify-center flex-shrink-0">
                                 <svg className="w-3 h-3 sm:w-4 sm:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
