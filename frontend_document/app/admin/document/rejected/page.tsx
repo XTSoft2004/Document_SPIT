@@ -119,7 +119,7 @@ export default function DocumentRejectedPage() {
     };
 
     const columns: TableColumnType<IDocumentResponse>[] = [
-        ...getFilteredColumnsTableDocument(['name', 'statusDocument', 'fullNameUser', 'courseName', 'isPrivate']),
+        ...getFilteredColumnsTableDocument(),
         {
             title: 'Thao tác',
             key: 'actions',
@@ -178,6 +178,7 @@ export default function DocumentRejectedPage() {
                     <DataGrid<IDocumentResponse>
                         nameTable="document_rejected"
                         columns={columns}
+                        defaultColumns={['name', 'statusDocument', 'fullNameUser', 'courseName', 'isPrivate', 'actions']}
                         rowKey="id"
                         singleSelect={true}
                         fetcher={async (search: string, page: number, limit: number) => {

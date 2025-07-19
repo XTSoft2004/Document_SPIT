@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Button, Pagination, Table, Dropdown, Checkbox } from 'antd';
 import type { TableColumnsType, TableProps, MenuProps } from 'antd';
 import useSWR from 'swr';
@@ -21,10 +21,6 @@ type DataGridProps<T> = {
     onSelectionChange?: (selected: T | null) => void;
     enableColumnFilter?: boolean; // Tùy chọn bật/tắt column filter
     defaultColumns?: string[]; // Danh sách các cột hiển thị mặc định (nếu không có sẽ hiển thị tất cả)
-    columnFilterConfig?: {
-        saveToLocalStorage?: boolean; // Lưu cấu hình vào localStorage
-        storageKey?: string; // Key để lưu trong localStorage
-    };
 };
 
 const DataGrid = <T extends object>({
@@ -38,99 +34,50 @@ const DataGrid = <T extends object>({
     onSelectionChange,
     enableColumnFilter = true,
     defaultColumns = [],
-    columnFilterConfig,
 }: DataGridProps<T>) => {
+    // Basic states
     const [pageIndex, setPageIndex] = useState(1);
     const [pageSize, setPageSize] = useState(6);
     const [searchText, setSearchText] = useState('');
     const [selectedKey, setSelectedKey] = useState<React.Key | null>(null);
-    const [selectedItem, setSelectedItem] = useState<T | null>(null);
 
     // Column filter states
     const [hiddenColumns, setHiddenColumns] = useState<Set<string>>(new Set());
-    const [availableColumns, setAvailableColumns] = useState<{ key: string, title: string }[]>([]);
 
-    // Generate storage key for localStorage
-    const storageKey = columnFilterConfig?.storageKey || `dataGrid_${nameTable}_hiddenColumns`;
-
-    // Load hidden columns from localStorage or use default
-    const loadHiddenColumns = (): Set<string> => {
-        if (columnFilterConfig?.saveToLocalStorage && typeof window !== 'undefined') {
-            try {
-                const saved = localStorage.getItem(storageKey);
-                if (saved) {
-                    const savedArray = JSON.parse(saved) as string[];
-                    return new Set(savedArray);
-                }
-            } catch (error) {
-                console.warn('Failed to load hidden columns from localStorage:', error);
-            }
-        }
-        return new Set();
-    };
-
-    // Save hidden columns to localStorage
-    const saveHiddenColumns = (hiddenCols: Set<string>) => {
-        if (columnFilterConfig?.saveToLocalStorage && typeof window !== 'undefined') {
-            try {
-                localStorage.setItem(storageKey, JSON.stringify(Array.from(hiddenCols)));
-            } catch (error) {
-                console.warn('Failed to save hidden columns to localStorage:', error);
-            }
-        }
-    };
-
-    // Initialize available columns và load hidden columns
-    useEffect(() => {
-        const cols = columns
-            .filter(col => col.key && col.title) // Chỉ lấy các column có key và title
+    const availableColumns = useMemo(() =>
+        columns
+            .filter(col => col.key && col.title)
             .map(col => ({
                 key: col.key as string,
                 title: typeof col.title === 'string' ? col.title : col.key as string
-            }));
-        setAvailableColumns(cols);
+            })),
+        [columns]
+    );
 
-        // Load hidden columns after columns are available
-        const loadInitialHiddenColumns = (): Set<string> => {
-            if (columnFilterConfig?.saveToLocalStorage && typeof window !== 'undefined') {
-                try {
-                    const saved = localStorage.getItem(storageKey);
-                    if (saved) {
-                        const savedArray = JSON.parse(saved) as string[];
-                        return new Set(savedArray);
-                    }
-                } catch (error) {
-                    console.warn('Failed to load hidden columns from localStorage:', error);
-                }
-            }
+    // Initialize hidden columns với defaultColumns
+    useEffect(() => {
+        if (defaultColumns.length > 0) {
+            const defaultHidden = new Set(
+                availableColumns.filter(col => !defaultColumns.includes(col.key)).map(col => col.key)
+            );
+            setHiddenColumns(defaultHidden);
+        }
+    }, [defaultColumns, availableColumns]);
 
-            // Nếu có defaultColumns, ẩn các cột không có trong defaultColumns
-            if (defaultColumns.length > 0) {
-                const allColumnKeys = cols.map(col => col.key);
-                const hiddenKeys = allColumnKeys.filter(key => !defaultColumns.includes(key));
-                return new Set(hiddenKeys);
-            }
-
-            return new Set();
-        };
-
-        const initialHiddenColumns = loadInitialHiddenColumns();
-        setHiddenColumns(initialHiddenColumns);
-    }, [columns, storageKey, defaultColumns, columnFilterConfig?.saveToLocalStorage]);
-
-    // Không cần internalReloadFlag để có thể mutate trực tiếp với key đơn giản
-
-    const columnsWithSTT: TableColumnsType<T> = [
-        {
-            title: 'STT',
-            dataIndex: 'stt',
-            key: 'stt',
-            width: 50,
-            align: 'center',
-            render: (_: any, __: T, index: number) => (pageIndex - 1) * pageSize + index + 1,
-        },
-        ...columns.filter(col => !hiddenColumns.has(col.key as string)), // Filter out hidden columns
-    ];
+    // Memoized filtered columns
+    const columnsWithSTT = useMemo((): TableColumnsType<T> => {
+        return [
+            {
+                title: 'STT',
+                dataIndex: 'stt',
+                key: 'stt',
+                width: 50,
+                align: 'center',
+                render: (_: any, __: T, index: number) => (pageIndex - 1) * pageSize + index + 1,
+            },
+            ...columns.filter(col => !hiddenColumns.has(col.key as string)),
+        ];
+    }, [columns, hiddenColumns, pageIndex, pageSize]);
     const { data, isLoading, mutate: mutateSWR } = useSWR<IIndexResponse<T>>(
         [nameTable, searchText, pageIndex, pageSize] as const,
         async (args: readonly [string | undefined, string, number, number]) => {
@@ -167,21 +114,21 @@ const DataGrid = <T extends object>({
         };
     }, [nameTable, mutateSWR]);
 
-    const handleSearch = (value: string) => {
+    // Event handlers
+    const handleSearch = useCallback((value: string) => {
         setSearchText(value);
         setPageIndex(1);
-    };
+    }, []);
 
-    const handleRowClick = (record: T) => {
+    const handleRowClick = useCallback((record: T) => {
         if (!singleSelect) return;
         const key = record[rowKey] as React.Key;
         setSelectedKey(key);
-        setSelectedItem(record);
         onSelectionChange?.(record);
-    };
+    }, [singleSelect, rowKey, onSelectionChange]);
 
-    // Column filter functions
-    const handleColumnToggle = (columnKey: string) => {
+    // Column filter handlers
+    const handleColumnToggle = useCallback((columnKey: string) => {
         const newHiddenColumns = new Set(hiddenColumns);
         if (newHiddenColumns.has(columnKey)) {
             newHiddenColumns.delete(columnKey);
@@ -189,39 +136,27 @@ const DataGrid = <T extends object>({
             newHiddenColumns.add(columnKey);
         }
         setHiddenColumns(newHiddenColumns);
-        saveHiddenColumns(newHiddenColumns);
-    };
+    }, [hiddenColumns]);
 
-    const handleShowAllColumns = () => {
+    const handleShowAllColumns = useCallback(() => {
         const newHiddenColumns = new Set<string>();
         setHiddenColumns(newHiddenColumns);
-        saveHiddenColumns(newHiddenColumns);
-    };
+    }, []);
 
-    const handleHideAllColumns = () => {
+    const handleHideAllColumns = useCallback(() => {
         const allColumnKeys = new Set(availableColumns.map(col => col.key));
         setHiddenColumns(allColumnKeys);
-        saveHiddenColumns(allColumnKeys);
-    };
+    }, [availableColumns]);
 
-    const handleResetToDefault = () => {
-        // Nếu có defaultColumns, ẩn các cột không có trong defaultColumns
-        if (defaultColumns.length > 0) {
-            const allColumnKeys = availableColumns.map(col => col.key);
-            const hiddenKeys = allColumnKeys.filter(key => !defaultColumns.includes(key));
-            const defaultHidden = new Set(hiddenKeys);
-            setHiddenColumns(defaultHidden);
-            saveHiddenColumns(defaultHidden);
-        } else {
-            // Nếu không có defaultColumns, hiển thị tất cả
-            const defaultHidden = new Set<string>();
-            setHiddenColumns(defaultHidden);
-            saveHiddenColumns(defaultHidden);
-        }
-    };
+    const handleResetToDefault = useCallback(() => {
+        const defaultHidden = defaultColumns.length > 0
+            ? new Set(availableColumns.filter(col => !defaultColumns.includes(col.key)).map(col => col.key))
+            : new Set<string>();
+        setHiddenColumns(defaultHidden);
+    }, [defaultColumns, availableColumns]);
 
-    // Create dropdown menu for column filter
-    const columnFilterMenu: MenuProps = {
+    // Memoized dropdown menu
+    const columnFilterMenu: MenuProps = useMemo(() => ({
         items: [
             {
                 key: 'actions',
@@ -230,33 +165,19 @@ const DataGrid = <T extends object>({
                 children: [
                     {
                         key: 'show-all',
-                        label: (
-                            <div onClick={handleShowAllColumns} className="w-full">
-                                Hiện tất cả cột
-                            </div>
-                        ),
+                        label: <div onClick={handleShowAllColumns}>Hiện tất cả cột</div>,
                     },
                     {
                         key: 'hide-all',
-                        label: (
-                            <div onClick={handleHideAllColumns} className="w-full">
-                                Ẩn tất cả cột
-                            </div>
-                        ),
+                        label: <div onClick={handleHideAllColumns}>Ẩn tất cả cột</div>,
                     },
                     ...(defaultColumns.length > 0 ? [{
                         key: 'reset-default',
-                        label: (
-                            <div onClick={handleResetToDefault} className="w-full">
-                                Khôi phục mặc định
-                            </div>
-                        ),
+                        label: <div onClick={handleResetToDefault}>Khôi phục mặc định</div>,
                     }] : []),
                 ],
             },
-            {
-                type: 'divider',
-            },
+            { type: 'divider' },
             {
                 key: 'columns',
                 type: 'group',
@@ -274,7 +195,7 @@ const DataGrid = <T extends object>({
                 })),
             },
         ],
-    };
+    }), [availableColumns, hiddenColumns, handleShowAllColumns, handleHideAllColumns, handleResetToDefault, handleColumnToggle, defaultColumns.length]);
 
     const [showDropdown, setShowDropdown] = useState(false);
 
@@ -346,11 +267,11 @@ const DataGrid = <T extends object>({
                     showSizeChanger
                     showLessItems
                     pageSizeOptions={[1, 6, 10, 15, 20, 30]}
-                    onShowSizeChange={(current, size) => {
+                    onShowSizeChange={useCallback((current: number, size: number) => {
                         setPageIndex(1);
                         setPageSize(size);
-                    }}
-                    onChange={(page) => setPageIndex(page)}
+                    }, [])}
+                    onChange={useCallback((page: number) => setPageIndex(page), [])}
                 />
             </div>
         </>

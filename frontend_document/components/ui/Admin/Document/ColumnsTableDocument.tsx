@@ -105,6 +105,7 @@ export const allColumnsTableDocument: TableColumnType<IDocumentResponse>[] = [
         align: 'center',
         render: (isPrivate: boolean, record: IDocumentResponse) => (
             <select
+                disabled={record.statusDocument === "Pending"}
                 value={isPrivate ? "private" : "public"}
                 onChange={async (e) => {
                     const newValue = e.target.value === "private";
@@ -146,6 +147,7 @@ export const allColumnsTableDocument: TableColumnType<IDocumentResponse>[] = [
         align: 'center',
         render: (status: string, record: IDocumentResponse) => (
             <select
+                disabled={status === "Pending"}
                 value={status || "Pending"}
                 onChange={async (e) => {
                     const newStatus = e.target.value;
