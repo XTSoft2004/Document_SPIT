@@ -209,8 +209,11 @@ const DataGrid = <T extends object>({
                             {btnAddInfo?.title || 'Thêm mới'}
                         </Button>
                     )}
+                </div>
+                <div className="flex w-full justify-center md:justify-end">
                     {enableColumnFilter && availableColumns.length > 0 && (
                         <Dropdown
+                            className='mr-2'
                             menu={columnFilterMenu}
                             trigger={['click']}
                             placement="bottomLeft"
@@ -222,8 +225,6 @@ const DataGrid = <T extends object>({
                             </Button>
                         </Dropdown>
                     )}
-                </div>
-                <div className="flex w-full justify-center md:justify-end">
                     <Searchbar setSearchText={handleSearch} />
                 </div>
             </div>

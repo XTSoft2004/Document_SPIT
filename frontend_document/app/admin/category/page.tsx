@@ -45,7 +45,7 @@ export default function CategoryPage() {
             render: (description: string) => (
                 <span
                     className={`${description
-                        ? 'text-gray-600 max-w-48 truncate inline-block'
+                        ? 'text-gray-600 max-w-65 truncate inline-block'
                         : 'text-gray-400 italic'
                         }`}
                     title={description || 'Không có mô tả'}
