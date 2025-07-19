@@ -19,7 +19,7 @@ export default function DocumentPage() {
     const [isShowModalUpdate, setIsShowModalUpdate] = useState(false);
     const [selectedItem, setSelectedItem] = useState<IDocumentResponse>();
 
-    const listColumn = getFilteredColumnsTableDocument(['name', 'courseName', 'statusDocument', 'totalDownloads', 'totalViews', 'fullNameUser', 'isPrivate']);
+    const listColumn = getFilteredColumnsTableDocument();
 
     const columns = useMemo<TableColumnType<IDocumentResponse>[]>(() => [
         ...listColumn,
@@ -54,6 +54,7 @@ export default function DocumentPage() {
                     <DataGrid<IDocumentResponse>
                         nameTable="document"
                         columns={columns}
+                        defaultColumns={['name', 'courseName', 'statusDocument', 'totalDownloads', 'totalViews', 'fullNameUser', 'isPrivate', 'actions']}
                         rowKey="id"
                         singleSelect={true}
                         fetcher={async (search: string, page: number, limit: number) => {

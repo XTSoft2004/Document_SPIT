@@ -203,8 +203,11 @@ export type DocumentColumnKey = typeof allColumnsTableDocument[number]['key'];
  * Hàm để lấy các columns theo list key được chỉ định
  */
 export const getFilteredColumnsTableDocument = (
-    columnKeys: DocumentColumnKey[]
+    columnKeys?: DocumentColumnKey[]
 ): TableColumnType<IDocumentResponse>[] => {
+    if (!columnKeys || columnKeys.length === 0) {
+        return allColumnsTableDocument;
+    }
     return allColumnsTableDocument.filter(column =>
         columnKeys.includes(column.key as DocumentColumnKey)
     );
