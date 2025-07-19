@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import { Eye, FileText, Image as ImageIcon, Smartphone } from "lucide-react";
 import Image from "next/image";
 
-interface FilePreviewProps {
+interface FilePreviewDashboardProps {
     src: string | null;
     type: "image" | "pdf" | "unsupported" | null;
     isMobile: boolean;
 }
 
-const FilePreview: React.FC<FilePreviewProps> = ({ src, type, isMobile }) => {
+const FilePreviewDashboard: React.FC<FilePreviewDashboardProps> = ({ src, type, isMobile }) => {
 
     const [imageLoading, setImageLoading] = useState(true);
     const [imageError, setImageError] = useState(false);
@@ -73,7 +73,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({ src, type, isMobile }) => {
                                 </div>
                             </div>
                         ) : (
-                            <div className="relative overflow-hidden rounded-xl bg-gray-50 dark:bg-gray-700 min-h-[250px] flex items-center justify-center">
+                            <div className="relative overflow-hidden min-h-[250px] flex items-center justify-center">
                                 {isBase64 ? (
                                     // Sử dụng img tag cho base64
                                     // eslint-disable-next-line @next/next/no-img-element
@@ -154,4 +154,4 @@ const FilePreview: React.FC<FilePreviewProps> = ({ src, type, isMobile }) => {
     );
 };
 
-export default FilePreview;
+export default FilePreviewDashboard;

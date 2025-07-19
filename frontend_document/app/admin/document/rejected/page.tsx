@@ -8,7 +8,7 @@ import { deleteDocument, getDocuments, updateDocument } from "@/actions/document
 import ModalCreateDocument from "@/components/ui/Admin/Document/Modal/All/ModalCreateDocument";
 import DataGrid from "@/components/ui/Table/DataGrid";
 import { IDocumentResponse } from "@/types/document";
-import PreviewPanel from "@/components/ui/Admin/Document/PreviewPanel";
+import PreviewPanel from "@/components/common/PreviewPanel";
 import { Tooltip } from "antd";
 import { mutateTable, reloadTable } from "@/utils/swrReload";
 import ModalUpdateDocument from "@/components/ui/Admin/Document/Modal/All/ModalUpdateDocument";

@@ -7,7 +7,7 @@ import type { UploadProps, UploadFile } from 'antd';
 import { createDocument } from '@/actions/document.actions';
 import { ICourseResponse } from '@/types/course';
 import NotificationService from '@/components/ui/Notification/NotificationService';
-import FilePreview from '@/components/common/FilePreview';
+import FilePreview from '@/components/common/FilePreviewDashboard';
 import { handleFilePreview } from '@/utils/filePreview';
 import { IDocumentPendingRequest } from '@/types/document';
 import { getCourse } from '@/actions/course.action';

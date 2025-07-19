@@ -9,7 +9,7 @@ import FolderSelector from '@/components/common/FolderSelector';
 import { ICourseResponse } from '@/types/course';
 import { IFileInfo } from '@/types/driver';
 import NotificationService from '@/components/ui/Notification/NotificationService';
-import PreviewPanel from '@/components/ui/Admin/Document/PreviewPanel';
+import PreviewPanel from '@/components/common/PreviewPanel';
 import { getCourse, getCourseById } from '@/actions/course.action';
 import { ICategoryResponse } from '@/types/category';
 import { getCategory } from '@/actions/category.actions';

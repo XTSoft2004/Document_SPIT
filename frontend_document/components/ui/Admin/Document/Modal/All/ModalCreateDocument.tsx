@@ -5,7 +5,7 @@ import NotificationService from "@/components/ui/Notification/NotificationServic
 import { createDocument } from "@/actions/document.actions";
 import { IFileInfo } from "@/types/driver";
 import { IDocumentRequest } from "@/types/document";
-import FilePreview from "@/components/common/FilePreview";
+import FilePreview from "@/components/common/FilePreviewDashboard";
 import { handleFilePreview } from "@/utils/filePreview";
 import FolderSelector from "@/components/common/FolderSelector";
 import { mutateTable } from "@/utils/swrReload";

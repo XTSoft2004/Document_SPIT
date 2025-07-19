@@ -8,7 +8,7 @@ import { getDocuments } from "@/actions/document.actions";
 import ModalCreateDocument from "@/components/ui/Admin/Document/Modal/All/ModalCreateDocument";
 import DataGrid from "@/components/ui/Table/DataGrid";
 import { IDocumentResponse } from "@/types/document";
-import PreviewPanel from "@/components/ui/Admin/Document/PreviewPanel";
+import PreviewPanel from "@/components/common/PreviewPanel";
 import { reloadTable } from "@/utils/swrReload";
 import ModalUpdateDocument from "@/components/ui/Admin/Document/Modal/All/ModalUpdateDocument";
 import { getFilteredColumnsTableDocument } from "@/components/ui/Admin/Document/ColumnsTableDocument";
