@@ -75,11 +75,11 @@ namespace Domain.Common.GoogleDriver.Interfaces
         /// <returns></returns>
         Task<bool> CutFile(string fileId, string folderNewId, string folderOldId);
         /// <summary>
-        /// Xoá file khỏi Google Drive
+        /// Xoá file vĩnh viễn khỏi Google Drive    
         /// </summary>
         /// <param name="fileId"></param>
         /// <returns></returns>
-        Task<bool> DeleteFile(string fileId);
+        Task<HttpResponse> DeleteFile(string fileId);
         /// <summary>
         /// Lấy thông tin file theo ID
         /// </summary>

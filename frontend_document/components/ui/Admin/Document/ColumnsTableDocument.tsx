@@ -3,6 +3,7 @@ import { IDocumentResponse } from "@/types/document";
 import { reloadTable } from "@/utils/swrReload";
 import { TableColumnType } from "antd";
 import NotificationService from "../../Notification/NotificationService";
+import RenderFolderLink from "@/components/common/RenderFolderLink";
 
 
 
@@ -62,33 +63,11 @@ export const allColumnsTableDocument: TableColumnType<IDocumentResponse>[] = [
         },
     },
     {
-        title: 'Thư mục',
-        dataIndex: 'folderId',
-        key: 'folderId',
-        width: 50,
-        align: 'center',
-        render: (folderId: string) => (
-            <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-yellow-50 text-yellow-700 font-medium text-xs border border-yellow-200">
-                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" className="inline mr-1 text-yellow-400">
-                    <path d="M3 7a2 2 0 0 1 2-2h4.465a2 2 0 0 1 1.414.586l1.535 1.535A2 2 0 0 0 14.828 8H19a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-                </svg>
-                {folderId
-                    ? (
-                        <span className="max-w-16 truncate inline-block" title={folderId}>
-                            {folderId}
-                        </span>
-                    )
-                    : <span className="italic text-gray-400">Chưa có</span>
-                }
-            </span>
-        ),
-    },
-    {
         title: 'Môn học',
         dataIndex: 'courseName',
         key: 'courseName',
         width: 100,
-        align: 'center',
+        // align: 'center',
         render: (courseName: string) => {
             return (
                 <span className="max-w-30 truncate inline-block" title={courseName}>
@@ -98,6 +77,16 @@ export const allColumnsTableDocument: TableColumnType<IDocumentResponse>[] = [
         }
     },
     {
+        title: 'Thư mục',
+        dataIndex: 'folderId',
+        key: 'folderId',
+        width: 50,
+        // align: 'center',
+        render: (_: string, record: IDocumentResponse) => (
+            <RenderFolderLink folderId={record.folderId} name={'Thư mục'} />
+        ),
+    },
+    {
         title: 'Trạng thái tài liệu',
         dataIndex: 'isPrivate',
         key: 'isPrivate',
@@ -105,6 +94,7 @@ export const allColumnsTableDocument: TableColumnType<IDocumentResponse>[] = [
         align: 'center',
         render: (isPrivate: boolean, record: IDocumentResponse) => (
             <select
+                disabled={record.statusDocument === "Pending"}
                 value={isPrivate ? "private" : "public"}
                 onChange={async (e) => {
                     const newValue = e.target.value === "private";
@@ -146,6 +136,7 @@ export const allColumnsTableDocument: TableColumnType<IDocumentResponse>[] = [
         align: 'center',
         render: (status: string, record: IDocumentResponse) => (
             <select
+                disabled={status === "Pending"}
                 value={status || "Pending"}
                 onChange={async (e) => {
                     const newStatus = e.target.value;
@@ -203,8 +194,11 @@ export type DocumentColumnKey = typeof allColumnsTableDocument[number]['key'];
  * Hàm để lấy các columns theo list key được chỉ định
  */
 export const getFilteredColumnsTableDocument = (
-    columnKeys: DocumentColumnKey[]
+    columnKeys?: DocumentColumnKey[]
 ): TableColumnType<IDocumentResponse>[] => {
+    if (!columnKeys || columnKeys.length === 0) {
+        return allColumnsTableDocument;
+    }
     return allColumnsTableDocument.filter(column =>
         columnKeys.includes(column.key as DocumentColumnKey)
     );

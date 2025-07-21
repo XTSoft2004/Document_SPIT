@@ -5,7 +5,7 @@ import { ListIcon, LayoutGridIcon } from 'lucide-react';
 import PathFolder from './PathFolder';
 import GridDocumentList from './GridDocumentList';
 import Back from './Back';
-import PreviewFile from './PreviewFile';
+import PreviewFile from '../../common/PreviewDocumentFile';
 import GridDocumentPreview from './GridDocumentPreview';
 import SidebarTree from './SidebarTree';
 import { flattenData } from "@/utils/flattenData";

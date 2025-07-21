@@ -7,10 +7,10 @@ import { IDocumentResponse, IDocumentUpdateRequest } from "@/types/document";
 import { updateDocument } from "@/actions/document.actions";
 import FolderSelector from "@/components/common/FolderSelector";
 import { mutateTable } from "@/utils/swrReload";
-import PreviewPanel from "@/components/ui/Admin/Document/PreviewPanel";
+import PreviewPanel from "@/components/common/PreviewPanel";
 import { ICourseResponse } from "@/types/course";
 import { handleFilePreview } from "@/utils/filePreview";
-import FilePreview from "@/components/common/FilePreview";
+import FilePreview from "@/components/common/FilePreviewDashboard";
 import { getCourse, getCourseById } from "@/actions/course.action";
 import { ICategoryResponse } from "@/types/category";
 import { getCategory } from "@/actions/category.actions";
@@ -24,7 +24,7 @@ interface ModalUpdateDocumentProps {
 const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Document, onCancel }) => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
-    const [loadingCourses, setLoadingCourses] = useState(false);
+    const [loadingInfo, setLoadingInfo] = useState(false);
     const [selectedFolderId, setSelectedFolderId] = useState<IFileInfo | null>(null);
     const [previewKey, setPreviewKey] = useState(0);
     const [currentFolderId, setCurrentFolderId] = useState<string>('');
@@ -33,23 +33,17 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
     const [previewSrc, setPreviewSrc] = useState<string | null>(null);
     const [previewType, setPreviewType] = useState<"pdf" | "image" | "unsupported" | null>(null);
     const [courses, setCourses] = useState<ICourseResponse[]>([]);
+    const [categories, setCategories] = useState<ICategoryResponse[]>([]);
 
-    // Debounced search function
-    const handleSearchCourse = useCallback(async (search: string) => {
-        if (!search?.trim()) return;
-
+    // Search courses function
+    const handleSearchCourse = useCallback(async (search: string = '') => {
         try {
-            setLoadingCourses(true);
             const response = await getCourse(search, 1, 20);
             if (response.ok) {
                 setCourses(response.data);
-            } else {
-                console.error('Failed to fetch courses:', response.message);
             }
         } catch (error) {
             console.error('Error fetching courses:', error);
-        } finally {
-            setLoadingCourses(false);
         }
     }, []);
 
@@ -101,98 +95,89 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
         setPreviewSrc(null);
         setPreviewType(null);
         setCourses([]);
+        setCategories([]);
     }, [form]);
 
-    // Memoized course options
-    const courseOptions = useMemo(() => {
-        return courses.map(course => ({
-            value: course.id,
-            label: `${course.code} - ${course.name}`
-        }));
-    }, [courses]);
-
-    // Get current course for folder selector title
-    const currentCourse = useMemo(() => {
-        const courseId = form.getFieldValue('courseId');
-        return courses.find(course => course.id === courseId);
-    }, [courses, form]);
-
-    const [categories, setCategories] = useState<ICategoryResponse[]>([]);
+    // Initialize data when modal opens
     useEffect(() => {
-        const fetchInitialCourse = async () => {
-            if (visible && Document && Document.courseId) {
-                const initialCourse = await getCourseById(Document.courseId);
-                if (initialCourse?.data) {
-                    setCourses(pre => [...pre, initialCourse.data]);
+        if (!visible) return;
+
+        const initializeData = async () => {
+            setLoadingInfo(true);
+            try {
+                // Fetch categories
+                const categoryResponse = await getCategory();
+                if (categoryResponse.ok) {
+                    setCategories(categoryResponse.data);
                 }
+
+                // Fetch initial course and search results
+                if (Document && Document.courseId) {
+                    setCourses([]);
+                    const initialCourse = await getCourseById(Document.courseId);
+                    if (initialCourse?.data) {
+                        setCourses([initialCourse.data]);
+                    }
+                }
+
+                // Load initial course search
+                handleSearchCourse('');
+
+                // Set form fields and states if Document exists
+                if (Document) {
+                    form.setFieldsValue({
+                        name: Document.name,
+                        courseId: Document.courseId,
+                        folderId: Document.folderId,
+                        categoryIds: Document.categoryIds,
+                    });
+                    setOriginalCourseId(Document.courseId);
+                    updateFolderFromCourse(Document.courseId);
+                    setShowFolderSelector(false);
+                } else {
+                    resetAllStates();
+                }
+            } catch (error) {
+                console.error('Error initializing data:', error);
+            } finally {
+                setLoadingInfo(false);
             }
         };
 
-        const fetchCategories = async () => {
-            const response = await getCategory();
-            if (response.ok) {
-                setCategories(response.data);
-            }
-        };
-
-        fetchInitialCourse();
-        fetchCategories();
-    }, [visible, form, Document]);
-
-    useEffect(() => {
-        if (visible && Document) {
-            form.setFieldsValue({
-                name: Document.name,
-                courseId: Document.courseId,
-                folderId: Document.folderId,
-                categoryIds: Document.categoryIds,
-            });
-            // Lưu courseId ban đầu
-            setOriginalCourseId(Document.courseId);
-
-            // Cập nhật folder từ course ban đầu
-            updateFolderFromCourse(Document.courseId);
-
-            // Không hiển thị FolderSelector ban đầu vì dùng course gốc
-            setShowFolderSelector(false);
-        } else if (visible) {
-            // Reset khi mở modal mà không có Document
-            resetAllStates();
-        }
-    }, [visible, Document, form, courses, resetAllStates, updateFolderFromCourse]);
+        initializeData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [visible, Document, form, handleSearchCourse, resetAllStates, updateFolderFromCourse]);
 
     const handleSubmit = async () => {
         try {
             setLoading(true);
             const values = await form.validateFields();
 
-            // Lấy folderId từ selectedFolderId hoặc fallback to current course folder
-            // const folderId = selectedFolderId?.id || getCurrentCourseFolderId();
-
             let folderId = "";
             let base64String = "";
             let fileName = "";
+
             if (showFolderSelector) {
-                folderId = values.folderId || getCurrentCourseFolderId();
-                base64String = values.fileUpload && values.fileUpload[0]?.originFileObj
-                    ? await new Promise<string>((resolve, reject) => {
+                folderId = values.folderId || await getCurrentCourseFolderId();
+
+                if (values.fileUpload && values.fileUpload[0]?.originFileObj) {
+                    base64String = await new Promise<string>((resolve, reject) => {
                         const reader = new FileReader();
                         reader.readAsDataURL(values.fileUpload[0].originFileObj);
                         reader.onload = () => resolve(reader.result as string);
                         reader.onerror = () => reject();
-                    })
-                    : "";
-                fileName = values.fileUpload && values.fileUpload[0]?.name ? values.fileUpload[0].name : ''; // Lấy tên file từ fileUpload
+                    });
+                    fileName = values.fileUpload[0].name;
+                }
             } else {
                 folderId = await getCurrentCourseFolderId();
-                base64String = "";
             }
 
             const DocumentUpdate: IDocumentUpdateRequest = {
                 name: values.name,
                 folderId: folderId || "",
-                base64String: base64String,
-                fileName: fileName,
+                base64String,
+                fileName,
                 courseId: values.courseId || 0,
                 categoryIds: values.categoryIds || [],
             };
@@ -205,7 +190,8 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
             } else {
                 NotificationService.error({ message: "Cập nhật tài liệu thất bại" });
             }
-        } catch {
+        } catch (error) {
+            console.error('Error updating document:', error);
             NotificationService.error({ message: "Có lỗi xảy ra khi cập nhật tài liệu" });
         } finally {
             setLoading(false);
@@ -239,10 +225,6 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
         });
     };
 
-    const handleReload = () => {
-        setPreviewKey(prev => prev + 1); // Force refresh preview
-    };
-
     return (
         <Modal
             title="Cập nhật thông tin tài liệu"
@@ -257,7 +239,7 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
                 maxHeight: '90vh'
             }}
             footer={[
-                <Button key="cancel" onClick={handleCancel} size="middle">
+                <Button key="cancel" onClick={handleCancel} size="middle" disabled={loadingInfo}>
                     Hủy
                 </Button>,
                 <Button
@@ -266,6 +248,7 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
                     onClick={handleSubmit}
                     loading={loading}
                     size="middle"
+                    disabled={loadingInfo}
                 >
                     Cập nhật
                 </Button>,
@@ -299,6 +282,7 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
                             <Input
                                 placeholder="Nhập tên tài liệu"
                                 size="middle"
+                                disabled={loadingInfo}
                             />
                         </Form.Item>
 
@@ -310,7 +294,7 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
                             <Select
                                 mode="multiple"
                                 showSearch
-                                placeholder="Chọn loại danh mục"
+                                placeholder={loadingInfo ? "Đang tải danh mục..." : "Chọn loại danh mục"}
                                 optionFilterProp="children"
                                 filterOption={(input, option) =>
                                     (`${option?.label ?? ''}`).toLowerCase().includes(input.toLowerCase())
@@ -326,7 +310,7 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
                                         )
                                     }))
                                 }
-                                notFoundContent={'Không tìm thấy loại danh mục'}
+                                notFoundContent={loadingInfo ? 'Đang tải...' : 'Không tìm thấy loại danh mục'}
                                 className="custom-multi-select"
                                 maxTagCount="responsive"
                                 maxTagPlaceholder={omittedValues => `+${omittedValues.length} loại`}
@@ -344,6 +328,7 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
                                     </div>
                                 )}
                                 style={{ width: '100%' }}
+                                disabled={loadingInfo}
                             />
                         </Form.Item>
 
@@ -355,19 +340,20 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
                         >
                             <Select
                                 showSearch
-                                placeholder="Tìm kiếm và chọn môn học..."
+                                placeholder={loadingInfo ? "Đang tải môn học..." : "Tìm kiếm và chọn môn học..."}
                                 size="middle"
                                 optionFilterProp="children"
-                                filterOption={false} // Use server-side search
-                                loading={loadingCourses}
+                                filterOption={false}
+                                loading={loadingInfo}
                                 allowClear
-                                notFoundContent={loadingCourses ? 'Đang tìm kiếm...' : 'Không tìm thấy môn học'}
+                                notFoundContent={loadingInfo ? 'Đang tải...' : 'Không tìm thấy môn học'}
                                 options={courses.map(course => ({
                                     value: course.id,
                                     label: `${course.code} - ${course.name}`
                                 }))}
                                 onChange={handleCourseChange}
                                 onSearch={handleSearchCourse}
+                                disabled={loadingInfo}
                             />
                         </Form.Item>
 
@@ -384,7 +370,7 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
                                         title={`Chọn thư mục của môn học | ${courses.find(course => course.id === form.getFieldValue('courseId'))?.code || ''} - ${courses.find(course => course.id === form.getFieldValue('courseId'))?.name || ''}`}
                                         onSelect={(folder, _) => {
                                             setSelectedFolderId(folder);
-                                            form.setFieldsValue({ folderId: folder.id, fileUpload: [] }); // Reset file khi đổi thư mục
+                                            form.setFieldsValue({ folderId: folder.id, fileUpload: [] });
                                             setPreviewSrc(null);
                                             setPreviewType(null);
                                             NotificationService.info({
@@ -392,6 +378,7 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
                                             });
                                         }}
                                         folderIdCurrent={currentFolderId}
+                                        disabled={loadingInfo}
                                     />
                                 </Form.Item>
 
@@ -400,9 +387,6 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
                                     name="fileUpload"
                                     valuePropName="fileList"
                                     getValueFromEvent={e => Array.isArray(e) ? e : e && e.fileList}
-                                // rules={[
-                                //     { required: showFolderSelector, message: "Vui lòng chọn file!" }
-                                // ]}
                                 >
                                     <Upload
                                         name="file"
@@ -410,10 +394,10 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
                                         showUploadList={true}
                                         maxCount={1}
                                         beforeUpload={() => false}
+                                        disabled={loadingInfo}
                                         onChange={({ fileList }) => {
                                             form.setFieldsValue({ fileUpload: fileList });
                                             if (fileList.length > 0) {
-                                                // Nếu có file mới, set lại folderId (nếu cần)
                                                 if (selectedFolderId) {
                                                     form.setFieldsValue({ folderId: selectedFolderId.id });
                                                 }
@@ -430,7 +414,9 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
                                             }
                                         }}
                                     >
-                                        <Button icon={<UploadOutlined />} size="middle">Chọn file</Button>
+                                        <Button icon={<UploadOutlined />} size="middle" disabled={loadingInfo}>
+                                            Chọn file
+                                        </Button>
                                     </Upload>
                                 </Form.Item>
                             </>
@@ -447,19 +433,11 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
                             </div>
                         )}
 
-                        {/* 
-                        <Form.Item name="folderId" label="Chọn thư mục" rules={[{ required: true, message: 'Vui lòng chọn thư mục' }]}>
-                            <FolderSelector onSelect={(folder, _) => {
-                                setSelectedFolderId(folder);
-                                form.setFieldsValue({ folderId: folder.id });
-                            }} />
-                        </Form.Item> */}
-
-                        <div className="bg-blue-50 p-3 rounded-lg"> {/* Giảm padding */}
-                            <p className="font-bold text-sm text-blue-700 mb-1"> {/* Giảm text size */}
+                        <div className="bg-blue-50 p-3 rounded-lg">
+                            <p className="font-bold text-sm text-blue-700 mb-1">
                                 Hướng dẫn:
                             </p>
-                            <ul className="text-sm text-blue-600 space-y-0.5"> {/* Giảm text size và spacing */}
+                            <ul className="text-sm text-blue-600 space-y-0.5">
                                 <li>• Chỉnh sửa tên tài liệu</li>
                                 <li>• Chọn môn học và thư mục</li>
                                 <li>• Nhấn <span className="font-bold">&quot;Cập nhật&quot;</span></li>

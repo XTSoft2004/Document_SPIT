@@ -7,6 +7,7 @@ import { IDocumentResponse } from "@/types/document";
 import globalConfig from "@/app.config";
 import { getCodeView } from "@/actions/document.actions";
 import Image from "next/image";
+import PreviewCommon from "./PreviewCommon";
 
 interface PreviewPanelProps {
     selectedItem: IDocumentResponse;
@@ -152,91 +153,7 @@ const PreviewPanel = ({
                     </div>
                 </div>
 
-                {/* Content */}
-                <div className="flex-1 p-2 sm:p-4 relative min-h-0"> {/* min-h-0 để flexbox hoạt động đúng */}
-                    {isImage ? (
-                        <div className="relative h-full group">
-                            {/* Loading state */}
-                            {loading && (
-                                <div className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-700 rounded-xl">
-                                    <div className="flex flex-col items-center gap-2 sm:gap-3">
-                                        <div className="w-8 h-8 sm:w-10 sm:h-10 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                                        <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 font-medium">Đang tải hình ảnh...</span>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Error state */}
-                            {imageError && (
-                                <div className="h-full flex items-center justify-center bg-gray-50 dark:bg-gray-700 rounded-xl">
-                                    <div className="text-center">
-                                        <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-2 sm:mb-3 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
-                                            <ImageIcon className="w-6 h-6 sm:w-8 sm:h-8 text-red-500 dark:text-red-400" />
-                                        </div>
-                                        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 font-medium mb-1">Không thể tải hình ảnh</p>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">Vui lòng thử lại sau</p>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Image */}
-                            {!imageError && (
-                                <div className="h-full overflow-hidden rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600">
-                                    <Image
-                                        width={800}
-                                        height={600}
-                                        src={codeView ? `${globalConfig.baseUrl}/document/view/${codeView}` : ''}
-                                        alt="Xem trước ảnh"
-                                        className={`w-full h-full object-contain transition-all duration-500 ${loading ? 'opacity-0 scale-95' : 'opacity-100 scale-100'} group-hover:scale-105`}
-                                        onLoad={() => setLoading(false)}
-                                        onError={() => {
-                                            setLoading(false);
-                                            setImageError(true);
-                                        }}
-                                        key={codeView}
-                                    />
-
-                                    {/* Image overlay */}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
-                                </div>
-                            )}
-                        </div>
-                    ) : (
-                        <div className="relative h-full">
-                            {/* Loading state */}
-                            {loading && (
-                                <div className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-700 rounded-xl z-10">
-                                    <div className="flex flex-col items-center gap-2 sm:gap-3">
-                                        <div className="w-8 h-8 sm:w-10 sm:h-10 border-3 border-red-500 border-t-transparent rounded-full animate-spin"></div>
-                                        <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 font-medium">Đang tải PDF...</span>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* PDF iframe */}
-                            <div className="h-full overflow-hidden rounded-xl border border-gray-200 dark:border-gray-600 bg-white flex flex-col">
-                                <iframe
-                                    key={codeView + (loading ? '-loading' : '')}
-                                    src={codeView ? `${globalConfig.baseUrl}/document/view/${codeView}#toolbar=0&navpanes=0&scrollbar=0` : ''}
-                                    title="Xem trước PDF"
-                                    width="100%"
-                                    height="100%"
-                                    className={`flex-1 border-0 transition-opacity duration-500 ${loading ? 'opacity-0' : 'opacity-100'}`}
-                                    style={{ minHeight: 0 }}
-                                    onLoad={() => setLoading(false)}
-                                />
-                            </div>
-
-                            {/* PDF indicator */}
-                            <div className="absolute top-2 right-2 px-2 py-1 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg shadow-sm border border-gray-200 dark:border-gray-600">
-                                <div className="flex items-center gap-1">
-                                    <FileText className="w-3 h-3 text-red-500" />
-                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">PDF</span>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
+                <PreviewCommon documentId={selectedItem.id} fileName={selectedItem.fileName} />
 
                 {/* Footer */}
                 <div className="px-2 sm:px-4 py-2 sm:py-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-600">

@@ -24,7 +24,7 @@ export default function DocumentPendingPage() {
     const [loading, setLoading] = useState(true);
 
     const columns: TableColumnType<IDocumentResponse>[] = [
-        ...getFilteredColumnsTableDocument(['name', 'statusDocument', 'fullNameUser', 'courseName', 'isPrivate']),
+        ...getFilteredColumnsTableDocument(),
         {
             title: 'Thao tác',
             key: 'actions',
@@ -57,6 +57,7 @@ export default function DocumentPendingPage() {
                     <DataGrid<IDocumentResponse>
                         nameTable="document_pending"
                         columns={columns}
+                        defaultColumns={['name', 'statusDocument', 'fullNameUser', 'courseName', 'isPrivate', 'actions']}
                         rowKey="id"
                         singleSelect={true}
                         fetcher={async (search: string, page: number, limit: number) => {
