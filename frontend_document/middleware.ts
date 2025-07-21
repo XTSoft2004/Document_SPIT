@@ -49,36 +49,43 @@ const redirectTo = (url: string, request: NextRequest) => {
 export async function middleware(request: NextRequest) {
   console.log('server >> middleware', request.nextUrl.pathname)
 
+  const nextUrl = request.nextUrl.pathname
+  const accessToken = cookies().get('accessToken')?.value
+  const res = NextResponse.next()
+
+  // Nếu không có token thì chỉ cho vào /auth
+  if (!accessToken) {
+    if (nextUrl.startsWith('/admin') || nextUrl.startsWith('/ban')) {
+      return redirectTo('/auth', request)
+    }
+    return res
+  }
+
   const userResponse = await getMe()
   const isLocked = userResponse.data?.islocked
-  const nextUrl = request.nextUrl.pathname
+  const isExpired = userResponse.status === 401 || userResponse.status === 403
 
-  // Kiểm tra xem người dùng đã đăng nhập hay chưa
+  if (isExpired) {
+    const response = redirectTo('/', request)
+    response.cookies.delete('accessToken')
+    response.cookies.delete('refreshToken')
+    return response
+  }
+
   if (nextUrl.startsWith('/auth')) {
-    // Nếu đã đăng nhập, chuyển hướng đến trang chủ
-    const accessToken = cookies().get('accessToken')?.value
-
-    if (accessToken) {
-      // Kiểm tra xem người dùng có bị khóa hay không
-      if (isLocked === true) return redirectTo('/ban', request)
-      else return redirectTo('/', request)
-    } else return NextResponse.next()
+    if (isLocked) return redirectTo('/ban', request)
+    return redirectTo('/', request)
   }
 
   if (nextUrl.startsWith('/ban')) {
-    if (isLocked !== true) return redirectTo('/', request)
+    if (!isLocked) return redirectTo('/', request)
   }
 
   if (nextUrl.startsWith('/admin')) {
-    const accessToken = cookies().get('accessToken')?.value
-    if (!accessToken) return redirectTo('/auth', request)
-
-    // Kiểm tra xem người dùng có tồn tại hay không
-    if (!userResponse.ok) return redirectTo('/auth', request)
-
-    // Kiểm tra xem người dùng có phải là Admin hay không
-    if (userResponse.data.roleName !== 'Admin') return redirectTo('/', request)
+    if (!userResponse.ok || userResponse.data.roleName !== 'Admin') {
+      return redirectTo('/', request)
+    }
   }
 
-  return NextResponse.next()
+  return res
 }

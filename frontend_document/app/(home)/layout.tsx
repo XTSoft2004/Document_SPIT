@@ -1,24 +1,26 @@
-import '@/app/globals.css';
-import type { Metadata } from "next";
+import '@/app/globals.css'
+import type { Metadata } from 'next'
 import { AntdRegistry } from '@ant-design/nextjs-registry'
-import AppInitializer from "@/components/ui/Loading/AppInitializer";
-import PageTransitionLoader from "@/components/ui/Loading/PageTransitionLoader";
-import Header from "@/layout/Header";
-import Footer from "@/layout/Footer";
-import React, { useState, useEffect } from "react";
+import AppInitializer from '@/components/ui/Loading/AppInitializer'
+import PageTransitionLoader from '@/components/ui/Loading/PageTransitionLoader'
+import Header from '@/layout/Header'
+import Footer from '@/layout/Footer'
+import React, { useState, useEffect } from 'react'
+import { AuthProvider } from '@/context/AuthContext'
 
 export const metadata: Metadata = {
-  title: "Trang chủ",
-  description: "Trang chủ của SPIT - Nơi chia sẻ tài liệu học tập và đóng góp kiến thức",
+  title: 'Trang chủ',
+  description:
+    'Trang chủ của SPIT - Nơi chia sẻ tài liệu học tập và đóng góp kiến thức',
   icons: {
-    icon: "/logo/logo-500x500.png",
+    icon: '/logo/logo-500x500.png',
   },
-};
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   // Không sử dụng useEffect trong layout, nên loại bỏ logic isMobile
   return (
@@ -27,17 +29,22 @@ export default function RootLayout({
         <AntdRegistry>
           <AppInitializer>
             <PageTransitionLoader />
-            <div className="sticky top-0 z-10 flex-shrink-0"
-              style={{
-                background: 'linear-gradient(to bottom right, #f8fafc , #eff6ff , #e0e7ff)',
-              }}>
-              <Header />
-              {children}
-              <Footer />
-            </div>
+            <AuthProvider>
+              <div
+                className="sticky top-0 z-10 flex-shrink-0"
+                style={{
+                  background:
+                    'linear-gradient(to bottom right, #f8fafc , #eff6ff , #e0e7ff)',
+                }}
+              >
+                <Header />
+                {children}
+                <Footer />
+              </div>
+            </AuthProvider>
           </AppInitializer>
         </AntdRegistry>
       </body>
     </html>
-  );
+  )
 }
