@@ -30,10 +30,30 @@ namespace Domain.Common
     }
     public enum Function_Enum
     {
+        Login,
+        Logout,
+        Create_CategoryType,
+        Update_CategoryType,
+        Delete_CategoryType,
+        Create_Course,
+        Update_Course,
+        Delete_Course,
+        Create_Department,
+        Update_Department,
+        Delete_Department,
         Create_Document,
         Review_Document,
         Update_Document,
         Delete_Document,
+        Create_Report,
+        Update_Report,
+        Delete_Report,
+        Create_User,
+        Update_User,
+        Set_Role,
+        Ban_User,
+        Update_Status_Star,
+
     }
     public static class EnumExtensions
     {

@@ -1,40 +1,84 @@
 'use client'
 
+import { IHistory } from "@/types/history";
 import { Avatar, Card } from "antd";
+import { useEffect, useState } from "react";
+import { getHistory } from "@/actions/history.actions";
 
-const ActivityCard = ({ index }: { index: number }) => (
-    <Card key={index} className="min-w-[200px] mb-3">
+function formatTimeAgo(modifiedDate: string | number | Date): string {
+    const modified = new Date(modifiedDate);
+    const now = new Date();
+    const seconds = Math.floor((now.getTime() - modified.getTime()) / 1000);
+
+    if (seconds < 60) return `- ${seconds} giây trước`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `- ${minutes} phút trước`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `- ${hours} giờ trước`;
+    const days = Math.floor(hours / 24);
+    return `- ${days} ngày trước`;
+}
+
+const ActivityCard = ({ item }: { item: IHistory }) => (
+    <Card key={item.id} className="min-w-[200px] mb-3">
         <Card.Meta
             avatar={
-                <Avatar src={`https://api.dicebear.com/7.x/miniavs/svg?seed=${index + 1}`} />
+                <Avatar
+                    src={"https://via.placeholder.com/150"}
+                    alt={item.fullname}
+                    className="w-8 h-8"
+                />
             }
             title={
                 <span className="flex items-center gap-2">
                     <span
-                        className="font-semibold truncate text-sm max-w-[110px]"
-                        title={`User Name ${index + 1}`}
+                        className="font-semibold truncate text-sm max-w-[100px]"
+                        title={`${item.fullname}`}
                     >
-                        {`User Name ${index + 1}`.slice(0, 15)}
+                        {`${item.fullname}`.slice(0, 15)}
                     </span>
                     <span
-                        className="text-gray-500 text-sm truncate max-w-[80px]"
-                        title={`- ${2 + index} hours ago`}
+                        className="text-gray-500 text-sm truncate max-w-[90px]"
+                        title={`${formatTimeAgo(item.modifiedDate)}`}
                     >
-                        - {2 + index} hours ago
+                        {formatTimeAgo(item.modifiedDate)}
                     </span>
-                </span>
+                </span >
             }
             description={
-                <div>
-                    <p>This is the description</p>
-                    <p>This is the description</p>
+                <div
+                    style={{
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'normal',
+                    }}
+                >
+                    <p className="m-0">{item.description}</p>
                 </div>
             }
         />
-    </Card>
+    </Card >
 );
 
 export default function ActivityRight() {
+    const [activity, setActivity] = useState<IHistory[]>([]);
+
+    useEffect(() => {
+        const fetchActivity = async () => {
+            try {
+                const response = await getHistory('', 1, 10, false, false);
+                setActivity(response.data);
+            } catch (error) {
+                console.error("Failed to fetch activity:", error);
+            }
+        };
+
+        fetchActivity();
+    }, []);
+
     return (
         <div className="flex flex-col gap-4 p-2 sm:p-4 pt-0">
             {/* Header */}
@@ -61,8 +105,8 @@ export default function ActivityRight() {
 
             {/* Activity List */}
             <div className="overflow-auto max-h-[60vh] sm:max-h-[70vh] lg:max-h-[80vh] scrollbar-hide space-y-2">
-                {Array.from({ length: 20 }).map((_, idx) => (
-                    <ActivityCard key={idx} index={idx} />
+                {activity.map((item) => (
+                    <ActivityCard item={item} key={item.id} />
                 ))}
             </div>
         </div>

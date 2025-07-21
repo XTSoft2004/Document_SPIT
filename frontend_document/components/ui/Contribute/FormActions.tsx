@@ -8,6 +8,7 @@ interface FormActionsProps {
     submitText?: string;
     cancelText?: string;
     className?: string;
+    isUserLoggedIn?: boolean;
 }
 
 export default function FormActions({
@@ -17,7 +18,8 @@ export default function FormActions({
     onSubmit,
     submitText = "Đóng góp tài liệu",
     cancelText = "Hủy",
-    className = ""
+    className = "",
+    isUserLoggedIn = true
 }: FormActionsProps) {
     return (
         <div className={`flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 ${className}`}>
@@ -35,7 +37,11 @@ export default function FormActions({
                 type="button"
                 onClick={onSubmit}
                 disabled={!isFormValid || isSubmitting}
-                className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-8 py-2 sm:py-3 text-sm sm:text-base order-1 sm:order-2 transition-all duration-200 hover:shadow-lg active:scale-95"
+                className={`w-full sm:w-auto ${
+                    isUserLoggedIn 
+                        ? 'bg-blue-600 hover:bg-blue-700' 
+                        : 'bg-gray-400 cursor-not-allowed hover:bg-gray-400'
+                } text-white px-4 sm:px-8 py-2 sm:py-3 text-sm sm:text-base order-1 sm:order-2 transition-all duration-200 hover:shadow-lg active:scale-95`}
             >
                 {isSubmitting ? (
                     <div className="flex items-center justify-center space-x-2">

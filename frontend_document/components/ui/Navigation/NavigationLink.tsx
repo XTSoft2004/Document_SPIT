@@ -6,7 +6,7 @@ interface NavigationLinkProps {
     href: string;
     children: ReactNode;
     className?: string;
-    onClick?: () => void;
+    onClick?: () => void | boolean;
 }
 
 export default function NavigationLink({ href, children, className, onClick }: NavigationLinkProps) {

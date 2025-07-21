@@ -69,51 +69,42 @@ const Header = () => {
                     </div>
 
                     {/* Right side - User actions */}
-                    <div className="absolute right-4 sm:right-6 lg:right-8">
-                        {islogin ? (
-                            // Khi đã login
-                            <div className="flex items-center space-x-3">
-                                {/* Mobile Menu - chỉ hiện trên mobile */}
-                                <div className="md:hidden">
-                                    <MenuMobile isLoggedIn={true} onLogout={handleLogout} />
-                                </div>
+                    <div className="absolute right-4 sm:right-6 lg:right-8 flex items-center space-x-3">
+                        {/* Mobile Menu */}
+                        <div className="md:hidden">
+                            <MenuMobile isLoggedIn={islogin} onLogout={islogin ? handleLogout : undefined} />
+                        </div>
 
-                                {/* Desktop - Avatar và username */}
-                                <div className="hidden md:flex items-center space-x-3 relative">
-                                    <span className="text-sm font-medium text-gray-700 uppercase">{user?.username}</span>
-                                    <button
-                                        onClick={() => setShowProfileMenu((prev) => !prev)}
-                                        className="flex items-center focus:outline-none hover:opacity-80 transition-opacity"
-                                    >
-                                        <Avatar size={36} icon={<UserOutlined />} className="border-2 border-gray-200" />
-                                    </button>
-                                    {showProfileMenu && (
-                                        <div className="absolute right-0 top-full mt-2 z-50">
-                                            <MenuProfile onClose={() => setShowProfileMenu(false)} />
-                                        </div>
-                                    )}
-                                </div>
+                        {/* Desktop */}
+                        {islogin ? (
+                            <div className="hidden md:flex items-center space-x-3 relative">
+                                <span className="text-sm font-medium text-gray-700 uppercase">{user?.username}</span>
+                                <button
+                                    onClick={() => setShowProfileMenu((prev) => !prev)}
+                                    className="flex items-center focus:outline-none hover:opacity-80 transition-opacity"
+                                >
+                                    <Avatar size={36} icon={<UserOutlined />} className="border-2 border-gray-200" />
+                                </button>
+                                {showProfileMenu && (
+                                    <div className="absolute right-0 top-full mt-2 z-50">
+                                        <MenuProfile onClose={() => setShowProfileMenu(false)} user={user} />
+                                    </div>
+                                )}
                             </div>
                         ) : (
-                            // Khi chưa login
-                            <div className="flex items-center space-x-3">
-                                {/* Mobile Menu - chỉ hiện trên mobile */}
-                                <div className="md:hidden">
-                                    <MenuMobile isLoggedIn={false} />
-                                </div>
-
-                                {/* Desktop - Login button */}
-                                <div className="hidden md:flex items-center">
-                                    <div className="relative group">
-                                        <div className="absolute inset-0 duration-1000 opacity-50 transition-all bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 rounded-xl blur-lg filter group-hover:opacity-75 group-hover:duration-200" />
-                                        <NavigationLink href="/auth" className="group relative inline-flex items-center justify-center text-sm rounded-xl bg-white px-6 py-2 font-semibold text-gray-900 transition-all duration-200 hover:bg-gray-50 hover:shadow-lg hover:-translate-y-0.5 hover:shadow-gray-300/30 border border-gray-200">
-                                            Đăng nhập
-                                            <svg aria-hidden="true" viewBox="0 0 10 10" height={10} width={10} fill="none" className="mt-0.5 ml-2 -mr-1 stroke-gray-900 stroke-2">
-                                                <path d="M0 5h7" className="transition opacity-0 group-hover:opacity-100" />
-                                                <path d="M1 1l4 4-4 4" className="transition group-hover:translate-x-[3px]" />
-                                            </svg>
-                                        </NavigationLink>
-                                    </div>
+                            <div className="hidden md:flex items-center">
+                                <div className="relative group">
+                                    <div className="absolute inset-0 duration-1000 opacity-50 transition-all bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 rounded-xl blur-lg filter group-hover:opacity-75 group-hover:duration-200" />
+                                    <NavigationLink
+                                        href="/auth"
+                                        className="group relative inline-flex items-center justify-center text-sm rounded-xl bg-white px-6 py-2 font-semibold text-gray-900 transition-all duration-200 hover:bg-gray-50 hover:shadow-lg hover:-translate-y-0.5 hover:shadow-gray-300/30 border border-gray-200"
+                                    >
+                                        Đăng nhập
+                                        <svg aria-hidden="true" viewBox="0 0 10 10" height={10} width={10} fill="none" className="mt-0.5 ml-2 -mr-1 stroke-gray-900 stroke-2">
+                                            <path d="M0 5h7" className="transition opacity-0 group-hover:opacity-100" />
+                                            <path d="M1 1l4 4-4 4" className="transition group-hover:translate-x-[3px]" />
+                                        </svg>
+                                    </NavigationLink>
                                 </div>
                             </div>
                         )}

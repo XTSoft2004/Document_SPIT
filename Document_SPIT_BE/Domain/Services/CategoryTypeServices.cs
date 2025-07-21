@@ -1,9 +1,13 @@
 ﻿using Domain.Base.Services;
+using Domain.Common;
 using Domain.Common.Http;
 using Domain.Entities;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
+using Domain.Model.Request.Auth;
 using Domain.Model.Request.CategoryType;
+using Domain.Model.Request.History;
+using Domain.Model.Response.User;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,11 +21,17 @@ namespace Domain.Services
     {
         private readonly IRepositoryBase<CategoryType>? _categoryType;
         private readonly IRepositoryBase<DocumentCategory>? _documentCategory;
+        private readonly IHistoryServices _historyServices;
+        private readonly ITokenServices? _tokenServices;
+        private UserTokenResponse? userMeToken;
 
-        public CategoryTypeServices(IRepositoryBase<CategoryType>? categoryType, IRepositoryBase<DocumentCategory>? documentCategory)
+        public CategoryTypeServices(IRepositoryBase<CategoryType>? categoryType, IRepositoryBase<DocumentCategory>? documentCategory, IHistoryServices historyServices, ITokenServices? tokenServices)
         {
             _categoryType = categoryType;
             _documentCategory = documentCategory;
+            _historyServices = historyServices;
+            _tokenServices = tokenServices;
+            userMeToken = _tokenServices.GetTokenBrowser();
         }
         // Tạo mới loại danh mục
         public async Task<HttpResponse> CreateAsync(CategoryTypeRequest categoryTypeRequest)
@@ -39,6 +49,14 @@ namespace Domain.Services
             _categoryType.Insert(newCategoryType);
             await UnitOfWork.CommitAsync();
 
+            await _historyServices.CreateAsync(new HistoryRequest
+            {
+                Title = "Tạo danh mục",
+                Description = $"Danh mục {newCategoryType.Name} vừa được tạo.",
+                function_status = Function_Enum.Create_CategoryType,
+                UserId = userMeToken.Id ?? -1
+            });
+
             return HttpResponse.OK(message: "Tạo loại danh mục thành công.");
         }
         // Cập nhật loại danh mục theo IdCategoryType
@@ -54,6 +72,14 @@ namespace Domain.Services
             _categoryType.Update(categoryType);
             await UnitOfWork.CommitAsync();
 
+            await _historyServices.CreateAsync(new HistoryRequest
+            {
+                Title = "Cập nhật danh mục",
+                Description = $"Danh mục {categoryType.Name} vừa được cập nhật.",
+                function_status = Function_Enum.Update_CategoryType,
+                UserId = userMeToken.Id ?? -1
+            });
+
             return HttpResponse.OK(message: "Cập nhật loại danh mục thành công.");
         }
         // Xoá loại danh mục theo IdCategoryType
@@ -65,6 +91,14 @@ namespace Domain.Services
             
             _categoryType.Delete(categoryType);
             await UnitOfWork.CommitAsync();
+
+            await _historyServices.CreateAsync(new HistoryRequest
+            {
+                Title = "Xoá danh mục",
+                Description = $"Danh mục {categoryType.Name} vừa được xoá.",
+                function_status = Function_Enum.Delete_CategoryType,
+                UserId = userMeToken.Id ?? -1
+            });
 
             return HttpResponse.OK(message: "Xoá loại danh mục thành công.");
         }

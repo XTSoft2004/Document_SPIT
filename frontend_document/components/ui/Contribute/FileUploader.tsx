@@ -1,111 +1,127 @@
-'use client';
+'use client'
 
 import { useState, useEffect } from 'react';
 import FilePreviewDashboard from '@/components/common/FilePreviewDashboard';
+import { isImageFile, createImageFile, ImageFile } from '@/utils/pdfUtils'
 
 interface FileUploaderProps {
-    file: File | null;
-    onFileChange: (file: File | null) => void;
-    acceptedTypes?: string;
-    maxSize?: string;
-    className?: string;
+    file: File | null
+    images: ImageFile[]
+    onFileChange: (file: File | null) => void
+    onImagesChange: (images: ImageFile[]) => void
+    acceptedTypes?: string
+    maxSize?: string
+    className?: string
 }
 
 export default function FileUploader({
     file,
+    images,
     onFileChange,
-    acceptedTypes = ".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.jpg,.jpeg,.png,.gif,.bmp,.webp",
-    maxSize = "10MB",
-    className = ""
+    onImagesChange,
+    acceptedTypes = '.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.image,.jpg,.jpeg,.png',
+    maxSize = '50MB',
+    className = '',
 }: FileUploaderProps) {
-    const [isDragOver, setIsDragOver] = useState(false);
-    const [previewSrc, setPreviewSrc] = useState<string | null>(null);
-    const [previewType, setPreviewType] = useState<"image" | "pdf" | "unsupported" | null>(null);
-    const [isMobile, setIsMobile] = useState(false);
-    const [showPreviewModal, setShowPreviewModal] = useState(false);
+    const [isDragOver, setIsDragOver] = useState(false)
 
-    // Detect mobile device
-    useEffect(() => {
-        const checkMobile = () => {
-            setIsMobile(window.innerWidth < 768);
-        };
+    const handleFileChange = async (
+        event: React.ChangeEvent<HTMLInputElement>,
+    ) => {
+        const selectedFiles = event.target.files
+        if (!selectedFiles || selectedFiles.length === 0) return
 
-        checkMobile();
-        window.addEventListener('resize', checkMobile);
-
-        return () => window.removeEventListener('resize', checkMobile);
-    }, []);
-
-    // Function để xử lý preview file
-    const generatePreview = (file: File) => {
-        const fileType = file.type.toLowerCase();
-        const fileName = file.name.toLowerCase();
-
-        // Kiểm tra nếu là ảnh
-        if (fileType.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                setPreviewSrc(e.target?.result as string);
-                setPreviewType('image');
-            };
-            reader.readAsDataURL(file);
-        }
-        // Kiểm tra nếu là PDF
-        else if (fileType === 'application/pdf' || fileName.endsWith('.pdf')) {
-            const url = URL.createObjectURL(file);
-            setPreviewSrc(url);
-            setPreviewType('pdf');
-        }
-        // Các file khác không hỗ trợ preview
-        else {
-            setPreviewSrc(null);
-            setPreviewType('unsupported');
-        }
-    };
-
-    // useEffect để tạo preview khi file thay đổi
-    useEffect(() => {
-        if (file) {
-            generatePreview(file);
-        } else {
-            setPreviewSrc(null);
-            setPreviewType(null);
-        }
-    }, [file]);
-
-    // Cleanup URL khi component unmount hoặc previewSrc thay đổi
-    useEffect(() => {
-        return () => {
-            if (previewSrc && previewSrc.startsWith('blob:')) {
-                URL.revokeObjectURL(previewSrc);
+        if (selectedFiles.length === 1) {
+            const selectedFile = selectedFiles[0]
+            if (isImageFile(selectedFile)) {
+                try {
+                    const imageFile = await createImageFile(selectedFile)
+                    onImagesChange([...images, imageFile])
+                    onFileChange(null)
+                } catch (error) {
+                    console.error('Error creating image file:', error)
+                }
+            } else {
+                onFileChange(selectedFile)
+                onImagesChange([])
             }
-        };
-    }, [previewSrc]);
+        } else {
+            const imageFiles = Array.from(selectedFiles).filter(isImageFile)
+            if (imageFiles.length > 0) {
+                try {
+                    const newImages = await Promise.all(
+                        imageFiles.map((file) => createImageFile(file)),
+                    )
+                    onImagesChange([...images, ...newImages])
+                    onFileChange(null)
+                } catch (error) {
+                    console.error('Error creating image files:', error)
+                }
+            }
+        }
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const selectedFile = event.target.files?.[0] || null;
-        onFileChange(selectedFile);
-    };
+        event.target.value = ''
+    }
 
-    const handleFileDrop = (event: React.DragEvent<HTMLDivElement>) => {
-        event.preventDefault();
-        setIsDragOver(false);
-        const droppedFile = event.dataTransfer.files?.[0] || null;
-        onFileChange(droppedFile);
-    };
+    const handleFileDrop = async (event: React.DragEvent<HTMLDivElement>) => {
+        event.preventDefault()
+        setIsDragOver(false)
+
+        const droppedFiles = Array.from(event.dataTransfer.files)
+        if (droppedFiles.length === 0) return
+
+        if (droppedFiles.length === 1) {
+            const droppedFile = droppedFiles[0]
+            if (isImageFile(droppedFile)) {
+                try {
+                    const imageFile = await createImageFile(droppedFile)
+                    onImagesChange([...images, imageFile])
+                    onFileChange(null)
+                } catch (error) {
+                    console.error('Error creating image file:', error)
+                }
+            } else {
+                onFileChange(droppedFile)
+                onImagesChange([])
+            }
+        } else {
+            const imageFiles = droppedFiles.filter(isImageFile)
+            if (imageFiles.length > 0) {
+                try {
+                    const newImages = await Promise.all(
+                        imageFiles.map((file) => createImageFile(file)),
+                    )
+                    onImagesChange([...images, ...newImages])
+                    onFileChange(null)
+                } catch (error) {
+                    console.error('Error creating image files:', error)
+                }
+            }
+        }
+    }
 
     const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
-        event.preventDefault();
-        setIsDragOver(true);
-    };
+        event.preventDefault()
+        setIsDragOver(true)
+    }
 
     const handleDragLeave = () => {
-        setIsDragOver(false);
-    };
+        setIsDragOver(false)
+    }
 
     const handleRemoveFile = () => {
-        onFileChange(null);
-    };
+        onFileChange(null)
+    }
+
+    const handleImagesReorder = (reorderedImages: ImageFile[]) => {
+        onImagesChange(reorderedImages)
+    }
+
+    const handleRemoveImage = (imageId: string) => {
+        onImagesChange(images.filter((img) => img.id !== imageId))
+    }
+
+    const hasContent = file || images.length > 0
 
     return (
         <div className={className}>
@@ -116,8 +132,8 @@ export default function FileUploader({
             </label>
             <div
                 className={`border-2 border-dashed rounded-lg p-4 sm:p-6 lg:p-8 text-center transition-all duration-200 ${isDragOver
-                    ? 'border-blue-500 bg-blue-50 scale-[1.02]'
-                    : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+                        ? 'border-blue-500 bg-blue-50 scale-[1.02]'
+                        : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
                     }`}
                 onDrop={handleFileDrop}
                 onDragOver={handleDragOver}
@@ -128,112 +144,81 @@ export default function FileUploader({
                     id="file"
                     onChange={handleFileChange}
                     accept={acceptedTypes}
+                    multiple
                     className="hidden"
                 />
 
-                {file ? (
-                    <FilePreview
-                        file={file}
-                        onRemove={handleRemoveFile}
-                        onPreview={() => setShowPreviewModal(true)}
-                        canPreview={previewType === 'image' || previewType === 'pdf'}
-                    />
+                {hasContent ? (
+                    <div className="space-y-4">
+                        {file && <FilePreview file={file} onRemove={handleRemoveFile} />}
+                        {images.length > 0 && (
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-3">
+                                        <div className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center">
+                                            <svg
+                                                className="w-4 h-4"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p className="font-medium text-blue-900">
+                                                {images.length} ảnh đã chọn
+                                            </p>
+                                            <p className="text-sm text-blue-700">
+                                                Sẽ được chuyển thành PDF khi đóng góp
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => onImagesChange([])}
+                                        className="text-red-500 hover:text-red-600 text-sm font-medium"
+                                    >
+                                        Xóa tất cả
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 ) : (
-                    <FileUploadPrompt
-                        acceptedTypes={acceptedTypes}
-                        maxSize={maxSize}
-                    />
+                    <FileUploadPrompt acceptedTypes={acceptedTypes} maxSize={maxSize} />
                 )}
             </div>
-
-            {/* Modal Preview File */}
-            {showPreviewModal && file && (previewType === 'image' || previewType === 'pdf') && (
-                <div
-                    className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-                    onClick={(e) => {
-                        if (e.target === e.currentTarget) {
-                            setShowPreviewModal(false);
-                        }
-                    }}
-                >
-                    <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-                        {/* Header Modal */}
-                        <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                            <div className="flex items-center space-x-3">
-                                <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                </svg>
-                                <h3 className="text-lg font-semibold text-gray-900">Xem trước tài liệu</h3>
-                            </div>
-                            <button
-                                onClick={() => setShowPreviewModal(false)}
-                                className="text-gray-400 hover:text-gray-600 transition-colors"
-                            >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-
-                        {/* Content Modal */}
-                        <div className="flex-1 overflow-hidden">
-                            <FilePreviewDashboard
-                                src={previewSrc}
-                                type={previewType}
-                                isMobile={isMobile}
-                            />
-                        </div>
-
-                        {/* Footer Modal */}
-                        <div className="p-4 border-t border-gray-200 bg-gray-50">
-                            <div className="flex items-center justify-between">
-                                <div className="text-sm text-gray-600">
-                                    <span className="font-medium">{file.name}</span>
-                                    <span className="ml-2">({(file.size / 1024 / 1024).toFixed(2)} MB)</span>
-                                </div>
-                                <button
-                                    onClick={() => setShowPreviewModal(false)}
-                                    className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
-                                >
-                                    Đóng
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Thông báo cho file không hỗ trợ preview */}
-            {file && previewType === 'unsupported' && (
-                <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                    <div className="flex items-center space-x-2">
-                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span className="text-sm text-gray-600">
-                            File này không hỗ trợ xem trước. Bạn có thể tải lên bình thường.
-                        </span>
-                    </div>
-                </div>
-            )}
         </div>
-    );
+    )
 }
 
 interface FilePreviewProps {
-    file: File;
-    onRemove: () => void;
-    onPreview: () => void;
-    canPreview: boolean;
+    file: File
+    onRemove: () => void
 }
 
-function FilePreview({ file, onRemove, onPreview, canPreview }: FilePreviewProps) {
+function FilePreview({ file, onRemove }: FilePreviewProps) {
     return (
         <div className="space-y-2 sm:space-y-3">
             <div className="flex items-center justify-center">
-                <svg className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                    className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-green-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                 </svg>
             </div>
             <p className="text-sm sm:text-base lg:text-lg font-medium text-gray-900 break-words px-2">
@@ -242,45 +227,43 @@ function FilePreview({ file, onRemove, onPreview, canPreview }: FilePreviewProps
             <p className="text-xs sm:text-sm text-gray-500">
                 {(file.size / 1024 / 1024).toFixed(2)} MB
             </p>
-            <div className="flex items-center justify-center gap-2 sm:gap-3">
-                {canPreview && (
-                    <button
-                        type="button"
-                        onClick={onPreview}
-                        className="text-blue-500 hover:text-blue-700 text-xs sm:text-sm font-medium transition-colors duration-200 hover:bg-blue-50 px-3 py-1 rounded-lg"
-                    >
-                        <span className="hidden sm:inline">Xem trước</span>
-                        <span className="sm:hidden">Xem</span>
-                    </button>
-                )}
-                <button
-                    type="button"
-                    onClick={onRemove}
-                    className="text-red-500 hover:text-red-700 text-xs sm:text-sm font-medium transition-colors duration-200 hover:bg-red-50 px-3 py-1 rounded-lg"
-                >
-                    <span className="hidden sm:inline">Xóa tệp</span>
-                    <span className="sm:hidden">Xóa</span>
-                </button>
-            </div>
+            <button
+                type="button"
+                onClick={onRemove}
+                className="text-red-500 hover:text-red-700 text-xs sm:text-sm font-medium transition-colors duration-200 hover:bg-red-50 px-3 py-1 rounded-lg"
+            >
+                <span className="hidden sm:inline">Xóa tệp</span>
+                <span className="sm:hidden">Xóa</span>
+            </button>
         </div>
-    );
+    )
 }
 
 interface FileUploadPromptProps {
-    acceptedTypes: string;
-    maxSize: string;
+    acceptedTypes: string
+    maxSize: string
 }
 
 function FileUploadPrompt({ acceptedTypes, maxSize }: FileUploadPromptProps) {
     const formatAcceptedTypes = (types: string) => {
-        return types.replace(/\./g, '').toUpperCase().replace(/,/g, ', ');
-    };
+        return types.replace(/\./g, '').toUpperCase().replace(/,/g, ', ')
+    }
 
     return (
         <div className="space-y-3 sm:space-y-4">
             <div className="flex items-center justify-center">
-                <svg className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                <svg
+                    className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                    />
                 </svg>
             </div>
             <div className="px-2">
@@ -294,10 +277,15 @@ function FileUploadPrompt({ acceptedTypes, maxSize }: FileUploadPromptProps) {
                         <span className="sm:hidden block mt-1">hoặc kéo thả</span>
                     </span>
                 </label>
+                <p className="text-xs text-blue-600 mt-1 font-medium">
+                    Có thể chọn nhiều ảnh cùng lúc để tạo PDF
+                </p>
             </div>
             <div className="space-y-1 px-2">
                 <p className="text-xs sm:text-sm text-gray-500">
-                    <span className="hidden sm:inline">Hỗ trợ: {formatAcceptedTypes(acceptedTypes)}</span>
+                    <span className="hidden sm:inline">
+                        Hỗ trợ: {formatAcceptedTypes(acceptedTypes)}
+                    </span>
                     <span className="sm:hidden">Hỗ trợ: PDF, DOC, PPT...</span>
                 </p>
                 <p className="text-xs text-gray-400">
@@ -306,5 +294,5 @@ function FileUploadPrompt({ acceptedTypes, maxSize }: FileUploadPromptProps) {
                 </p>
             </div>
         </div>
-    );
+    )
 }

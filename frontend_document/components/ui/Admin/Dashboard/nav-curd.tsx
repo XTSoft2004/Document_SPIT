@@ -75,9 +75,14 @@ export function NavCRUD() {
         },
         {
             name: "Quản lý lịch sử",
-            url: "#",
+            url: "/admin/history",
             icon: History,
             children: [
+                {
+                    name: "Tất cả lịch sử",
+                    url: "/admin/history",
+                    icon: History,
+                },
                 {
                     name: "Lịch sử đăng nhập",
                     url: "/admin/history/login",

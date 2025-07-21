@@ -39,9 +39,11 @@ namespace Domain.Services
             var token = new TokenResponse()
             {
                 AccessToken = GenerateTokenUser(user, deviceId),
-                ExpiresAt = DateTime.Now.AddMinutes(Convert.ToInt32(_config["JwtSettings:ExpireToken"])),
+                //ExpiresAt = DateTime.Now.AddMinutes(Convert.ToInt32(_config["JwtSettings:ExpireToken"])),
+                ExpiresAt = DateTime.Now.AddSeconds(30),
                 RefreshToken = GenerateRefreshToken(user, deviceId),
-                RefreshExpiresAt = DateTime.Now.AddDays(Convert.ToInt32(_config["JwtSettings:ExpireRefreshToken"]))
+                //RefreshExpiresAt = DateTime.Now.AddDays(Convert.ToInt32(_config["JwtSettings:ExpireRefreshToken"]))
+                RefreshExpiresAt = DateTime.Now.AddMinutes(1)
             }; ;
             return token;
         }
@@ -61,8 +63,8 @@ namespace Domain.Services
                 Issuer = _config["JwtSettings:Issuer"],
                 Audience = _config["JwtSettings:Audience"],
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.Now.AddDays(Convert.ToInt32(_config["JwtSettings:ExpireToken"])),
-                //Expires = DateTime.Now.AddSeconds(30),
+                //Expires = DateTime.Now.AddDays(Convert.ToInt32(_config["JwtSettings:ExpireToken"])),
+                Expires = DateTime.Now.AddSeconds(30),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
             };
 
@@ -88,8 +90,8 @@ namespace Domain.Services
                 Issuer = _config["JwtSettings:Issuer"],
                 Audience = _config["JwtSettings:Audience"],
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.Now.AddDays(Convert.ToInt32(_config["JwtSettings:ExpireRefreshToken"])),
-                //Expires = DateTime.Now.AddMinutes(1),
+                //Expires = DateTime.Now.AddDays(Convert.ToInt32(_config["JwtSettings:ExpireRefreshToken"])),
+                Expires = DateTime.Now.AddMinutes(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
             };
 

@@ -16,7 +16,6 @@ const MenuMobile = ({ isLoggedIn = false, onLogout }: MenuMobileProps) => {
     const [isVisible, setIsVisible] = useState(false);
     const [activeItem, setActiveItem] = useState<string | null>(null);
 
-    // Enhanced drawer open/close with staggered animations
     useEffect(() => {
         if (isDrawerOpen) {
             setIsVisible(true);

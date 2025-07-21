@@ -1,4 +1,5 @@
 ﻿using Domain.Base.Services;
+using Domain.Common;
 using Domain.Common.Http;
 using Domain.Common.HttpRequest;
 using Domain.Entities;
@@ -6,6 +7,7 @@ using Domain.Interfaces.Common;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
 using Domain.Model.Request.Auth;
+using Domain.Model.Request.History;
 using Domain.Model.Request.TokenUser;
 using Domain.Model.Request.User;
 using Domain.Model.Response.Auth;
@@ -17,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -30,14 +33,16 @@ namespace Domain.Services
         private readonly IUserServices? _userServices;
         private readonly IRepositoryBase<TokenUser>? _token;
         private readonly IRepositoryBase<User>? _user;
-        private UserTokenResponse? userMeToken;  
-        public AuthServices(ITokenServices? tokenServices, IUserServices? userServices, IRepositoryBase<TokenUser>? token, IRepositoryBase<User>? user)
+        private readonly IHistoryServices _historyServices;
+        private UserTokenResponse? userMeToken;
+        public AuthServices(ITokenServices? tokenServices, IUserServices? userServices, IRepositoryBase<TokenUser>? token, IRepositoryBase<User>? user, IHistoryServices historyServices)
         {
             _tokenServices = tokenServices;
             _userServices = userServices;
             _token = token;
             _user = user;
             userMeToken = _tokenServices.GetTokenBrowser();
+            _historyServices = historyServices;
         }
         public async Task<HttpResponse> RegisterAsync(RegisterRequest registerRequest)
         {
@@ -161,6 +166,14 @@ namespace Domain.Services
                 RefreshExpiresAt = tokenResponse.RefreshExpiresAt
             };
 
+            await _historyServices.CreateAsync(new HistoryRequest
+            {
+                Title = "Đăng nhập",
+                Description = $"Người dùng {loginResponse.Username} vừa đăng nhập.",
+                function_status = Function_Enum.Login,
+                UserId = loginResponse.UserId ?? -1
+            });
+
             return HttpResponse.OK(message: "Đăng nhập thành công.",data: loginResponse);
         }
         public async Task<HttpResponse> LogoutUser()
@@ -176,6 +189,15 @@ namespace Domain.Services
 
             _token.Delete(tokenUser);
             await UnitOfWork.CommitAsync();
+
+            await _historyServices.CreateAsync(new HistoryRequest
+            {
+                Title = "Đăng xuất",
+                Description = $"Người dùng {user.Username} vừa đăng xuất.",
+                function_status = Function_Enum.Logout,
+                UserId = userMeToken.Id ?? -1
+            });
+
             return HttpResponse.OK(message: "Đăng xuất thành công.");
         }
         public async Task<HttpResponse> RefreshTokenAccount()

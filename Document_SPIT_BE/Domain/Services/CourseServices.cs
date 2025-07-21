@@ -1,4 +1,5 @@
 ﻿using Domain.Base.Services;
+using Domain.Common;
 using Domain.Common.GoogleDriver.Interfaces;
 using Domain.Common.GoogleDriver.Model.Response;
 using Domain.Common.Http;
@@ -6,8 +7,11 @@ using Domain.Entities;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
 using Domain.Model.Request.Course;
+using Domain.Model.Request.History;
 using Domain.Model.Response.Course;
 using Domain.Model.Response.Department;
+using Domain.Model.Response.Token;
+using Domain.Model.Response.User;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,11 +25,18 @@ namespace Domain.Services
         private readonly IRepositoryBase<Course> _course;
         private readonly IRepositoryBase<Department> _department;
         private readonly IGoogleDriverServices _googleDriverServices;
-        public CourseServices(IRepositoryBase<Course> course, IRepositoryBase<Department> department, IGoogleDriverServices googleDriverServices)
+        private readonly IHistoryServices _historyServices;
+        private readonly ITokenServices _tokenServices;
+        private UserTokenResponse? userMeToken;
+        
+        public CourseServices(IRepositoryBase<Course> course, IRepositoryBase<Department> department, IGoogleDriverServices googleDriverServices, IHistoryServices historyServices, ITokenServices tokenServices)
         {
             _course = course;
             _department = department;
             _googleDriverServices = googleDriverServices;
+            _historyServices = historyServices;
+            _tokenServices = tokenServices;
+            userMeToken = _tokenServices.GetTokenBrowser();
         }
 
         public async Task<HttpResponse> CreateAsync(CourseCreateRequest request)
@@ -54,6 +65,14 @@ namespace Domain.Services
             _course.Update(course);
             await UnitOfWork.CommitAsync();
 
+            await _historyServices.CreateAsync(new HistoryRequest 
+            { 
+                Title = "Tạo học phần", 
+                Description = $"Học phần {course.Name} vừa được tạo.", 
+                function_status = Function_Enum.Create_Course, 
+                UserId = userMeToken?.Id ?? -1 
+            });
+
             return HttpResponse.OK(message: "Tạo học phần thành công.");
         }
 
@@ -74,6 +93,15 @@ namespace Domain.Services
             }
             _course.Update(course);
             await UnitOfWork.CommitAsync();
+            
+            await _historyServices.CreateAsync(new HistoryRequest 
+            { 
+                Title = "Cập nhật học phần", 
+                Description = $"Học phần {course.Name} vừa được cập nhật.", 
+                function_status = Function_Enum.Update_Course, 
+                UserId = userMeToken?.Id ?? -1 
+            });
+            
             return HttpResponse.OK(message: "Cập nhật học phần thành công.");
         }
 
@@ -82,8 +110,18 @@ namespace Domain.Services
             var course = _course.Find(f => f.Id == id);
             if (course == null)
                 return HttpResponse.Error(message: "Học phần không tồn tại.");
+            
             _course.Delete(course);
             await UnitOfWork.CommitAsync();
+            
+            await _historyServices.CreateAsync(new HistoryRequest 
+            { 
+                Title = "Xóa học phần", 
+                Description = $"Học phần {course.Name} vừa được xóa.", 
+                function_status = Function_Enum.Delete_Course, 
+                UserId = userMeToken?.Id ?? -1 
+            });
+            
             return HttpResponse.OK(message: "Xóa học phần thành công.");
         }
 
