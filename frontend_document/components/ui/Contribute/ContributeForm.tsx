@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ICourseResponse } from '@/types/course'
-import { useAuth } from '@/context/AuthContext'
+import { getMe } from '@/actions/user.action'
 import CourseSelector from './CourseSelector'
 import FileUploader from './FileUploader'
 import FormActions from './FormActions'
@@ -19,7 +19,6 @@ import NotificationService from '../Notification/NotificationService'
 import { Button } from '../shadcn-ui/button'
 
 export default function ContributeForm() {
-  const { isLoggedIn, getInfo } = useAuth()
   const [formData, setFormData] = useState<ContributeFormData>(
     createEmptyFormData(),
   )
@@ -31,11 +30,15 @@ export default function ContributeForm() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const userInfo = await getInfo()
-      setUserLoggedIn(!!userInfo)
+      try {
+        const userResponse = await getMe()
+        setUserLoggedIn(userResponse.ok && !!userResponse.data)
+      } catch (error) {
+        setUserLoggedIn(false)
+      }
     }
     checkAuth()
-  }, [getInfo])
+  }, [])
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({ ...prev, name: e.target.value }))
