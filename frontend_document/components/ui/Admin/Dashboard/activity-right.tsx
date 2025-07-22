@@ -4,6 +4,7 @@ import { IHistory } from "@/types/history";
 import { Avatar, Card } from "antd";
 import { useEffect, useState } from "react";
 import { getHistory } from "@/actions/history.actions";
+import { useAuth } from "@/context/AuthContext";
 
 function formatTimeAgo(modifiedDate: string | number | Date): string {
     const modified = new Date(modifiedDate);
@@ -19,49 +20,53 @@ function formatTimeAgo(modifiedDate: string | number | Date): string {
     return `- ${days} ngày trước`;
 }
 
-const ActivityCard = ({ item }: { item: IHistory }) => (
-    <Card key={item.id} className="min-w-[200px] mb-3">
-        <Card.Meta
-            avatar={
-                <Avatar
-                    src={"https://via.placeholder.com/150"}
-                    alt={item.fullname}
-                    className="w-8 h-8"
-                />
-            }
-            title={
-                <span className="flex items-center gap-2">
-                    <span
-                        className="font-semibold truncate text-sm max-w-[100px]"
-                        title={`${item.fullname}`}
+const ActivityCard = ({ item }: { item: IHistory }) => {
+    const { getInfo } = useAuth();
+    const userInfo = getInfo();
+    return (
+        <Card key={item.id} className="min-w-[200px] mb-3">
+            <Card.Meta
+                avatar={
+                    <Avatar
+                        src={userInfo?.avatarUrl || "https://via.placeholder.com/150"}
+                        alt={item.fullname}
+                        className="w-8 h-8"
+                    />
+                }
+                title={
+                    <span className="flex items-center gap-2">
+                        <span
+                            className="font-semibold truncate text-sm max-w-[100px]"
+                            title={`${item.fullname}`}
+                        >
+                            {`${item.fullname}`.slice(0, 15)}
+                        </span>
+                        <span
+                            className="text-gray-500 text-sm truncate max-w-[90px]"
+                            title={`${formatTimeAgo(item.modifiedDate)}`}
+                        >
+                            {formatTimeAgo(item.modifiedDate)}
+                        </span>
+                    </span >
+                }
+                description={
+                    <div
+                        style={{
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'normal',
+                        }}
                     >
-                        {`${item.fullname}`.slice(0, 15)}
-                    </span>
-                    <span
-                        className="text-gray-500 text-sm truncate max-w-[90px]"
-                        title={`${formatTimeAgo(item.modifiedDate)}`}
-                    >
-                        {formatTimeAgo(item.modifiedDate)}
-                    </span>
-                </span >
-            }
-            description={
-                <div
-                    style={{
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'normal',
-                    }}
-                >
-                    <p className="m-0">{item.description}</p>
-                </div>
-            }
-        />
-    </Card >
-);
+                        <p className="m-0">{item.description}</p>
+                    </div>
+                }
+            />
+        </Card >
+    );
+};
 
 export default function ActivityRight() {
     const [activity, setActivity] = useState<IHistory[]>([]);

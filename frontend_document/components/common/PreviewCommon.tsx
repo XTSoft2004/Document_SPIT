@@ -21,6 +21,7 @@ export default function PreviewFile({ fileName, documentId }: PreviewFilePopupPr
     const [error, setError] = useState<string | null>(null);
     const [isInitialized, setIsInitialized] = useState(false);
     const [isIframeLoading, setIsIframeLoading] = useState(false);
+    const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
 
     const isImage = /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(fileName);
 
@@ -61,6 +62,47 @@ export default function PreviewFile({ fileName, documentId }: PreviewFilePopupPr
             }
         }
     }, [isFullscreen]);
+
+    // Track container dimensions for responsive layout
+    useEffect(() => {
+        const updateDimensions = () => {
+            if (containerRef.current) {
+                const { clientWidth, clientHeight } = containerRef.current;
+                setContainerDimensions({ width: clientWidth, height: clientHeight });
+            }
+        };
+
+        updateDimensions();
+        window.addEventListener('resize', updateDimensions);
+
+        return () => window.removeEventListener('resize', updateDimensions);
+    }, []);
+
+    // Calculate optimal image size based on container dimensions
+    const getImageConstraints = () => {
+        const { width, height } = containerDimensions;
+        if (width === 0 || height === 0) return { maxWidth: '100%', maxHeight: '100%' };
+
+        const containerAspectRatio = width / height;
+        const isContainerLandscape = containerAspectRatio > 1;
+
+        // Responsive sizing based on container orientation and size
+        if (isContainerLandscape) {
+            // Landscape container - optimize for width
+            return {
+                maxWidth: width > 1200 ? '90%' : '95%',
+                maxHeight: height > 600 ? '85%' : '90%'
+            };
+        } else {
+            // Portrait container - optimize for height
+            return {
+                maxWidth: width > 800 ? '85%' : '90%',
+                maxHeight: height > 800 ? '80%' : '85%'
+            };
+        }
+    };
+
+    const imageConstraints = getImageConstraints();
 
     useEffect(() => {
         let isSubscribed = true;
@@ -164,11 +206,12 @@ export default function PreviewFile({ fileName, documentId }: PreviewFilePopupPr
     return (
         <div
             ref={containerRef}
-            className="flex-1 overflow-hidden flex justify-center items-center bg-gray-50 relative"
+            className="flex-1 overflow-hidden flex justify-center items-center bg-gray-50 relative w-full h-full"
             style={{
                 cursor: isImage && isPanning ? 'grabbing' : isImage ? 'grab' : 'default',
-                minHeight: '500px',
-                height: 'calc(90vh - 120px)' // Trừ đi height của toolbar và padding
+                minHeight: '400px',
+                height: '100%',
+                width: '100%'
             }}
             onMouseMove={isImage ? handleMouseMove : undefined}
             onMouseUp={isImage ? handleMouseUp : undefined}
@@ -214,31 +257,43 @@ export default function PreviewFile({ fileName, documentId }: PreviewFilePopupPr
                     </div>
                 </div>
             ) : isImage ? (
-                <div className="relative w-full h-full flex items-center justify-center p-4">
-                    <Image
-                        ref={imgRef}
-                        src={`${globalConfig.baseUrl}/document/view/${codeView}`}
-                        alt={fileName}
-                        fill
-                        sizes="(max-width: 1200px) 100vw, 1200px"
-                        className="transition-all duration-200 object-contain"
+                <div className="relative w-full h-full flex items-center justify-center">
+                    <div
+                        className="relative"
                         style={{
-                            transform: `scale(${scale}) translate(${translate.x / scale}px, ${translate.y / scale}px)`,
-                            transition: isPanning ? 'none' : 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                            userSelect: 'none',
-                            cursor: isPanning ? 'grabbing' : 'grab',
-                            maxHeight: isFullscreen ? '90vh' : '80vh',
+                            maxWidth: imageConstraints.maxWidth,
+                            maxHeight: imageConstraints.maxHeight,
+                            width: 'fit-content',
+                            height: 'fit-content'
                         }}
-                        draggable={false}
-                        onMouseDown={handleMouseDown}
-                        onError={() => {
-                            setError("Không thể tải ảnh. Vui lòng thử lại sau.");
-                        }}
-                    />
+                    >
+                        <Image
+                            ref={imgRef}
+                            src={`${globalConfig.baseUrl}/document/view/${codeView}`}
+                            alt={fileName}
+                            width={0}
+                            height={0}
+                            sizes="100vw"
+                            className="transition-all duration-200 w-auto h-auto object-contain"
+                            style={{
+                                transform: `scale(${scale}) translate(${translate.x / scale}px, ${translate.y / scale}px)`,
+                                transition: isPanning ? 'none' : 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                userSelect: 'none',
+                                cursor: isPanning ? 'grabbing' : 'grab',
+                                maxWidth: '100%',
+                                maxHeight: '100%',
+                            }}
+                            draggable={false}
+                            onMouseDown={handleMouseDown}
+                            onError={() => {
+                                setError("Không thể tải ảnh. Vui lòng thử lại sau.");
+                            }}
+                        />
+                    </div>
 
                     {/* Zoom indicator */}
                     {scale !== 1 && (
-                        <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-medium">
+                        <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-medium z-10">
                             {Math.round(scale * 100)}%
                         </div>
                     )}
@@ -271,7 +326,11 @@ export default function PreviewFile({ fileName, documentId }: PreviewFilePopupPr
                     <iframe
                         src={`${globalConfig.baseUrl}/document/view/${codeView}#toolbar=0&navpanes=0&scrollbar=0`}
                         className="w-full h-full border-0"
-                        style={{ minHeight: '80vh', height: '100%' }}
+                        style={{
+                            minHeight: '400px',
+                            height: '100%',
+                            width: '100%'
+                        }}
                         onLoad={() => setIsIframeLoading(false)}
                         onError={() => {
                             console.error('Error loading iframe');

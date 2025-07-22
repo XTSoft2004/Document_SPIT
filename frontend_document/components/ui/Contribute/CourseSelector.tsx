@@ -2,7 +2,7 @@
 
 import { getCourse } from '@/actions/course.actions';
 import { ICourseResponse } from '@/types/course';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface CourseSelectorProps {
     value: string;
@@ -21,20 +21,44 @@ export default function CourseSelector({
 }: CourseSelectorProps) {
     const [searchTerm, setSearchTerm] = useState(value);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
     const [courses, setCourses] = useState<ICourseResponse[]>([]);
+    const debounceRef = useRef<NodeJS.Timeout | null>(null);
     const handleSearchCourse = async (search: string) => {
         if (search && search.trim() !== '') {
             const response = await getCourse(search, 1, 20);
             if (response.ok) {
                 setCourses(response.data);
             }
+        } else {
+            setCourses([]);
         }
     }
+
+    // Debounced search function
+    const debouncedSearch = (search: string) => {
+        // Clear previous timeout
+        if (debounceRef.current) {
+            clearTimeout(debounceRef.current);
+        }
+
+        // Set new timeout
+        debounceRef.current = setTimeout(() => {
+            handleSearchCourse(search);
+        }, 1000); // 1 second delay
+    };
 
     useEffect(() => {
         setSearchTerm(value);
     }, [value]);
+
+    // Cleanup timeout on component unmount
+    useEffect(() => {
+        return () => {
+            if (debounceRef.current) {
+                clearTimeout(debounceRef.current);
+            }
+        };
+    }, []);
 
     const filteredCourses = courses.filter(course =>
         course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -48,9 +72,12 @@ export default function CourseSelector({
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchTerm(e.target.value);
+        const value = e.target.value;
+        setSearchTerm(value);
         setIsDropdownOpen(true);
-        handleSearchCourse(e.target.value);
+
+        // Use debounced search instead of immediate search
+        debouncedSearch(value);
     };
 
     const handleInputFocus = () => {

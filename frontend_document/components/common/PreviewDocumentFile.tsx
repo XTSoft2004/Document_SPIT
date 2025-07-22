@@ -94,7 +94,7 @@ export default function PreviewDocumentFile({ open, onClose, fileName, documentI
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
+            className="rounded-lg fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
             onClick={onClose}
         >
             <div
