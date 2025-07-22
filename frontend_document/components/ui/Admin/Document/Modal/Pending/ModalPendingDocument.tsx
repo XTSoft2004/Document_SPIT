@@ -11,6 +11,7 @@ import FilePreview from '@/components/common/FilePreviewDashboard';
 import { handleFilePreview } from '@/utils/filePreview';
 import { IDocumentPendingRequest } from '@/types/document';
 import { getCourse } from '@/actions/course.action';
+import FilePreviewDashboard from '@/components/common/FilePreviewDashboard';
 
 const { Dragger } = Upload;
 
@@ -305,10 +306,12 @@ export default function ModalPendingDocument({
                 <div className="w-[350px] border-l border-gray-200 pl-4"> {/* Giảm width và padding */}
                     <div className="h-full">
                         {previewSrc && previewType !== "unsupported" ? (
-                            <FilePreview
+                            <FilePreviewDashboard
                                 src={previewSrc}
                                 type={previewType}
                                 isMobile={false}
+                                isFooter={true}
+                                isHeader={true}
                             />
                         ) : (
                             <div className="h-full flex items-center justify-center bg-gray-50 rounded-lg">

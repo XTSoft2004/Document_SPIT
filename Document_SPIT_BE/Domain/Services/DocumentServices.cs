@@ -171,6 +171,8 @@ namespace Domain.Services
                 // Tạo mới chi tiết tài liệu
                 var detailDocument = new DetailDocument
                 {
+                    TotalDownload = 0,
+                    TotalView = 0,
                     DocumentId = documentPending.Id,
                     Document = documentPending,
                     CreatedDate = DateTime.Now
@@ -392,6 +394,7 @@ namespace Domain.Services
                 .Include(d => d.User)
                 .Include(d => d.DocumentCategories)
                 .Include(d => d.Course)
+                .Include(d => d.DetaiDocument)
                 .AsQueryable();
 
             if (!string.IsNullOrEmpty(search))

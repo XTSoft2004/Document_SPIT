@@ -70,7 +70,7 @@ export default function PathFolder({ path }: PathFolderProps) {
             crumbs.push({
                 title: isLast ? (
                     <span
-                        className="font-semibold text-gray-800 align-middle cursor-pointer group relative text-xs xs:text-sm break-words max-w-xs truncate"
+                        className="text-gray-800 font-semibold flex items-center px-1 xs:px-2 py-1 rounded hover:bg-gray-100 transition-colors cursor-pointer align-middle text-xs xs:text-sm"
                         style={{ verticalAlign: 'middle' }}
                         onClick={() => handleCopyPath(index)}
                         title={item} // Show full text on hover
@@ -96,7 +96,7 @@ export default function PathFolder({ path }: PathFolderProps) {
                     </span>
                 ) : (
                     <span
-                        className="cursor-pointer text-blue-600 hover:underline align-middle text-xs xs:text-sm break-words max-w-xs truncate"
+                        className="cursor-pointer text-blue-600 flex items-center px-1 xs:px-2 py-1 rounded hover:bg-gray-100 transition-colors align-middle text-xs xs:text-sm"
                         style={{ verticalAlign: 'middle' }}
                         onClick={() => handleNavigate(index)}
                         title={item} // Show full text on hover
@@ -111,7 +111,7 @@ export default function PathFolder({ path }: PathFolderProps) {
     }, [path, handleNavigate, router, handleCopyPath]);
 
     return (
-        <div className="min-w-0 flex-1 overflow-hidden">
+        <div className="min-w-0 flex-1 overflow-hidden mt-[1px]">
             <Breadcrumb
                 items={items}
                 className="text-xs xs:text-sm sm:text-base overflow-hidden"

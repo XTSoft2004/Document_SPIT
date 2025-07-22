@@ -16,6 +16,7 @@ import Search from './Search';
 import convertSlug from '@/utils/convertSlug';
 import { set } from 'zod';
 import { getMe } from '@/actions/user.action';
+import PreviewDocumentFile from '../../common/PreviewDocumentFile';
 
 interface GridDocumentProps {
     data: IDriveResponse[]
@@ -240,7 +241,7 @@ export default function GridDocument({ data, content, slug, path, treeData, mobi
                             onStarredUpdate={setStarDocument}
                         />
                     )}
-                    <PreviewFile
+                    <PreviewDocumentFile
                         open={!!previewFile}
                         onClose={() => setPreviewFile(null)}
                         fileName={previewFile?.fileName || ''}
