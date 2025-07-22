@@ -98,6 +98,19 @@ const ModalUpdateUser: React.FC<ModalUpdateUserProps> = ({
                 >
                     <Input value={form.getFieldValue("fullname")} />
                 </Form.Item>
+                <Form.Item
+                    label="Mật khẩu:"
+                    name="password"
+                    rules={[
+                        { required: false, message: "Vui lòng nhập mật khẩu!" },
+                        { min: 8, message: "Mật khẩu phải có ít nhất 8 ký tự!" },
+                    ]}
+                >
+                    <Input.Password
+                        placeholder="Để trống nếu không muốn thay đổi mật khẩu"
+                        value={form.getFieldValue("password")}
+                    />
+                </Form.Item>
             </Form>
         </Modal>
     );

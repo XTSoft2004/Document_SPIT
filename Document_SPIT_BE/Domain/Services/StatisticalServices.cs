@@ -6,6 +6,7 @@ using Domain.Interfaces.Services;
 using Domain.Model.Response.Statistical;
 using Domain.Model.Response.User;
 using Newtonsoft.Json.Linq;
+using Sprache;
 using System.Linq;
 using System.Net;
 
@@ -99,6 +100,49 @@ namespace Domain.Services
 
             return HttpResponse.OK(
                 message: "Lấy dữ liệu biểu đồ thành công.",
+                data: data
+            );
+        }
+        public async Task<HttpResponse> GetStatisticalAdmin()
+        {
+            // Lấy danh sách tài liệu, người dùng, môn học
+            var documents = _document.All().ToList();
+            var users = _user.All().ToList();
+            var courses = documents.Select(d => d.CourseId).Distinct().Count();
+
+            // Lấy tổng số tài liệu, người dùng và môn học 
+            long? totalDocument = documents.Count;
+            long? totalUser = users.Count;
+            long? totalCourse = courses;
+
+            // Lấy số lượng tài liệu, người dùng, môn học trong ngày hôm nay
+            var today = DateTime.Now.Date;
+            long? todayDocument = documents.Count(d => d.CreatedDate.Date == today);
+            long? todayUser = users.Count(u => u.CreatedDate.Date == today);
+            long? todayCourse = documents.Where(d => d.CreatedDate.Date == today).Select(d => d.CourseId).Distinct().Count();
+
+            var pastDay = DateTime.Now.Date.AddDays(-1);
+            long? pastDayDocument = documents.Count(d => d.CreatedDate.Date == pastDay);
+
+            double? percentDocument = totalDocument > 0 ? (double)todayDocument / totalDocument * 100 : 0;
+            double? percentUser = totalUser > 0 ? (double)todayUser / totalUser * 100 : 0;
+            double? percentCourse = totalCourse > 0 ? (double)todayCourse / totalCourse * 100 : 0;
+            double? percentPastDayDocument = totalDocument > 0 ? (double)pastDayDocument / todayDocument * 100 : 0;
+
+            var data = new StatisticalAdminResponse
+            {
+                TotalDocuments = totalDocument,
+                TotalUsers = totalUser,
+                TotalCourses = totalCourse,
+                TotalDocumentToday = todayDocument,
+                PercentDocuments = percentDocument,
+                PercentUsers = percentUser,
+                PercentCourses = percentCourse,
+                PercentDocumentToday = percentPastDayDocument
+            };
+
+            return HttpResponse.OK(
+                message: "Lấy thống kê thành công.",
                 data: data
             );
         }

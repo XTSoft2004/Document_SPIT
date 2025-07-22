@@ -24,5 +24,10 @@ namespace Domain.Interfaces.Services
         /// </summary>
         /// <returns></returns>
         Task<HttpResponse> LineChartDate(int numberDay = 15);
+        /// <summary>
+        /// Trả về thống kê tổng quan cho quản trị viên, bao gồm tổng số tài liệu, người dùng, khóa học và các tỷ lệ phần trăm tương ứng.
+        /// </summary>
+        /// <returns></returns>
+        Task<HttpResponse> GetStatisticalAdmin();
     }
 }

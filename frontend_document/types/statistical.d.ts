@@ -18,3 +18,14 @@ export interface ILineChartDate {
   date: string
   file: number
 }
+
+export interface IStatisticalAdmin {
+  totalDocuments: number;
+  totalUsers: number;
+  totalCourses: number;
+  totalDocumentToday: number;
+  percentDocuments: number;
+  percentUsers: number;
+  percentCourses: number;
+  percentDocumentToday: number;
+}
