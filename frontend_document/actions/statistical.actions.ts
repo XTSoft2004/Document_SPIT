@@ -5,6 +5,7 @@ import {
   ILineChartDate,
   IParameterDocument,
   IRanking,
+  IStatisticalAdmin,
 } from '@/types/statistical'
 import { cookies, headers } from 'next/headers'
 
@@ -63,4 +64,26 @@ export const getLineChartDate = async () => {
     status: response.status,
     ...data,
   } as IIndexResponse<ILineChartDate>
+}
+
+export const getStatisticalAdmin = async () => {
+  const response = await fetch(
+    `${globalConfig.baseUrl}/statistical/statistical-admin`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization:
+          headers().get('Authorization') ||
+          `Bearer ${cookies().get('accessToken')?.value || ' '}`,
+      },
+    },
+  )
+
+  const data = await response.json()
+  return {
+    ok: response.ok,
+    status: response.status,
+    ...data,
+  } as IShowResponse<IStatisticalAdmin>
 }

@@ -40,5 +40,13 @@ namespace Document_SPIT_BE.Controllers
             var response = await _statistical.LineChartDate(numberDay);
             return response.ToActionResult();
         }
+        [HttpGet("statistical-admin")]
+        public async Task<IActionResult> GetStatisticalAdmin()
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+            var response = await _statistical.GetStatisticalAdmin();
+            return response.ToActionResult();
+        }
     }
 }
