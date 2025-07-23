@@ -77,8 +77,6 @@ export const logoutAccount = async () => {
   if (response.ok) {
     cookies().delete('accessToken')
     cookies().delete('refreshToken')
-    localStorage.setItem('user', '')
-    localStorage.setItem('isLoggedIn', 'false')
   }
 
   return {

@@ -7,6 +7,7 @@ import LoadingSkeleton from '../Loading/LoadingSkeleton';
 import NotFound from '../NotFound';
 import HeartButton from './HeartButton';
 import globalConfig from '@/app.config';
+import getFileIcon from '@/components/common/IconFile';
 
 interface GridDocumentListProps {
     content: IDriveItem[];
@@ -19,12 +20,7 @@ interface GridDocumentListProps {
     onStarredUpdate?: (starDocument: number[]) => void;
 }
 
-const getFileIcon = (name: string, isFolder: boolean) => {
-    if (isFolder) return <HiFolderOpen className="w-8 h-8 text-yellow-500 fill-yellow-400" />;
-    if (name.endsWith('.pdf')) return <FaFilePdf className="w-8 h-8 text-red-500" />;
-    if (name.endsWith('.doc') || name.endsWith('.docx')) return <FaFileWord className="w-8 h-8 text-blue-600" />;
-    return <HiOutlineDocument className="w-8 h-8 text-gray-400" />;
-};
+
 
 export default function GridDocumentList({
     content,

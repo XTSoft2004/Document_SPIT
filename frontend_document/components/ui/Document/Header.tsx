@@ -45,6 +45,7 @@ const Header = ({ treeData, allItems, onMobileSearch, isMobile }: HeaderProps) =
             setIsLogin(false);
             setUser(undefined);
             window.location.href = '/';
+            localStorage.clear();
             NotificationService.success({ message: 'Đăng xuất thành công' });
         } catch (error) {
             NotificationService.error({ message: 'Đăng xuất thất bại' });

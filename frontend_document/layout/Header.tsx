@@ -39,6 +39,7 @@ const Header = () => {
             setUser(undefined);
             setShowProfileMenu(false);
             window.location.href = '/';
+            localStorage.clear();
             NotificationService.success({ message: 'Đăng xuất thành công' });
         } catch (error) {
             NotificationService.error({ message: 'Đăng xuất thất bại' });

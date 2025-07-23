@@ -91,8 +91,6 @@ export const AuthProvider: React.FC<{
     const logout = () => {
         setInfo(null);
         setIsLoggedIn(false);
-        localStorage.removeItem('user');
-        localStorage.setItem('isLoggedIn', 'false');
         NotificationService.success({
             message: 'Đăng xuất thành công',
             description: 'Bạn đã đăng xuất khỏi hệ thống.',

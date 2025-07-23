@@ -205,13 +205,14 @@ namespace Domain.Services
             if (userMeToken == null)
                 return HttpResponse.Error(message: "Không tìm thấy thông tin người dùng.", HttpStatusCode.Unauthorized);
 
-            var user = _user!.Find(f => f.Id == userMeToken.Id);
+            var user = await _user!.FindAsync(f => f.Id == userMeToken.Id, "Role");
             // Tạo JWT token và Refresh Token cho người dùng
             TokenResponse tokenResponse = _tokenServices.GenerateToken(new UserResponse()
             {
                 Id = user.Id,
                 Username = user.Username,
                 Fullname = user.Fullname,
+                RoleName = user.Role?.DisplayName,
             }, userMeToken.DeviceId!);
 
             // Nếu người dùng mới thì tạo mới Refresh Token, ngược lại thì cập nhật Refresh Token
@@ -227,8 +228,9 @@ namespace Domain.Services
             {
                 UserId = user.Id,
                 AccessToken = tokenResponse.AccessToken,
-                RefreshExpiresAt = tokenResponse.RefreshExpiresAt,
+                ExpiresAt = tokenResponse.ExpiresAt,
                 RefreshToken = tokenResponse.RefreshToken,
+                RefreshExpiresAt = tokenResponse.RefreshExpiresAt,
                 DeviceId = userMeToken?.DeviceId!
             });
         }

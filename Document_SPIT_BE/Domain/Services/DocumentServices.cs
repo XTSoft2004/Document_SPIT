@@ -527,7 +527,8 @@ namespace Domain.Services
         public async Task<HttpResponse> GetRecentDocuments(int number)
         {
             var documents = _document!.All()
-                .Include("User")
+                .Include(d => d.User)
+                .Include(d => d.DetaiDocument)
                 .Where(d => d.IsPrivate == false && d.StatusDocument == StatusDocument_Enum.Approved)
                 .OrderByDescending(d => d.ModifiedDate)
                 .Take(number)

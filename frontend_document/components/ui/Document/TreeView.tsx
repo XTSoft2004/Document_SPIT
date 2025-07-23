@@ -3,6 +3,7 @@ import { ChevronDown, ChevronRight, Folder, FolderOpen, File } from 'lucide-reac
 import type { ITreeNode } from '@/types/tree';
 import { HiFolderOpen, HiOutlineDocument } from 'react-icons/hi2';
 import { FaFilePdf, FaFileWord } from 'react-icons/fa6';
+import getFileIcon from '@/components/common/IconFile';
 
 interface TreeViewProps {
     treeData: ITreeNode[];
@@ -21,12 +22,6 @@ interface TreeNodeProps {
     onExpand: (keys: React.Key[]) => void;
 }
 
-const getFileIcon = (name: string, isFolder: boolean) => {
-    if (isFolder) return <HiFolderOpen className="w-8 h-8 text-yellow-500 fill-yellow-400" />;
-    if (name.endsWith('.pdf')) return <FaFilePdf className="w-8 h-8 text-red-500" />;
-    if (name.endsWith('.doc') || name.endsWith('.docx')) return <FaFileWord className="w-8 h-8 text-blue-600" />;
-    return <HiOutlineDocument className="w-8 h-8 text-gray-400" />;
-};
 
 const TreeNode = ({ node, level, selectedKeys, expandedKeys, onSelect, onExpand }: TreeNodeProps) => {
     const isSelected = selectedKeys.includes(node.key);

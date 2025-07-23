@@ -23,12 +23,15 @@ export default function CourseSelector({
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [courses, setCourses] = useState<ICourseResponse[]>([]);
     const debounceRef = useRef<NodeJS.Timeout | null>(null);
+    const [loading, setLoading] = useState(false);
     const handleSearchCourse = async (search: string) => {
         if (search && search.trim() !== '') {
+            setLoading(true);
             const response = await getCourse(search, 1, 20);
             if (response.ok) {
                 setCourses(response.data);
             }
+            setLoading(false);
         } else {
             setCourses([]);
         }
@@ -125,7 +128,11 @@ export default function CourseSelector({
                             ))
                         ) : (
                             <div className="px-4 py-3 text-gray-500">
-                                Vui lòng nhập để tìm kiếm môn học
+                                {loading
+                                    ? "Đang tìm kiếm các môn học ..."
+                                    : courses.length == 0
+                                        ? "Không tìm thấy môn học nào phù hợp"
+                                        : "Vui lòng nhập để tìm kiếm môn học"}
                             </div>
                         )}
                     </div>
