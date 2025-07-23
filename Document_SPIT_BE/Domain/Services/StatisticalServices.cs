@@ -17,11 +17,15 @@ namespace Domain.Services
     {
         public readonly IRepositoryBase<User> _user;
         public readonly IRepositoryBase<Document> _document;
+        public readonly IRepositoryBase<DetailDocument> _detailDocument;
+        public readonly IRepositoryBase<StarDocument> _starDocument;
 
-        public StatisticalServices(IRepositoryBase<User> user, IRepositoryBase<Document> document)
+        public StatisticalServices(IRepositoryBase<User> user, IRepositoryBase<Document> document, IRepositoryBase<DetailDocument> detailDocument, IRepositoryBase<StarDocument> starDocument)
         {
             _user = user;
             _document = document;
+            _detailDocument = detailDocument;
+            _starDocument = starDocument;
         }
 
         public async Task<HttpResponse> GetRanking()
@@ -135,14 +139,52 @@ namespace Domain.Services
                 TotalUsers = totalUser,
                 TotalCourses = totalCourse,
                 TotalDocumentToday = todayDocument,
-                PercentDocuments = percentDocument,
-                PercentUsers = percentUser,
-                PercentCourses = percentCourse,
-                PercentDocumentToday = percentPastDayDocument
+                PercentDocuments = Math.Round((double)percentDocument, 2),
+                PercentUsers = Math.Round((double)percentUser, 2),
+                PercentCourses = Math.Round((double)percentCourse, 2),
+                PercentDocumentToday = Math.Round((double)percentPastDayDocument, 2)
             };
 
             return HttpResponse.OK(
                 message: "Lấy thống kê thành công.",
+                data: data
+            );
+        }
+        public async Task<HttpResponse> GetStatisticalUser(string username)
+        {
+            var documents = _document.All().ToList();
+            var users = _user.All().ToList();
+            var detailDocuments = _detailDocument.All().ToList();
+            var starDocuments = _starDocument.All().ToList();
+
+            var userId = users.FirstOrDefault(u => u.Username.ToLower() == username.ToLower().Trim())?.Id;
+            if (userId == null)
+            {
+                return HttpResponse.Error(message: "Người dùng không tồn tại.",
+                    statusCode: HttpStatusCode.NotFound
+                );
+            }
+
+            // Lấy tổng số tài liệu đã tải lên của người dùng
+            var userDocuments = documents.Where(d => d.UserId == userId).ToList();
+
+            // Lấy tổng số lượt tải xuống và lượt xem của người dùng
+            var totalDownloads = detailDocuments.Where(dd => dd.DocumentId.HasValue && userDocuments.Any(d => d.Id == dd.DocumentId.Value)).Sum(dd => dd.TotalDownload) ?? 0;
+            var totalViews = detailDocuments.Where(dd => dd.DocumentId.HasValue && userDocuments.Any(d => d.Id == dd.DocumentId.Value)).Sum(dd => dd.TotalView) ?? 0;
+
+            // Lấy tổng số lượt sao của người dùng
+            var totalStars = starDocuments.Count(sd => sd.UserId == userId);
+
+            var data = new StatisticalUserResponse
+            {
+                TotalDocuments = userDocuments.Count,
+                TotalDownloads = totalDownloads,
+                TotalViews = totalViews,
+                TotalStars = totalStars
+            };
+
+            return HttpResponse.OK(
+                message: "Lấy thống kê người dùng thành công.",
                 data: data
             );
         }

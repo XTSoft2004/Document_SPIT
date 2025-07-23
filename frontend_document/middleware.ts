@@ -4,6 +4,7 @@ import { IShowResponse } from './types/global'
 import { IUserResponse } from './types/user'
 import globalConfig from './app.config'
 import { cookies, headers } from 'next/headers'
+import next from 'next'
 
 export const config = {
   matcher: [
@@ -72,7 +73,19 @@ export async function middleware(request: NextRequest) {
     return response
   }
 
-  if (nextUrl.startsWith('/auth')) {
+  if (nextUrl === '/profile') {
+    if (!userResponse.ok) {
+      return redirectTo('/', request)
+    }
+
+    if (isLocked) {
+      return redirectTo('/ban', request)
+    }
+
+    return redirectTo(`/profile/${userResponse.data.username}`, request)
+  }
+
+  if (nextUrl.startsWith('/auth')) {  
     if (isLocked) return redirectTo('/ban', request)
     return redirectTo('/', request)
   }

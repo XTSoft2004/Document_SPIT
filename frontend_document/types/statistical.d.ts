@@ -20,12 +20,19 @@ export interface ILineChartDate {
 }
 
 export interface IStatisticalAdmin {
-  totalDocuments: number;
-  totalUsers: number;
-  totalCourses: number;
-  totalDocumentToday: number;
-  percentDocuments: number;
-  percentUsers: number;
-  percentCourses: number;
-  percentDocumentToday: number;
+  totalDocuments: number
+  totalUsers: number
+  totalCourses: number
+  totalDocumentToday: number
+  percentDocuments: number
+  percentUsers: number
+  percentCourses: number
+  percentDocumentToday: number
+}
+
+export interface IStatisticalUser {
+  totalDocuments: number
+  totalViews: number
+  totalDownloads: number
+  totalStars: number
 }

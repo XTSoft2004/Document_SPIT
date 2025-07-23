@@ -81,6 +81,11 @@ const MenuProfile = ({ onClose, user }: MenuProfileProps) => {
         router.push('/admin/dashboard');
     }, [handleClose, router]);
 
+    const handleProfile = useCallback(() => {
+        handleClose();
+        router.push('/profile');
+    }, [handleClose, router]);
+
     return (
         <div
             ref={menuRef}
@@ -113,6 +118,28 @@ const MenuProfile = ({ onClose, user }: MenuProfileProps) => {
                             <span className="transition-all duration-300">Quản trị</span>
                         </button>
                     )}
+                    {/* Divider */}
+                    <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent my-2"></div>
+
+                    {/* Profile button */}
+                    <button
+                        onClick={handleProfile}
+                        className="group w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 rounded-lg hover:bg-gradient-to-r hover:from-green-500 hover:to-green-600 hover:text-white transition-all duration-300 hover:shadow-lg hover:scale-[1.02] transform"
+                    >
+                        <div className="relative">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7.002 7.002 0 00-6.32 4.32A9.003 9.003 0 0112 20a9.003 9.003 0 016.32-1.68A7.002 7.002 0 0012 14z" />
+                            </svg>
+                            <div className="absolute inset-0 bg-green-400 opacity-0 group-hover:opacity-20 rounded-full blur-sm transition-opacity duration-300"></div>
+                        </div>
+                        <span className="transition-all duration-300">Cá nhân</span>
+                        <div className="ml-auto opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-1 group-hover:translate-x-0">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                        </div>
+                    </button>
+
                     {/* Divider */}
                     <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent my-2"></div>
 

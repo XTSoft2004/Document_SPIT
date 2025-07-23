@@ -48,5 +48,13 @@ namespace Document_SPIT_BE.Controllers
             var response = await _statistical.GetStatisticalAdmin();
             return response.ToActionResult();
         }
+        [HttpGet("statistical-user/{username}")]
+        public async Task<IActionResult> GetStatisticalUser(string username)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+            var response = await _statistical.GetStatisticalUser(username);
+            return response.ToActionResult();
+        }
     }
 }

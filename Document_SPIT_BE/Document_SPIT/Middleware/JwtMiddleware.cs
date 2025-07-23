@@ -54,7 +54,7 @@ namespace Server_Manager.Middleware
             };
 
             var requestPath = context.Request.Path.Value?.ToLower() ?? string.Empty;
-            if (bypassRoutes.Any(route => requestPath.Contains(route)))
+            if (bypassRoutes.Any(route => requestPath.Contains(route)) || requestPath.StartsWith("/statistical/statistical-user"))
             {
                 await _next(context);
                 return;
