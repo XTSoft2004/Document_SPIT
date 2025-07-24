@@ -19,6 +19,9 @@ using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using System.Net.WebSockets;
+using Domain.Common.GoogleDriver.Interfaces;
+using Domain.Common.GoogleDriver.Model.Request;
 
 namespace Domain.Services
 {
@@ -31,8 +34,9 @@ namespace Domain.Services
         private readonly IRepositoryBase<Document>? _document;
         private readonly ITokenServices _tokenServices;
         private readonly IHistoryServices _historyServices;
+        private readonly IGoogleDriverServices _googleDriverServices;
         private UserTokenResponse? userMeToken;
-        public UserServices(IRepositoryBase<User>? user, IRepositoryBase<Role>? role, ITokenServices tokenServices, IRepositoryBase<History>? history, IRepositoryBase<StarDocument>? startDocument, IRepositoryBase<Document>? document, IHistoryServices historyServices)
+        public UserServices(IRepositoryBase<User>? user, IRepositoryBase<Role>? role, ITokenServices tokenServices, IRepositoryBase<History>? history, IRepositoryBase<StarDocument>? startDocument, IRepositoryBase<Document>? document, IHistoryServices historyServices, IGoogleDriverServices googleDriverServices)
         {
             _user = user;
             _role = role;
@@ -42,6 +46,9 @@ namespace Domain.Services
             userMeToken = _tokenServices.GetTokenBrowser();
             _startDocument = startDocument;
             _document = document;
+            _googleDriverServices = googleDriverServices;
+            var envPath = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.Parent.FullName, ".env");
+            DotNetEnv.Env.Load(envPath);
         }
         public async Task<HttpResponse> UpdateAsync(long idUser, UserRequest userRequest)
         {
@@ -78,7 +85,6 @@ namespace Domain.Services
             {
                 Id = user?.Id,
                 Username = user?.Username,
-                Fullname = user?.Fullname,
                 RoleName = user?.RoleName,
             });
         }
@@ -315,6 +321,43 @@ namespace Domain.Services
                 data: data,
                 message: "Lấy thông tin người dùng thành công."
             );
+        }
+        public async Task<HttpResponse> UploadAvatar(UploadAvatarRequest uploadAvatarRequest)
+        {
+            if (userMeToken == null)
+                return HttpResponse.Error(message: "Không tìm thấy thông tin người dùng.", HttpStatusCode.Unauthorized);
+           
+            if (uploadAvatarRequest == null || string.IsNullOrEmpty(uploadAvatarRequest.imageBase64))
+                return HttpResponse.Error(message: "Thông tin hình ảnh không hợp lệ.", HttpStatusCode.BadRequest);
+
+            var user = _user!.Find(f => f.Id == userMeToken.Id);
+            if (user == null)
+                return HttpResponse.Error(message: "Người dùng không tồn tại.", HttpStatusCode.NotFound);
+
+            string FOLDER_AVATAR = Environment.GetEnvironmentVariable("FOLDER_AVATAR");
+            var infoUpload = await _googleDriverServices.UploadFile(new UploadFileBase64Request
+            {
+                Base64String = uploadAvatarRequest.imageBase64,
+                FileName = $"{user.Username}_avatar.png",
+                FolderId = FOLDER_AVATAR
+            });
+            
+            if(infoUpload != null)
+            {
+                user.AvatarUrl = infoUpload.id;
+            }
+
+
+
+            await UnitOfWork.CommitAsync();
+            await _historyServices.CreateAsync(new HistoryRequest 
+            { 
+                Title = "Cập nhật ảnh đại diện", 
+                Description = $"Người dùng {user.Username} vừa cập nhật ảnh đại diện.", 
+                function_status = Function_Enum.Update_Avatar, 
+                UserId = userMeToken?.Id ?? -1 
+            });
+            return HttpResponse.OK(message: "Cập nhật ảnh đại diện thành công.");
         }
     } 
 }

@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/shadcn-ui/badge'
 import { Search, FileText, Calendar, Eye, Download, Star, File } from 'lucide-react'
 import { getDocumentUser } from '@/actions/document.actions'
 import { IDocumentUser } from '@/types/document'
+import { HiFolderOpen } from 'react-icons/hi2'
 
 interface DocumentsTabProps {
   username: string
@@ -28,7 +29,7 @@ export default function DocumentsTab({
       try {
         setLoading(true)
         const response = await getDocumentUser(username)
-        
+
         if (response.ok && response.data) {
           setDocuments(response.data)
         } else {
@@ -91,7 +92,7 @@ export default function DocumentsTab({
 
       {/* Documents List */}
       <Card>
-        <CardHeader>
+        <CardHeader className='py-5 ml-2'>
           <CardTitle className="flex items-center gap-2">
             <FileText className="w-5 h-5" />
             Tài liệu đã đóng góp
@@ -126,7 +127,7 @@ export default function DocumentsTab({
                 {documents.length === 0 ? 'Chưa có tài liệu' : 'Không tìm thấy tài liệu'}
               </h3>
               <p className="text-gray-500">
-                {documents.length === 0 
+                {documents.length === 0
                   ? 'Người dùng này chưa đóng góp tài liệu nào.'
                   : 'Thử thay đổi từ khóa tìm kiếm.'
                 }
@@ -147,15 +148,15 @@ export default function DocumentsTab({
                           <h3 className="font-semibold text-lg text-gray-900 hover:text-blue-600 transition-colors">
                             {document.name}
                           </h3>
-                          <p className="text-sm text-gray-500">
+                          {/* <p className="text-sm text-gray-500">
                             {`${document.name}.${document.typeFile}`}
-                          </p>
+                          </p> */}
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
                         <span className="flex items-center gap-1">
-                          <File className="w-4 h-4" />
+                          <HiFolderOpen className="w-4 h-4 text-yellow-500 fill-yellow-400" />
                           {document.courseName}
                         </span>
                         <span className="flex items-center gap-1">
@@ -181,8 +182,8 @@ export default function DocumentsTab({
                     </div>
 
                     <div className="ml-4">
-                      <Badge 
-                        variant="outline" 
+                      <Badge
+                        variant="outline"
                         className={`${getStatusBadgeColor(document.statusDocument)} font-medium`}
                       >
                         {document.statusDocument}

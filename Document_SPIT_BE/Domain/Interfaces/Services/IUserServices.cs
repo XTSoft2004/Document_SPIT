@@ -82,5 +82,11 @@ namespace Domain.Interfaces.Services
         /// <param name="username"></param>
         /// <returns></returns>
         Task<HttpResponse> GetProfileUser(string username);
+        /// <summary>
+        /// Tải lên ảnh đại diện cho người dùng
+        /// </summary>
+        /// <param name="uploadAvatarRequest"></param>
+        /// <returns></returns>
+        Task<HttpResponse> UploadAvatar(UploadAvatarRequest uploadAvatarRequest);
     }
 }

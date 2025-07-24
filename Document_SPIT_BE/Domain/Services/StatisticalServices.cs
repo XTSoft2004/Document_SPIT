@@ -114,24 +114,34 @@ namespace Domain.Services
             var users = _user.All().ToList();
             var courses = documents.Select(d => d.CourseId).Distinct().Count();
 
-            // Lấy tổng số tài liệu, người dùng và môn học 
-            long? totalDocument = documents.Count;
-            long? totalUser = users.Count;
-            long? totalCourse = courses;
+            // Tổng số
+            long totalDocument = documents.Count;
+            long totalUser = users.Count;
+            long totalCourse = courses;
 
-            // Lấy số lượng tài liệu, người dùng, môn học trong ngày hôm nay
+            // Thống kê hôm nay
             var today = DateTime.Now.Date;
-            long? todayDocument = documents.Count(d => d.CreatedDate.Date == today);
-            long? todayUser = users.Count(u => u.CreatedDate.Date == today);
-            long? todayCourse = documents.Where(d => d.CreatedDate.Date == today).Select(d => d.CourseId).Distinct().Count();
+            long todayDocument = documents.Count(d => d.CreatedDate.Date == today);
+            long todayUser = users.Count(u => u.CreatedDate.Date == today);
+            long todayCourse = documents
+                .Where(d => d.CreatedDate.Date == today)
+                .Select(d => d.CourseId)
+                .Distinct()
+                .Count();
 
-            var pastDay = DateTime.Now.Date.AddDays(-1);
-            long? pastDayDocument = documents.Count(d => d.CreatedDate.Date == pastDay);
+            // Thống kê hôm qua
+            var yesterday = today.AddDays(-1);
+            long yesterdayDocument = documents.Count(d => d.CreatedDate.Date == yesterday);
 
-            double? percentDocument = totalDocument > 0 ? (double)todayDocument / totalDocument * 100 : 0;
-            double? percentUser = totalUser > 0 ? (double)todayUser / totalUser * 100 : 0;
-            double? percentCourse = totalCourse > 0 ? (double)todayCourse / totalCourse * 100 : 0;
-            double? percentPastDayDocument = totalDocument > 0 ? (double)pastDayDocument / todayDocument * 100 : 0;
+            // Tính tỷ lệ phần trăm so với tổng
+            double percentDocument = totalDocument > 0 ? (double)todayDocument / totalDocument * 100 : 0;
+            double percentUser = totalUser > 0 ? (double)todayUser / totalUser * 100 : 0;
+            double percentCourse = totalCourse > 0 ? (double)todayCourse / totalCourse * 100 : 0;
+
+            // Tính phần trăm so sánh số tài liệu hôm nay so với hôm qua
+            double percentTodayVsYesterday = yesterdayDocument > 0
+                ? (double)todayDocument / yesterdayDocument * 100
+                : 0;
 
             var data = new StatisticalAdminResponse
             {
@@ -139,10 +149,10 @@ namespace Domain.Services
                 TotalUsers = totalUser,
                 TotalCourses = totalCourse,
                 TotalDocumentToday = todayDocument,
-                PercentDocuments = Math.Round((double)percentDocument, 2),
-                PercentUsers = Math.Round((double)percentUser, 2),
-                PercentCourses = Math.Round((double)percentCourse, 2),
-                PercentDocumentToday = Math.Round((double)percentPastDayDocument, 2)
+                PercentDocuments = Math.Round(percentDocument, 2),
+                PercentUsers = Math.Round(percentUser, 2),
+                PercentCourses = Math.Round(percentCourse, 2),
+                PercentDocumentToday = Math.Round(percentTodayVsYesterday, 2)
             };
 
             return HttpResponse.OK(
@@ -150,6 +160,7 @@ namespace Domain.Services
                 data: data
             );
         }
+
         public async Task<HttpResponse> GetStatisticalUser(string username)
         {
             var documents = _document.All().ToList();

@@ -40,149 +40,161 @@ export default function ProfileInfoTab({
   } = useProfileEdit({ userInfo, onSave })
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-8">
-      <Card className="relative overflow-hidden shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
-        {/* Decorative background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 opacity-60" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-blue-100/30 to-transparent rounded-full -translate-y-48 translate-x-48" />
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-purple-100/30 to-transparent rounded-full translate-y-32 -translate-x-32" />
-        
-        <CardHeader className="relative bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white pb-10 pt-8">
-          <div className="flex items-center gap-6">
-            <div className="relative">
-              <div className="p-4 bg-white/20 rounded-2xl backdrop-blur-md border border-white/30">
-                <User className="w-10 h-10" />
-              </div>
-              <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white animate-pulse" />
-            </div>
-            <div className="flex-1">
-              <CardTitle className="text-3xl font-bold mb-2 tracking-tight">
-                Thông tin cá nhân
-              </CardTitle>
-              <CardDescription className="text-blue-100 text-lg font-medium">
-                Quản lý và cập nhật thông tin tài khoản của bạn
-              </CardDescription>
-            </div>
-          </div>
-          
-          {/* Decorative elements */}
-          <div className="absolute top-4 right-4 w-20 h-20 border border-white/20 rounded-full" />
-          <div className="absolute top-8 right-8 w-12 h-12 border border-white/30 rounded-full" />
-        </CardHeader>
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+      {/* Header */}
+      <div className="px-6 py-4 border-b border-gray-200">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-gray-900">Thông tin cá nhân</h2>
+          {isOwnProfile && (
+            <ProfileActions
+              isEditing={isEditing}
+              isSaving={isSaving}
+              onEdit={handleEdit}
+              onSave={handleSave}
+              onCancel={handleCancel}
+            />
+          )}
+        </div>
+      </div>
 
-        <CardContent className="relative p-10">
-          <div className="space-y-8 max-w-3xl mx-auto">
-            <div className="flex justify-between items-center mb-8">
-              <div className="flex items-center gap-3">
-                <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full" />
-                <h3 className="text-2xl font-bold text-gray-800">
-                  Thông tin cơ bản
-                </h3>
+      {/* Content */}
+      <div className="p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Left Column */}
+          <div className="space-y-6">
+            {/* Username */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Tên đăng nhập
+              </label>
+              <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-gray-500">
+                {localUserInfo.username}
               </div>
-              {isOwnProfile && !isEditing && (
+            </div>
+
+            {/* Full Name */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Họ và tên
+              </label>
+              {isEditing ? (
+                <div>
+                  <input
+                    type="text"
+                    value={formData.fullname}
+                    onChange={(e) => handleInputChange('fullname', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Nhập họ và tên của bạn"
+                  />
+                  {errors.fullname && (
+                    <p className="mt-1 text-sm text-red-600">{errors.fullname}</p>
+                  )}
+                </div>
+              ) : (
+                <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-gray-900">
+                  {localUserInfo.fullname}
+                </div>
+              )}
+            </div>
+
+            {/* Password - Only show when editing */}
+            {isEditing && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Mật khẩu mới
+                </label>
                 <div className="relative">
-                  <ProfileActions
-                    isEditing={isEditing}
-                    isSaving={isSaving}
-                    onEdit={handleEdit}
-                    onSave={handleSave}
-                    onCancel={handleCancel}
-                  />
-                </div>
-              )}
-            </div>
-
-            <div className="grid gap-8">
-              {/* Fullname */}
-              <div className="group">
-                <ProfileField
-                  icon={User}
-                  label="Họ và tên"
-                  value={formData.fullname}
-                  isEditing={isEditing}
-                  error={errors.fullname}
-                  onChange={(value) => handleInputChange('fullname', value)}
-                  className="transition-all duration-300 hover:transform hover:scale-[1.02]"
-                />
-              </div>
-
-              {/* Username */}
-              <div className="group">
-                <ProfileField
-                  icon={AtSign}
-                  label="Tên đăng nhập"
-                  value={localUserInfo.username}
-                  disabled={true}
-                  className="transition-all duration-300 hover:transform hover:scale-[1.02]"
-                />
-              </div>
-
-              {/* Email */}
-              {localUserInfo.email && (
-                <div className="group">
-                  <ProfileField
-                    icon={Mail}
-                    label="Email"
-                    value={localUserInfo.email}
-                    disabled={true}
-                    className="transition-all duration-300 hover:transform hover:scale-[1.02]"
-                  />
-                </div>
-              )}
-
-              {/* Password fields - only show when editing */}
-              {isEditing && (
-                <div className="space-y-6 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Lock className="w-5 h-5 text-blue-600" />
-                    <h4 className="text-lg font-semibold text-blue-900">Đổi mật khẩu</h4>
-                  </div>
-                  
-                  <ProfileField
-                    icon={Lock}
-                    label="Mật khẩu mới"
+                  <input
+                    type="password"
                     value={formData.password}
-                    type="password"
-                    isEditing={true}
-                    error={errors.password}
-                    onChange={(value) => handleInputChange('password', value)}
+                    onChange={(e) => handleInputChange('password', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Để trống nếu không muốn thay đổi"
                   />
-
-                  <ProfileField
-                    icon={Lock}
-                    label="Xác nhận mật khẩu"
-                    value={formData.confirmPassword}
-                    type="password"
-                    isEditing={true}
-                    error={errors.confirmPassword}
-                    onChange={(value) => handleInputChange('confirmPassword', value)}
-                  />
-                </div>
-              )}
-
-              {/* Role */}
-              <div className="group">
-                <div className="transition-all duration-300 hover:transform hover:scale-[1.02]">
-                  <ProfileRoleBadge roleName={localUserInfo.roleName} />
+                  {errors.password && (
+                    <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+                  )}
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Action buttons when editing */}
-            {isEditing && isOwnProfile && (
-              <div className="mt-10 pt-8 border-t border-gray-200">
-                <ProfileActions
-                  isEditing={isEditing}
-                  isSaving={isSaving}
-                  onEdit={handleEdit}
-                  onSave={handleSave}
-                  onCancel={handleCancel}
+            {/* Confirm Password - Only show when editing and password is entered */}
+            {isEditing && formData.password && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Xác nhận mật khẩu
+                </label>
+                <input
+                  type="password"
+                  value={formData.confirmPassword}
+                  onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Nhập lại mật khẩu mới"
                 />
+                {errors.confirmPassword && (
+                  <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
+                )}
               </div>
             )}
           </div>
-        </CardContent>
-      </Card>
+
+          {/* Right Column */}
+          <div className="space-y-6">
+            {/* Email */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email
+              </label>
+              <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-gray-500">
+                {localUserInfo.email || 'Chưa cập nhật'}
+              </div>
+            </div>
+
+            {/* Role */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Vai trò
+              </label>
+              <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-gray-500">
+                {localUserInfo.roleName}
+              </div>
+            </div>
+
+            {/* User ID */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                ID người dùng
+              </label>
+              <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-gray-500">
+                #{localUserInfo.userId}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Save Changes Button - Only show when editing */}
+        {isEditing && (
+          <div className="mt-8 flex justify-start">
+            <button
+              onClick={handleSave}
+              disabled={isSaving}
+              className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSaving ? 'Đang lưu...' : 'Lưu thay đổi'}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Link Social Profiles Section
+      <div className="border-t border-gray-200">
+        <div className="px-6 py-4">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Liên kết mạng xã hội</h3>
+          <div className="text-gray-500 text-sm">
+            Chưa cấu hình liên kết mạng xã hội.
+          </div>
+        </div>
+      </div> */}
     </div>
   )
 }

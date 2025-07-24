@@ -52,6 +52,17 @@ namespace Domain.Common.GoogleDriver.Services
         //    }
         //    return string.Empty;
         //}
+        public enum FolderIdDriver
+        {
+            [Display(Name = "10FY1zxYW6KY1AAZdsCjH1msLB4197Vpx")]
+            Avatar,
+            [Display(Name = "1_PzznjzNRCCK5_DkKe1Te_6WmSTLa9jF")]
+            DongGop,
+            [Display(Name = "1ZQtu52YOqyV7q-U7qJ-1T_q_BZtnj7TS")]
+            TaiLieu,
+            [Display(Name = "162CPY_OHi3esgmPzLQWB4byueaameQHz")]
+            ThungRac,
+        }
         public async Task<string> GetThumbnailBase64(string fileId)
         {
             string accessToken = await GetAccessToken();

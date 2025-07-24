@@ -100,7 +100,7 @@ export default function ModalReviewDocument({
         if (visible) {
             fetchData();
         }
-    }, [visible, Document]);
+    }, [form, visible, Document]);
 
     const handleSubmit = async (statusDocument: string) => {
         try {

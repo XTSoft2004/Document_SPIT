@@ -49,7 +49,19 @@ namespace Domain.Common
             { ".7z", "application/x-7z-compressed" },
 
             // ✅ Fallback
-            { ".bin", "application/octet-stream" }
+            { ".bin", "application/octet-stream" },
+
+            // 🖼️ Images
+            { ".jpg", "image/jpeg" },
+            { ".jpeg", "image/jpeg" },
+            { ".png", "image/png" },
+            { ".gif", "image/gif" },
+            { ".bmp", "image/bmp" },
+            { ".webp", "image/webp" },
+            { ".tiff", "image/tiff" },
+            { ".tif", "image/tiff" },
+            { ".svg", "image/svg+xml" },
+            { ".ico", "image/x-icon" },
         };
         public static string GetMimeTypeDriver(string fileName)
         {

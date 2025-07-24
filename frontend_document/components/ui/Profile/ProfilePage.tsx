@@ -26,19 +26,20 @@ export default function ProfilePage({ userInfo, userStats, username }: ProfilePa
 
   useEffect(() => {
     const fetchUser = async () => {
-        try {
-            const response = await getMe();
-            if (response.ok) {
-                setMe(response.data)
-            } else {
-                NotificationService.error({
-                    message: 'Lỗi',
-                    description: response.message || 'Không thể lấy thông tin người dùng'
-                })
-            }
-        } catch (error) {
-            console.error('Error fetching user:', error)    
+      try {
+        const response = await getMe();
+        if (response.ok) {
+          setMe(response.data)
         }
+        // else {
+        //   NotificationService.error({
+        //     message: 'Lỗi',
+        //     description: response.message || 'Không thể lấy thông tin người dùng'
+        //   })
+        // }
+      } catch (error) {
+        console.error('Error fetching user:', error)
+      }
     }
 
     fetchUser()
@@ -63,7 +64,7 @@ export default function ProfilePage({ userInfo, userStats, username }: ProfilePa
 
     try {
       const response = await updateUser(me.id.toString(), updateData as IUserUpdate)
-      
+
       if (response.ok) {
         if (updateData.fullname) {
           setCurrentUserInfo(prev => ({
@@ -96,8 +97,8 @@ export default function ProfilePage({ userInfo, userStats, username }: ProfilePa
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Header Section */}
-      <ProfileHeader 
-        userInfo={currentUserInfo} 
+      <ProfileHeader
+        userInfo={currentUserInfo}
         onEditClick={handleEditProfile}
       />
 

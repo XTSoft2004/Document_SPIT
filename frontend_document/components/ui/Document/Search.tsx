@@ -31,7 +31,7 @@ const Search = ({ allItems, onResult }: SearchProps) => {
                 placeholder="Tìm kiếm toàn bộ file hoặc thư mục..."
                 value={query}
                 onChange={e => setQuery(e.target.value)}
-                className="w-[150px] rounded-lg shadow-md px-3 py-2"
+                className="w-[100%] rounded-lg shadow-md px-3 py-2"
             />
         </div>
     );

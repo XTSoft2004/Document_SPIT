@@ -32,16 +32,16 @@ export default function ProfileTabs({
   return (
     <div className="container mx-auto px-4 pb-12">
       <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 bg-gradient-to-r from-gray-50 to-white shadow-lg border border-gray-200 rounded-xl h-20 text-lg p-2">
-          <TabsTrigger 
-            value="overview" 
+        <TabsList className="grid w-full grid-cols-2 bg-gradient-to-r from-gray-50 to-white shadow-lg border border-gray-200 rounded-xl h-[4rem] text-lg p-1">
+          <TabsTrigger
+            value="overview"
             className="flex items-center justify-center gap-3 h-full rounded-lg font-semibold transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-gray-100 data-[state=active]:hover:from-blue-600 data-[state=active]:hover:to-purple-700"
           >
             <User className="w-5 h-5" />
             Thông tin cá nhân
           </TabsTrigger>
-          <TabsTrigger 
-            value="documents" 
+          <TabsTrigger
+            value="documents"
             className="flex items-center justify-center gap-3 h-full rounded-lg font-semibold transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-gray-100 data-[state=active]:hover:from-blue-600 data-[state=active]:hover:to-purple-700"
           >
             <FileText className="w-5 h-5" />

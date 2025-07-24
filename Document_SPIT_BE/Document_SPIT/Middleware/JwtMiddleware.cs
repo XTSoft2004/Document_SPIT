@@ -49,7 +49,7 @@ namespace Server_Manager.Middleware
                 "/document/recent",
                 "/statistical/ranking",
                 "/statistical/parameter-document",
-                "/user/profile",
+                "/user/profile/",
                 "/server",
             };
 

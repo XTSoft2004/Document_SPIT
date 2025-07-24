@@ -590,7 +590,7 @@ namespace Domain.Services
                 {
                     Id = doc.Id,
                     Name = doc.Name,
-                    FileName = doc.Name,
+                    FileName = doc.FileName,
                     FileId = doc.FileId,
                     TotalDownloads = doc.DetaiDocument?.TotalDownload ?? 0,
                     TotalViews = doc.DetaiDocument?.TotalView ?? 0,

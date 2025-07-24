@@ -35,3 +35,7 @@ export interface IProfile {
   roleName: string
   avatarUrl: string
 }
+
+export interface IUserUploadAvatar {
+  imageBase64: string
+}
