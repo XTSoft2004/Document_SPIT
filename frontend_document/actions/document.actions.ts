@@ -7,6 +7,7 @@ import {
   IDocumentResponse,
   IDocumentReviewRequest,
   IDocumentUpdateRequest,
+  IDocumentUser,
 } from '@/types/document'
 import { cookies, headers } from 'next/headers'
 
@@ -223,4 +224,27 @@ export const getCodeDocument = async (documentId: number) => {
     status: response.status,
     ...data,
   } as IShowResponse<{ code: string }>
+}
+
+export const getDocumentUser = async (username: string) => {
+  const response = await fetch(
+    `${globalConfig.baseUrl}/document/user/${username}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      next: {
+        tags: ['document.user'],
+      },
+    },
+  )
+
+  const data = await response.json()
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    ...data,
+  } as IIndexResponse<IDocumentUser>
 }

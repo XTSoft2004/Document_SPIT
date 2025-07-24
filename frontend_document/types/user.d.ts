@@ -27,3 +27,11 @@ export interface ITokenInfoResponse {
   isLocked: boolean
   roleName: string
 }
+
+export interface IProfile {
+  username: string
+  fullname: string
+  email: string
+  roleName: string
+  avatarUrl: string
+}

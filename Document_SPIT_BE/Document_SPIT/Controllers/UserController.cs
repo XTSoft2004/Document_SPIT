@@ -100,5 +100,11 @@ namespace Document_SPIT_BE.Controllers
             var response = await _services!.GetRecentUpload();
             return response.ToActionResult();
         }
+        [HttpGet("profile/{username}")]
+        public async Task<IActionResult> GetProfileUser(string username)
+        {
+            var response = await _services!.GetProfileUser(username);
+            return response.ToActionResult();
+        }
     }
 }

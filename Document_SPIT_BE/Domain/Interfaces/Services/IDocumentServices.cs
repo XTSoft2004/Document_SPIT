@@ -87,5 +87,11 @@ namespace Domain.Interfaces.Services
         /// <param name="IdDocument"></param>
         /// <returns></returns>
         Task<string> GetThumbnailBase64(long IdDocument);
+        /// <summary>
+        /// Lấy danh sách tài liệu của người dùng theo username
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns></returns>
+        Task<HttpResponse> GetMe(string username);
     }
 }

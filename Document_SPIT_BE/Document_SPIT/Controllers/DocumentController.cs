@@ -146,5 +146,13 @@ namespace Document_SPIT_BE.Controllers
             var response = await _services.GetRecentDocuments(number);
             return response.ToActionResult();
         }
+        [HttpGet("user/{username}")]
+        public async Task<IActionResult> GetMe(string username)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+            var response = await _services.GetMe(username);
+            return response.ToActionResult();
+        }
     }
 }

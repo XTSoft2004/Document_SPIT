@@ -295,5 +295,26 @@ namespace Domain.Services
                 message: "Lấy danh sách tài liệu đã tải lên gần đây thành công."
             );
         }
+        public async Task<HttpResponse> GetProfileUser(string username)
+        {
+            var user = _user!.Find(f => f.Username == username);
+            if (user == null)
+                return HttpResponse.Error(message: "Người dùng không tồn tại.", HttpStatusCode.NotFound);
+
+            var data = new ProfileResponse
+            {
+                UserId = user.Id,
+                Username = user.Username,
+                Fullname = user.Fullname,
+                Email = user.Email,
+                RoleName = _role.Find(r => r.Id == user.RoleId)?.DisplayName,
+                AvatarUrl = user.AvatarUrl,
+            };
+
+            return HttpResponse.OK(
+                data: data,
+                message: "Lấy thông tin người dùng thành công."
+            );
+        }
     } 
 }

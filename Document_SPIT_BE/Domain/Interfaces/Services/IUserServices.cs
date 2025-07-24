@@ -76,5 +76,11 @@ namespace Domain.Interfaces.Services
         /// </summary>
         /// <returns></returns>
         Task<HttpResponse> GetRecentUpload();
+        /// <summary>
+        /// Lấy thông tin người dùng theo tên đăng nhập
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns></returns>
+        Task<HttpResponse> GetProfileUser(string username);
     }
 }

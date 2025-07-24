@@ -53,8 +53,14 @@ namespace Server_Manager.Middleware
                 "/server",
             };
 
+            var specialRoutes = new[]
+            {
+                "/statistical/statistical-user",
+                "/user/profile",
+            };
+
             var requestPath = context.Request.Path.Value?.ToLower() ?? string.Empty;
-            if (bypassRoutes.Any(route => requestPath.Contains(route)) || requestPath.StartsWith("/statistical/statistical-user"))
+            if (bypassRoutes.Any(route => requestPath.Contains(route)) || specialRoutes.Any(route => requestPath.StartsWith(route)))
             {
                 await _next(context);
                 return;

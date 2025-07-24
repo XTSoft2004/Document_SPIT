@@ -1,0 +1,31 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Domain.Model.Response.Document
+{
+    public class DocumentUserResponse
+    {
+        public long Id { get; set; }
+        public string Name { get; set; }
+        public string FileName { get; set; }
+        public string FileId { get; set; }
+        public long TotalDownloads { get; set; } = 0;
+        public long TotalViews { get; set; } = 0;
+        public long TotalStars { get; set; } = 0;
+        public string StatusDocument { get; set; }
+        public string CourseName { get; set; }
+        public string TypeFile
+        {
+            get
+            {
+                var extension = Path.GetExtension(FileName);
+                return string.IsNullOrEmpty(extension) ? "Unknown" : extension.TrimStart('.').ToLower();
+            }
+        }
+        public DateTime CreatedDate { get; set; }
+        public DateTime? ModifiedDate { get; set; }
+    }
+}
