@@ -11,6 +11,7 @@ import ProfileTabs from '@/components/ui/Profile/ProfileTabs'
 import { Document as DocumentType } from '@/components/ui/Profile/DocumentList'
 import { IStatisticalUser } from '@/types/statistical'
 import { getStatisticalUser } from '@/actions/statistical.actions'
+import { IInfoUserResponse } from '@/types/auth'
 
 export default function PublicProfilePage() {
   const params = useParams()
@@ -25,7 +26,7 @@ export default function PublicProfilePage() {
   })
   const [documents, setDocuments] = useState<DocumentType[]>([])
   const [searchTerm, setSearchTerm] = useState('')
-  const [profileUser, setProfileUser] = useState<any>(null)
+  const [profileUser, setProfileUser] = useState<IInfoUserResponse>()
   const [loading, setLoading] = useState(true)
   const [formData, setFormData] = useState({
     fullname: '',
@@ -44,8 +45,7 @@ export default function PublicProfilePage() {
 
         const response = await getStatisticalUser(username)
         if (response) {
-            setStats(response.data)
-        }
+          setStats(response.data)
         } else {
           notFound()
         }
@@ -59,6 +59,7 @@ export default function PublicProfilePage() {
 
     if (username) {
       fetchUserProfile()
+      setProfileUser(currentUser || undefined)
     }
   }, [username, isOwnProfile])
 
@@ -118,7 +119,6 @@ export default function PublicProfilePage() {
       {/* Header Section */}
       <ProfileHeader
         userInfo={profileUser}
-        formData={formData}
         isEditing={isEditing && isOwnProfile}
         onEditClick={() => isOwnProfile && setIsEditing(true)}
         onSave={handleSave}
@@ -134,7 +134,6 @@ export default function PublicProfilePage() {
         activeTab={activeTab}
         onTabChange={setActiveTab}
         userInfo={profileUser}
-        formData={formData}
         isEditing={isEditing && isOwnProfile}
         onInputChange={handleInputChange}
         documents={documents}

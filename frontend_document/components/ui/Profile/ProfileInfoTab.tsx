@@ -6,14 +6,7 @@ import { Input } from '@/components/ui/shadcn-ui/input';
 import { Label } from '@/components/ui/shadcn-ui/label';
 import { Badge } from '@/components/ui/shadcn-ui/badge';
 import { User } from 'lucide-react';
-
-interface UserInfo {
-    username: string;
-    roleName: string;
-    fullname: string;
-    email?: string;
-    avatarUrl?: string;
-}
+import { IInfoUserResponse } from '@/types/auth';
 
 interface FormData {
     fullname: string;
@@ -22,8 +15,7 @@ interface FormData {
 }
 
 interface ProfileInfoTabProps {
-    userInfo: UserInfo;
-    formData: FormData;
+    userInfo: IInfoUserResponse | undefined;
     isEditing: boolean;
     onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     isOwnProfile?: boolean;
@@ -31,7 +23,6 @@ interface ProfileInfoTabProps {
 
 export default function ProfileInfoTab({
     userInfo,
-    formData,
     isEditing,
     onInputChange,
     isOwnProfile = true
@@ -56,7 +47,7 @@ export default function ProfileInfoTab({
                                 <Input
                                     id="fullname"
                                     name="fullname"
-                                    value={formData.fullname}
+                                    value={userInfo?.fullname}
                                     onChange={onInputChange}
                                     placeholder="Nhập họ và tên"
                                     className="mt-1"
@@ -68,7 +59,7 @@ export default function ProfileInfoTab({
                                     id="email"
                                     name="email"
                                     type="email"
-                                    value={formData.email}
+                                    value={userInfo?.email}
                                     onChange={onInputChange}
                                     placeholder="Nhập email"
                                     className="mt-1"
@@ -78,7 +69,7 @@ export default function ProfileInfoTab({
                         <div>
                             <Label className="text-sm text-gray-600">Tên đăng nhập</Label>
                             <Input
-                                value={userInfo.username}
+                                value={userInfo?.username}
                                 disabled
                                 className="mt-1 bg-gray-50"
                             />
@@ -91,20 +82,20 @@ export default function ProfileInfoTab({
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <Label className="text-sm text-gray-600">Họ và tên</Label>
-                            <p className="font-medium text-lg">{formData.fullname}</p>
+                            <p className="font-medium text-lg">{userInfo?.fullname}</p>
                         </div>
                         <div>
                             <Label className="text-sm text-gray-600">Tên đăng nhập</Label>
-                            <p className="font-medium text-lg">@{userInfo.username}</p>
+                            <p className="font-medium text-lg">@{userInfo?.username}</p>
                         </div>
                         <div>
                             <Label className="text-sm text-gray-600">Email</Label>
-                            <p className="font-medium text-lg">{formData.email}</p>
+                            <p className="font-medium text-lg">{userInfo?.email}</p>
                         </div>
                         <div>
                             <Label className="text-sm text-gray-600">Vai trò</Label>
                             <Badge variant="outline" className="mt-1">
-                                {userInfo.roleName}
+                                {userInfo?.roleName}
                             </Badge>
                         </div>
                     </div>

@@ -72,16 +72,14 @@ namespace Domain.Services
             if (userMeToken == null)
                 return HttpResponse.Error(message: "Không tìm thấy thông tin người dùng.", HttpStatusCode.Unauthorized);
 
-            var user = await _user!.FindAsync(f => f.Id == userMeToken.Id, "Role");
-            if (user == null)
-                return HttpResponse.Error(message: "Người dùng không tồn tại.", HttpStatusCode.NotFound);
+            var user = _tokenServices.GetInfoFromToken(_tokenServices.GetTokenFromHeader());
 
             return HttpResponse.OK(data: new UserResponse()
             {
                 Id = user?.Id,
                 Username = user?.Username,
                 Fullname = user?.Fullname,
-                RoleName = user.Role != null ? user.Role.DisplayName : string.Empty
+                RoleName = user?.RoleName,
             });
         }
         public async Task<HttpResponse> SetRole(string? username, string roleName)

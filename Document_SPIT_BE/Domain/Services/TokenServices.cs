@@ -55,6 +55,7 @@ namespace Domain.Services
                 new Claim("userName", user.Username),
                 new Claim("userId", user.Id.ToString()),
                 new Claim(ClaimTypes.Role, user.RoleName),
+                new Claim("fullName", user.Fullname),
                 new Claim("deviceId", deviceId ?? string.Empty),
             };
 
@@ -81,7 +82,8 @@ namespace Domain.Services
             {
                 new Claim("userName", user.Username),
                 new Claim("userId", user.Id.ToString()),
-                new Claim(ClaimTypes.Role, user.RoleName),
+                new Claim("roleName", user.RoleName),
+                new Claim("fullName", user.Fullname),
                 new Claim("deviceId", deviceId ?? string.Empty),
             };
 
@@ -116,8 +118,9 @@ namespace Domain.Services
             var claims = jwtToken.Claims;
             var IdValue = claims.FirstOrDefault(c => c.Type == "userId")?.Value;
             var username = claims.FirstOrDefault(c => c.Type == "userName")?.Value;
-            var role = claims.FirstOrDefault(c => c.Type == "role")?.Value;
+            var role = claims.FirstOrDefault(c => c.Type == "roleName")?.Value;
             var deviceId = claims.FirstOrDefault(c => c.Type == "deviceId")?.Value;
+            var fullName = claims.FirstOrDefault(c => c.Type == "fullName")?.Value;
             var expiryDateUnix = claims.FirstOrDefault(c => c.Type == "exp")?.Value;
             var expiryDate = expiryDateUnix != null
                 ? DateTimeOffset.FromUnixTimeSeconds(long.Parse(expiryDateUnix))
@@ -129,6 +132,7 @@ namespace Domain.Services
             {
                 Id = !string.IsNullOrEmpty(IdValue) ? long.Parse(IdValue) : -100,
                 Username = username,
+                Fullname = fullName,
                 ExpiryDate = expiryDate,
                 DeviceId = deviceId,
                 RoleName = role
