@@ -334,20 +334,23 @@ namespace Domain.Services
             if (user == null)
                 return HttpResponse.Error(message: "Người dùng không tồn tại.", HttpStatusCode.NotFound);
 
+            string base64Check = uploadAvatarRequest.imageBase64.Split(',').Length == 2 ? uploadAvatarRequest.imageBase64.Split(',')[1] : string.Empty;
+            if (string.IsNullOrEmpty(base64Check))
+                return HttpResponse.Error("Base64 không hợp lệ, vui lòng kiểm tra lại.", System.Net.HttpStatusCode.BadRequest);
+
             string FOLDER_AVATAR = Environment.GetEnvironmentVariable("FOLDER_AVATAR");
             var infoUpload = await _googleDriverServices.UploadFile(new UploadFileBase64Request
             {
-                Base64String = uploadAvatarRequest.imageBase64,
+                Base64String = base64Check,
                 FileName = $"{user.Username}_avatar.png",
                 FolderId = FOLDER_AVATAR
             });
             
             if(infoUpload != null)
             {
-                user.AvatarUrl = infoUpload.id;
+                user.AvatarUrl = $"https://drive.google.com/thumbnail?id={infoUpload.id}&sz=w1000";
+                _user.Update(user);
             }
-
-
 
             await UnitOfWork.CommitAsync();
             await _historyServices.CreateAsync(new HistoryRequest 

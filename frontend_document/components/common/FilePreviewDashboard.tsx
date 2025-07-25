@@ -118,11 +118,18 @@ const FilePreviewDashboard: React.FC<FilePreviewDashboardProps> = ({ isHeader = 
                 )}
                 {type === "pdf" && !isMobile && (
                     <div className="relative overflow-hidden rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 w-full flex items-center justify-center min-h-[250px]">
+                        {/* Debug info for PDF */}
+                        {/* <div className="absolute top-2 left-2 z-10 px-2 py-1 bg-red-500 text-white text-xs rounded">
+                            PDF Debug: src={src ? src.substring(0, 50) + '...' : 'null'}
+                        </div> */}
+
                         <iframe
                             src={`${src}#toolbar=0&navpanes=0&scrollbar=0`}
                             title="PDF Preview"
                             className="w-full h-[60vh] border-none"
                             style={{ backgroundColor: 'transparent' }}
+                            onLoad={() => console.log('PDF iframe loaded successfully')}
+                            onError={() => console.error('PDF iframe failed to load')}
                         />
                         {/* PDF Loading overlay */}
                         <div className="absolute top-4 right-4 px-3 py-1 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full text-xs text-gray-600 dark:text-gray-400 shadow-sm">

@@ -12,6 +12,8 @@ import { handleFilePreview } from '@/utils/filePreview';
 import { IDocumentPendingRequest } from '@/types/document';
 import { getCourse } from '@/actions/course.action';
 import FilePreviewDashboard from '@/components/common/FilePreviewDashboard';
+import { convertImagesToPDF, ImageFile } from '@/utils/pdfUtils';
+import ImagePreviewModal from '@/components/ui/Contribute/ImagePreviewModal';
 
 const { Dragger } = Upload;
 
@@ -34,6 +36,11 @@ export default function ModalPendingDocument({
     const [previewSrc, setPreviewSrc] = useState<string | null>(null);
     const [previewType, setPreviewType] = useState<"pdf" | "image" | "unsupported" | null>(null);
 
+    // State cho xử lý ảnh
+    const [images, setImages] = useState<ImageFile[]>([]);
+    const [showImagePreviewModal, setShowImagePreviewModal] = useState(false);
+    const [finalFile, setFinalFile] = useState<File | null>(null);
+
     const [loadingCourses, setLoadingCourses] = useState(false);
     const [courses, setCourses] = useState<ICourseResponse[]>([]);
     const handleSearchCourse = async (search: string) => {
@@ -53,14 +60,17 @@ export default function ModalPendingDocument({
             setFileList([]);
             setPreviewSrc(null);
             setPreviewType(null);
+            setImages([]);
+            setShowImagePreviewModal(false);
+            setFinalFile(null);
         }
     }, [visible, form]);
 
     // Upload props
     const uploadProps: UploadProps = {
         name: 'file',
-        multiple: false,
-        maxCount: 1,
+        multiple: true, // Cho phép chọn nhiều file
+        maxCount: 10, // Tối đa 10 file
         fileList,
         accept: '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.webp,.txt',
         beforeUpload: (file) => {
@@ -95,69 +105,142 @@ export default function ModalPendingDocument({
             const { fileList: newFileList } = info;
             setFileList([...newFileList]);
 
-            if (newFileList.length > 0 && newFileList[0].originFileObj) {
-                const file = newFileList[0];
+            // Kiểm tra nếu tất cả file là ảnh
+            const imageFiles = newFileList.filter(file =>
+                file.originFileObj && file.originFileObj.type.startsWith('image/')
+            );
 
-                // // Auto fill tên file
-                // if (!form.getFieldValue('name')) {
-                //     const fileName = file.name.replace(/\.[^/.]+$/, "");
-                //     form.setFieldsValue({ name: fileName });
-                // }
+            if (imageFiles.length === newFileList.length && imageFiles.length > 0) {
+                // Tất cả file đều là ảnh
+                const newImages: ImageFile[] = imageFiles.map(file => ({
+                    id: file.uid,
+                    file: file.originFileObj as File,
+                    preview: URL.createObjectURL(file.originFileObj as File)
+                }));
 
+                setImages(newImages);
+
+                if (newImages.length === 1) {
+                    // 1 ảnh - set trực tiếp làm final file
+                    setFinalFile(newImages[0].file);
+                    // Generate preview cho ảnh đơn
+                    handleFilePreview(imageFiles[0], setPreviewSrc, setPreviewType, () => {
+                        message.warning("Không thể xem trước file này.");
+                        setPreviewSrc(null);
+                        setPreviewType(null);
+                    });
+                } else if (newImages.length > 1) {
+                    // Nhiều ảnh - mở modal preview
+                    setShowImagePreviewModal(true);
+                    setFinalFile(null);
+                    setPreviewSrc(null);
+                    setPreviewType(null);
+                }
+            } else if (newFileList.length === 1 && !newFileList[0].originFileObj?.type.startsWith('image/')) {
+                // File đơn không phải ảnh
+                setImages([]);
+                setFinalFile(newFileList[0].originFileObj as File);
                 // Generate preview
-                handleFilePreview(file, setPreviewSrc, setPreviewType, () => {
+                handleFilePreview(newFileList[0], setPreviewSrc, setPreviewType, () => {
                     message.warning("Không thể xem trước file này.");
                     setPreviewSrc(null);
                     setPreviewType(null);
                 });
             } else {
+                // Mixed files hoặc không có file
+                setImages([]);
+                setFinalFile(null);
                 setPreviewSrc(null);
                 setPreviewType(null);
             }
         },
         onRemove: () => {
             setFileList([]);
+            setImages([]);
+            setFinalFile(null);
             setPreviewSrc(null);
             setPreviewType(null);
             return true;
         },
     };
 
+    const handleImagePreviewSave = async (reorderedImages: ImageFile[]) => {
+        setImages(reorderedImages);
+        setShowImagePreviewModal(false);
+
+        try {
+            // Convert images to PDF
+            const documentName = form.getFieldValue('name') || 'document';
+            const pdfFile = await convertImagesToPDF(reorderedImages, documentName);
+            setFinalFile(pdfFile);
+
+            // Generate preview for the PDF
+            const fakeUploadFile = {
+                uid: 'pdf-preview',
+                name: `${documentName}.pdf`,
+                type: 'application/pdf',
+                originFileObj: pdfFile
+            } as UploadFile;
+
+            handleFilePreview(fakeUploadFile, setPreviewSrc, setPreviewType, () => {
+                message.warning("Không thể xem trước file PDF.");
+                setPreviewSrc(null);
+                setPreviewType(null);
+            });
+
+            message.success(`Đã gộp ${reorderedImages.length} ảnh thành PDF`);
+        } catch (error) {
+            message.error('Có lỗi xảy ra khi gộp ảnh thành PDF');
+            console.error(error);
+        }
+    };
+
     const handleSubmit = async () => {
         try {
             const values = await form.validateFields();
 
-            if (fileList.length === 0) {
+            // Kiểm tra có file hay không
+            if (!finalFile && fileList.length === 0) {
                 message.error('Vui lòng chọn file để upload!');
                 return;
             }
 
             console.log('Submitting document:', values);
+            console.log('FinalFile:', finalFile);
             console.log('FileList:', fileList);
 
             setLoading(true);
 
-            // Lấy file từ fileList state thay vì form values
-            const file = fileList[0];
-            if (!file.originFileObj) {
+            let fileToUpload = finalFile;
+
+            // Nếu chưa có finalFile, thử lấy từ fileList
+            if (!fileToUpload && fileList.length > 0) {
+                const file = fileList[0];
+                if (!file.originFileObj) {
+                    message.error('Không tìm thấy file để upload!');
+                    return;
+                }
+                fileToUpload = file.originFileObj as File;
+            }
+
+            if (!fileToUpload) {
                 message.error('Không tìm thấy file để upload!');
                 return;
             }
 
             const base64String = await new Promise<string>((resolve, reject) => {
                 const reader = new FileReader();
-                reader.readAsDataURL(file.originFileObj as File);
+                reader.readAsDataURL(fileToUpload as File);
                 reader.onload = () => resolve(reader.result as string);
                 reader.onerror = () => reject(new Error('Không thể đọc file'));
             });
 
             const documentPending: IDocumentPendingRequest = {
                 name: values.name,
-                fileName: file.name || "",
+                fileName: fileToUpload.name || "",
                 base64String,
                 courseId: values.courseId.toString(),
             };
-
 
             const response = await createDocument(documentPending);
             if (response.ok) {
@@ -188,15 +271,21 @@ export default function ModalPendingDocument({
     const handleCancel = () => {
         form.resetFields();
         setFileList([]);
+        setImages([]);
+        setFinalFile(null);
         setPreviewSrc(null);
         setPreviewType(null);
+        setShowImagePreviewModal(false);
         onCancel();
     };
 
     const clearFile = () => {
         setFileList([]);
+        setImages([]);
+        setFinalFile(null);
         setPreviewSrc(null);
         setPreviewType(null);
+        setShowImagePreviewModal(false);
     };
 
     return (
@@ -221,7 +310,7 @@ export default function ModalPendingDocument({
                     type="primary"
                     onClick={handleSubmit}
                     loading={loading}
-                    disabled={fileList.length === 0}
+                    disabled={!finalFile && fileList.length === 0}
                     size="middle"
                     className="bg-blue-500 text-white hover:bg-blue-600 border-none rounded-md"
                 >
@@ -247,9 +336,21 @@ export default function ModalPendingDocument({
                                     Kéo thả file vào đây hoặc click để chọn
                                 </p>
                                 <p className="ant-upload-hint text-gray-500 text-sm"> {/* Giảm hint size */}
-                                    Hỗ trợ PDF, Word, Excel, PowerPoint, hình ảnh. Tối đa 50MB.
+                                    Hỗ trợ PDF, Word, Excel, PowerPoint, hình ảnh. Tối đa 50MB. Có thể chọn nhiều ảnh để gộp PDF.
                                 </p>
                             </Dragger>
+
+                            {/* Preview Button cho nhiều ảnh */}
+                            {images.length > 1 && (
+                                <Button
+                                    type="primary"
+                                    onClick={() => setShowImagePreviewModal(true)}
+                                    className="w-full mt-2"
+                                    icon={<InboxOutlined />}
+                                >
+                                    Preview & Sắp xếp ảnh ({images.length})
+                                </Button>
+                            )}
                         </Form.Item>
 
                         <Form.Item
@@ -305,6 +406,11 @@ export default function ModalPendingDocument({
                 {/* Preview bên phải */}
                 <div className="w-[350px] border-l border-gray-200 pl-4"> {/* Giảm width và padding */}
                     <div className="h-full">
+                        {/* Debug info */}
+                        {/* <div className="text-xs text-gray-500 mb-2">
+                            Debug: previewSrc={previewSrc ? 'có' : 'null'}, previewType={previewType}
+                        </div> */}
+
                         {previewSrc && previewType !== "unsupported" ? (
                             <FilePreviewDashboard
                                 src={previewSrc}
@@ -331,6 +437,15 @@ export default function ModalPendingDocument({
                     </div>
                 </div>
             </div>
+
+            {/* Image Preview Modal */}
+            <ImagePreviewModal
+                isOpen={showImagePreviewModal}
+                images={images}
+                documentName={form.getFieldValue('name') || 'document'}
+                onClose={() => setShowImagePreviewModal(false)}
+                onSave={handleImagePreviewSave}
+            />
         </Modal>
     );
 }

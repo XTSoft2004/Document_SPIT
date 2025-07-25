@@ -13,7 +13,7 @@ import { IInfoUserResponse } from '@/types/auth'
 import { uploadAvatar } from '@/actions/user.action'
 import NotificationService from '../Notification/NotificationService'
 import { IUserUploadAvatar } from '@/types/user'
-
+import { useRouter } from 'next/navigation'
 interface ProfileHeaderProps {
   userInfo: IInfoUserResponse
   onEditClick?: () => void
@@ -23,6 +23,8 @@ export default function ProfileHeader({
   userInfo,
   onEditClick,
 }: ProfileHeaderProps) {
+  const router = useRouter()
+
   const getRoleBadgeColor = (role: string) => {
     switch (role.toLowerCase()) {
       case 'admin':
@@ -45,12 +47,15 @@ export default function ProfileHeader({
     const userUpload: IUserUploadAvatar = {
       imageBase64: base64String,
     }
-    const upload = await uploadAvatar(userUpload)
+    const upload = await uploadAvatar(userInfo.username, userUpload)
     if (upload.ok) {
       NotificationService.success({
         message: 'Thành công',
         description: 'Cập nhật ảnh đại diện thành công',
       })
+      // router.prefetch(`/profile/${userInfo.username}`)
+      // Reload lại trang hiện tại để lấy dữ liệu mới
+      window.location.reload()
     } else {
       NotificationService.error({
         message: 'Thất bại',

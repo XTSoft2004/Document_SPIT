@@ -238,7 +238,7 @@ export const getProfileUser = async (username: string) => {
           `Bearer ${cookies().get('accessToken')?.value || ' '}`,
       },
       next: {
-        tags: ['user.profile'],
+        tags: [`user.profile.${username}`],
       },
     },
   )
@@ -252,7 +252,10 @@ export const getProfileUser = async (username: string) => {
   } as IShowResponse<IInfoUserResponse>
 }
 
-export const uploadAvatar = async (userUpload: IUserUploadAvatar) => {
+export const uploadAvatar = async (
+  username: string,
+  userUpload: IUserUploadAvatar,
+) => {
   const response = await fetch(`${globalConfig.baseUrl}/user/upload-avatar`, {
     method: 'POST',
     headers: {
@@ -268,6 +271,7 @@ export const uploadAvatar = async (userUpload: IUserUploadAvatar) => {
   })
 
   const data = await response.json()
+  revalidateTag(`user.profile.${username}`)
 
   return {
     ok: response.ok,
