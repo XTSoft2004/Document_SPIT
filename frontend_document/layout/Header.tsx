@@ -14,29 +14,32 @@ import NotificationService from '@/components/ui/Notification/NotificationServic
 
 import { UserOutlined } from '@ant-design/icons';
 import { Avatar } from 'antd';
+import { useAuth } from '@/context/AuthContext';
 
 const Header = () => {
-    const [user, setUser] = React.useState<IUserResponse>();
+    // const [user, setUser] = React.useState<IUserResponse>();
+    const { getInfo } = useAuth();
+    const user = getInfo();
     const [islogin, setIsLogin] = React.useState<boolean>(false);
     const [showProfileMenu, setShowProfileMenu] = React.useState<boolean>(false);
 
     useEffect(() => {
-        const fetchUser = async () => {
-            const userData = await getMe();
-            setUser(userData.data);
-            if (userData.status === 200)
-                setIsLogin(true);
-            else
-                setIsLogin(false);
-        };
-        fetchUser();
+        // const fetchUser = async () => {
+        //     const userData = await getMe();
+        //     setUser(userData.data);
+        //     if (userData.status === 200)
+        //         setIsLogin(true);
+        //     else
+        //         setIsLogin(false);
+        // };
+        // fetchUser();
     }, []);
 
     const handleLogout = async () => {
         try {
             await logoutAccount();
             setIsLogin(false);
-            setUser(undefined);
+            // setUser(undefined);
             setShowProfileMenu(false);
             window.location.href = '/';
             localStorage.clear();
@@ -73,22 +76,22 @@ const Header = () => {
                     <div className="absolute right-4 sm:right-6 lg:right-8 flex items-center space-x-3">
                         {/* Mobile Menu */}
                         <div className="md:hidden">
-                            <MenuMobile isLoggedIn={islogin} onLogout={islogin ? handleLogout : undefined} />
+                            <MenuMobile isLoggedIn={!!user} onLogout={user ? handleLogout : undefined} />
                         </div>
 
                         {/* Desktop */}
-                        {islogin ? (
+                        {user ? (
                             <div className="hidden md:flex items-center space-x-3 relative">
                                 <span className="text-sm font-medium text-gray-700 uppercase">{user?.username}</span>
                                 <button
                                     onClick={() => setShowProfileMenu((prev) => !prev)}
                                     className="flex items-center focus:outline-none hover:opacity-80 transition-opacity"
                                 >
-                                    <Avatar size={36} icon={<UserOutlined />} className="border-2 border-gray-200" />
+                                    <Avatar size={36} src={user?.avatarUrl} icon={<UserOutlined />} className="border-2 border-gray-200" />
                                 </button>
                                 {showProfileMenu && (
                                     <div className="absolute right-0 top-full mt-2 z-50">
-                                        <MenuProfile onClose={() => setShowProfileMenu(false)} user={user} />
+                                        <MenuProfile onClose={() => setShowProfileMenu(false)} user={user || undefined} />
                                     </div>
                                 )}
                             </div>

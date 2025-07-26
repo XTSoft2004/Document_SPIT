@@ -6,11 +6,11 @@ import {
 import { useRouter } from 'next/navigation';
 import { logoutAccount } from '@/actions/auth.actions';
 import NotificationService from '../Notification/NotificationService';
-import { IUserResponse } from '@/types/user';
+import { IInfoUserResponse } from '@/types/auth';
 
 interface MenuProfileProps {
     onClose?: () => void;
-    user?: IUserResponse;
+    user?: IInfoUserResponse;
 }
 
 const MenuProfile = ({ onClose, user }: MenuProfileProps) => {

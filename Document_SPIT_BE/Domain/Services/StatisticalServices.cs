@@ -1,4 +1,5 @@
 ﻿using Domain.Base.Services;
+using Domain.Common;
 using Domain.Common.Http;
 using Domain.Entities;
 using Domain.Interfaces.Repositories;
@@ -45,6 +46,8 @@ namespace Domain.Services
                 if (documentCount != 0)
                     ranking.Add(new RankingResponse
                     {
+                        Username = user.Username,
+                        AvatarUrl = user.AvatarUrl,
                         Fullname = user.Fullname,
                         TotalUpload = documentCount,
                     });
@@ -58,7 +61,9 @@ namespace Domain.Services
         }
         public async Task<HttpResponse> ParameterDocument()
         {
-            var documents = _document.All().ToList();
+            var documents = _document.All()
+                .Where(d => d.StatusDocument == StatusDocument_Enum.Approved)
+                .ToList();
 
             long? totalDocument = documents.Count;
             long? totalUserContribute = documents.Select(d => d.UserId).Distinct().Count();
@@ -110,7 +115,10 @@ namespace Domain.Services
         public async Task<HttpResponse> GetStatisticalAdmin()
         {
             // Lấy danh sách tài liệu, người dùng, môn học
-            var documents = _document.All().ToList();
+            var documents = _document.All()
+                .Where(w => w.StatusDocument == StatusDocument_Enum.Approved)
+                .ToList();
+
             var users = _user.All().ToList();
             var courses = documents.Select(d => d.CourseId).Distinct().Count();
 
@@ -161,20 +169,20 @@ namespace Domain.Services
             );
         }
 
+        #region GetStatisticalUser
         public async Task<HttpResponse> GetStatisticalUser(string username)
         {
-            var documents = _document.All().ToList();
-            var users = _user.All().ToList();
-            var detailDocuments = _detailDocument.All().ToList();
-            var starDocuments = _starDocument.All().ToList();
-
-            var userId = users.FirstOrDefault(u => u.Username.ToLower() == username.ToLower().Trim())?.Id;
+            var userId = _user.All().FirstOrDefault(u => u.Username.ToLower() == username.ToLower().Trim())?.Id;
             if (userId == null)
             {
                 return HttpResponse.Error(message: "Người dùng không tồn tại.",
                     statusCode: HttpStatusCode.NotFound
                 );
             }
+
+            var documents = _document.All().Where(d => d.UserId == userId).ToList();
+            var detailDocuments = _detailDocument.All().ToList();
+            var starDocuments = _starDocument.All().ToList();
 
             // Lấy tổng số tài liệu đã tải lên của người dùng
             var userDocuments = documents.Where(d => d.UserId == userId).ToList();
@@ -199,5 +207,6 @@ namespace Domain.Services
                 data: data
             );
         }
+        #endregion
     }
 }

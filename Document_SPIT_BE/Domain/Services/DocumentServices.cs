@@ -1,5 +1,7 @@
 ﻿using Domain.Base.Services;
 using Domain.Common;
+using Domain.Common.Gemini.Interfaces;
+using Domain.Common.Gemini.Models;
 using Domain.Common.GoogleDriver.Interfaces;
 using Domain.Common.GoogleDriver.Model.Request;
 using Domain.Common.GoogleDriver.Model.Response;
@@ -17,6 +19,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -36,11 +39,12 @@ namespace Domain.Services
         private readonly IRepositoryBase<StarDocument>? _starDocument;
         private readonly IGoogleDriverServices? _googleDriverServices;
         private readonly ICategoryTypeServices? _categoryTypeServices;
+        private readonly IGeminiServices? _geminiServices;
         private readonly ITokenServices? _tokenServices;
         private readonly IRepositoryBase<OneTimeToken>? _oneTimeToken;
         private UserTokenResponse? userMeToken;
 
-        public DocumentServices(IRepositoryBase<Document>? document, IRepositoryBase<User>? user, IGoogleDriverServices? googleDriverServices, IRepositoryBase<DetailDocument>? detailDocument, ITokenServices? tokenServices, IRepositoryBase<OneTimeToken>? oneTimeToken, IRepositoryBase<Course>? course, ICategoryTypeServices? categoryTypeServices, IRepositoryBase<CategoryType>? catetoryType, IRepositoryBase<DocumentCategory>? documentCategory, IHistoryServices historyServices, IRepositoryBase<StarDocument>? starDocument)
+        public DocumentServices(IRepositoryBase<Document>? document, IRepositoryBase<User>? user, IGoogleDriverServices? googleDriverServices, IRepositoryBase<DetailDocument>? detailDocument, ITokenServices? tokenServices, IRepositoryBase<OneTimeToken>? oneTimeToken, IRepositoryBase<Course>? course, ICategoryTypeServices? categoryTypeServices, IRepositoryBase<CategoryType>? catetoryType, IRepositoryBase<DocumentCategory>? documentCategory, IHistoryServices historyServices, IRepositoryBase<StarDocument>? starDocument, IGeminiServices? geminiServices)
         {
             _document = document;
             _user = user;
@@ -57,6 +61,7 @@ namespace Domain.Services
             _documentCategory = documentCategory;
             _historyServices = historyServices;
             _starDocument = starDocument;
+            _geminiServices = geminiServices;
         }
 
         public async Task<HttpResponse> CreatePending(DocumentPendingRequest documentCreatePending)
@@ -72,6 +77,14 @@ namespace Domain.Services
             // Kiểm tra thông tin tài liệu
             if (AppExtension.IsBase64String(base64Check) == false)
                 return HttpResponse.Error("Base64 không hợp lệ, vui lòng kiểm tra lại.", System.Net.HttpStatusCode.BadRequest);
+
+            var isCheckGemini = await _geminiServices.GeminiCheck(new UploadFileGeminiCheckRequest
+            {
+                base64File = base64Check,
+                mineType = AppDictionary.GetMimeTypeDriver(documentCreatePending.fileName)
+            });
+            if (isCheckGemini)
+                return HttpResponse.Error("Tài liệu có nội dung độc hại, không được phép tải lên.", HttpStatusCode.BadRequest);
 
             // Tính toán MD5 từ Base64
             var md5Hash = AppExtension.GetMd5FromBase64(base64Check);

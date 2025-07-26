@@ -30,6 +30,9 @@ import {
 } from "@/components/ui/shadcn-ui/sidebar"
 import { useAuth } from "@/context/AuthContext"
 import { use, useEffect } from "react"
+import Link from "next/link"
+import NotificationService from "../../Notification/NotificationService"
+import { logoutAccount } from "@/actions/auth.actions"
 
 export function NavUser({
   user,
@@ -43,6 +46,19 @@ export function NavUser({
   const { isMobile } = useSidebar()
   const { getInfo } = useAuth();
   const info = getInfo();
+
+  const handleLogout = async () => {
+    try {
+      await logoutAccount();
+      window.location.href = '/';
+      localStorage.clear();
+      NotificationService.success({ message: 'Đăng xuất thành công' });
+    } catch (error) {
+      NotificationService.error({ message: 'Đăng xuất thất bại' });
+      console.error('Logout failed:', error);
+    }
+  };
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -52,7 +68,7 @@ export function NavUser({
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground border shadow rounded-xl"
             >
-              <Avatar className="h-8 w-8 rounded-lg grayscale">
+              <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage className="object-cover" src={info?.avatarUrl} alt={info?.username} />
                 <AvatarFallback className="rounded-lg">{info?.fullname.slice(0, 2)}</AvatarFallback>
               </Avatar>
@@ -87,9 +103,11 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <UserCircleIcon />
-                Profile
+              <DropdownMenuItem asChild>
+                <Link href={`/profile/${info?.username}`} className="flex items-center gap-2">
+                  <UserCircleIcon />
+                  Profile
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <UserCircleIcon />
@@ -97,7 +115,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleLogout()} className="flex items-center gap-2">
               <LogOutIcon />
               Log out
             </DropdownMenuItem>

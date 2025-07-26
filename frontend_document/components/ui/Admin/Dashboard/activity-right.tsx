@@ -5,6 +5,7 @@ import { Avatar, Card } from "antd";
 import { useEffect, useState } from "react";
 import { getHistory } from "@/actions/history.actions";
 import { useAuth } from "@/context/AuthContext";
+import Link from "next/link";
 
 function formatTimeAgo(modifiedDate: string | number | Date): string {
     const modified = new Date(modifiedDate);
@@ -85,12 +86,12 @@ export default function ActivityRight() {
     }, []);
 
     return (
-        <div className="flex flex-col gap-4 p-2 sm:p-4 pt-0">
+        <div className="flex flex-col gap-4 p-1 sm:p-2 pt-0">
             {/* Header */}
             <div className="flex items-center justify-between">
-                <h2 className="text-base sm:text-lg font-semibold">Activity</h2>
-                <a className="flex items-center text-xs sm:text-sm text-blue-500 hover:underline cursor-pointer">
-                    <span>View All</span>
+                <h2 className="text-base sm:text-lg font-semibold">Hoạt động</h2>
+                <Link href="/admin/history" className="flex items-center text-xs sm:text-sm text-blue-500 hover:underline cursor-pointer">
+                    <span>Xem tất cả</span>
                     <svg
                         className="ml-1 w-3 h-3 sm:w-4 sm:h-4"
                         xmlns="http://www.w3.org/2000/svg"
@@ -105,7 +106,7 @@ export default function ActivityRight() {
                             d="M9 5l7 7-7 7"
                         />
                     </svg>
-                </a>
+                </Link>
             </div>
 
             {/* Activity List */}

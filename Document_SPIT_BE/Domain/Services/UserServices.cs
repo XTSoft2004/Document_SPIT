@@ -348,7 +348,7 @@ namespace Domain.Services
             
             if(infoUpload != null)
             {
-                user.AvatarUrl = $"https://drive.google.com/thumbnail?id={infoUpload.id}&sz=w1000";
+                user.AvatarUrl = $"https://drive.google.com/thumbnail?id={infoUpload.id}&sz=w500";
                 _user.Update(user);
             }
 

@@ -231,7 +231,8 @@ namespace Domain.Services
                 ExpiresAt = tokenResponse.ExpiresAt,
                 RefreshToken = tokenResponse.RefreshToken,
                 RefreshExpiresAt = tokenResponse.RefreshExpiresAt,
-                DeviceId = userMeToken?.DeviceId!
+                DeviceId = userMeToken?.DeviceId!,
+                RoleName = user.Role?.DisplayName ?? string.Empty
             });
         }
     }

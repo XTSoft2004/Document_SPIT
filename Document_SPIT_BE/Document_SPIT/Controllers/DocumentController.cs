@@ -21,7 +21,7 @@ namespace Document_SPIT_BE.Controllers
             _services = services;
         }
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpPost("create")]
         public async Task<IActionResult> CreateAsync(DocumentPendingRequest documentPending)
         {
@@ -31,6 +31,7 @@ namespace Document_SPIT_BE.Controllers
             var response = await _services.CreatePending(documentPending);
             return response.ToActionResult();
         }
+        [Authorize(Roles = "Admin")]
         [HttpPost("review/{IdDocument}")]
         public async Task<IActionResult> ReviewAsync(long? IdDocument, DocumentReviewRequest documentReview)
         {

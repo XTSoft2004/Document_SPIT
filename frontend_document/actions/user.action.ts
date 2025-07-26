@@ -272,6 +272,7 @@ export const uploadAvatar = async (
 
   const data = await response.json()
   revalidateTag(`user.profile.${username}`)
+  revalidateTag(`auth.refreshToken`)
 
   return {
     ok: response.ok,

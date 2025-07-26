@@ -1,5 +1,7 @@
 ﻿using System.Security.Claims;
 using System.Text;
+using Domain.Common.Gemini.Interfaces;
+using Domain.Common.Gemini.Services;
 using Domain.Common.GoogleDriver.Interfaces;
 using Domain.Common.GoogleDriver.Services;
 using Domain.Common.Http;
@@ -107,6 +109,8 @@ builder.Services.AddControllers(); // Thêm Controller
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddScoped<IGoogleDriverServices, GoogleDriverSevices>();
+builder.Services.AddScoped<IGeminiServices, GeminiServices>();
+builder.Services.AddScoped<IGeminiServices, GeminiServices>();
 builder.Services.AddScoped(typeof(IRepositoryBase<>), typeof(RepositoryBase<>));
 builder.Services.AddHttpContextAccessor();
 

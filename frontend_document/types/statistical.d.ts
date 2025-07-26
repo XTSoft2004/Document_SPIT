@@ -4,6 +4,8 @@ export interface IStar {
 }
 
 export interface IRanking {
+  username: string
+  avatarUrl: string
   fullname: string
   totalUpload: number
 }

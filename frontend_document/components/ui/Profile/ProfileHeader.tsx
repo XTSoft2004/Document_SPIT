@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/shadcn-ui/badge'
 import { Button } from '@/components/ui/shadcn-ui/button'
 import { User, Mail, Edit3 } from 'lucide-react'
 import { IInfoUserResponse } from '@/types/auth'
-import { uploadAvatar } from '@/actions/user.action'
+import { getProfileUser, uploadAvatar } from '@/actions/user.action'
 import NotificationService from '../Notification/NotificationService'
 import { IUserUploadAvatar } from '@/types/user'
 import { useRouter } from 'next/navigation'
@@ -53,6 +53,17 @@ export default function ProfileHeader({
         message: 'Thành công',
         description: 'Cập nhật ảnh đại diện thành công',
       })
+      const userNew = await getProfileUser(userInfo.username)
+      const userJson: IInfoUserResponse = {
+        userId: userNew.data.userId,
+        username: userNew.data.username,
+        fullname: userNew.data.fullname,
+        roleName: userNew.data.roleName || 'User', // Default role if not provided
+        email: userNew.data.email,
+        avatarUrl: userNew.data.avatarUrl || '', // Ensure avatarUrl is set
+      };
+      localStorage.setItem('user', JSON.stringify(userJson));
+
       // router.prefetch(`/profile/${userInfo.username}`)
       // Reload lại trang hiện tại để lấy dữ liệu mới
       window.location.reload()
@@ -128,7 +139,7 @@ export default function ProfileHeader({
         <div className="flex flex-col md:flex-row items-center gap-8">
           {/* Avatar Section */}
           <div className="relative group">
-            <Avatar className="w-32 h-32 border-4 border-white/20 shadow-2xl backdrop-blur-sm">
+            <Avatar className="w-32 h-32 border-4 border-white/20 shadow-2xl">
               <AvatarImage
                 src={userInfo.avatarUrl}
                 alt={userInfo.fullname}
