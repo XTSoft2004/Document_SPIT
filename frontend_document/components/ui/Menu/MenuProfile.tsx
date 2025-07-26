@@ -6,11 +6,11 @@ import {
 import { useRouter } from 'next/navigation';
 import { logoutAccount } from '@/actions/auth.actions';
 import NotificationService from '../Notification/NotificationService';
-import { IInfoUserResponse } from '@/types/auth';
+import { IUserResponse } from '@/types/user';
 
 interface MenuProfileProps {
     onClose?: () => void;
-    user?: IInfoUserResponse;
+    user?: IUserResponse;
 }
 
 const MenuProfile = ({ onClose, user }: MenuProfileProps) => {
@@ -107,15 +107,20 @@ const MenuProfile = ({ onClose, user }: MenuProfileProps) => {
                     {user?.roleName === 'Admin' && (
                         <button
                             onClick={handleAdminDashboard}
-                            className="group w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 rounded-lg hover:bg-gradient-to-r hover:from-blue-500 hover:to-blue-600 hover:text-white transition-all duration-300 hover:shadow-lg hover:scale-[1.02] transform"
+                        className="group w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 rounded-lg hover:bg-gradient-to-r hover:from-yellow-500 hover:to-yellow-600 hover:text-white transition-all duration-300 hover:shadow-lg hover:scale-[1.02] transform"
                         >
                             <div className="relative">
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 0v4m0-4h4m-4 0H8m6 8H6a2 2 0 01-2-2V6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2h-6z" />
                                 </svg>
-                                <div className="absolute inset-0 bg-blue-400 opacity-0 group-hover:opacity-20 rounded-full blur-sm transition-opacity duration-300"></div>
+                                <div className="absolute inset-0 bg-yellow-400 opacity-0 group-hover:opacity-20 rounded-full blur-sm transition-opacity duration-300"></div>
                             </div>
                             <span className="transition-all duration-300">Quản trị</span>
+                            <div className="ml-auto opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-1 group-hover:translate-x-0">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                        </div>
                         </button>
                     )}
                     {/* Divider */}

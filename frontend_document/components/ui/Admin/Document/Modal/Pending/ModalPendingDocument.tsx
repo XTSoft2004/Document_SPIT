@@ -52,6 +52,8 @@ export default function ModalPendingDocument({
         setLoadingCourses(false);
     }
 
+    const maxSize = parseInt(process.env.NEXT_PUBLIC_MAX_SIZE_FILE || '10')
+
     // Reset form khi modal mở/đóng
     useEffect(() => {
         handleSearchCourse('');
@@ -94,8 +96,8 @@ export default function ModalPendingDocument({
                 return false;
             }
 
-            if (file.size / 1024 / 1024 > 50) {
-                message.error('File phải nhỏ hơn 50MB!');
+            if (file.size / 1024 / 1024 > maxSize) {
+                message.error(`File phải nhỏ hơn ${maxSize}MB!`);
                 return false;
             }
 
@@ -336,7 +338,7 @@ export default function ModalPendingDocument({
                                     Kéo thả file vào đây hoặc click để chọn
                                 </p>
                                 <p className="ant-upload-hint text-gray-500 text-sm"> {/* Giảm hint size */}
-                                    Hỗ trợ PDF, Word, Excel, PowerPoint, hình ảnh. Tối đa 50MB. Có thể chọn nhiều ảnh để gộp PDF.
+                                    Hỗ trợ PDF, Word, Excel, PowerPoint, hình ảnh. Tối đa {maxSize}MB. Có thể chọn nhiều ảnh để gộp PDF.
                                 </p>
                             </Dragger>
 

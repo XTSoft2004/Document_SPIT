@@ -176,7 +176,7 @@ export default function TopRankingTable({ rankings, loading }: TopRankingTablePr
                                 <th className="text-left py-4 px-4 font-bold text-gray-900">Hạng</th>
                                 <th className="text-left py-4 px-4 font-bold text-gray-900">Người dùng</th>
                                 <th className="text-center py-4 px-4 font-bold text-gray-900">Số tài liệu đã tải lên</th>
-                                <th className="text-center py-4 px-4 font-bold text-gray-900">Trạng thái</th>
+                                <th className="text-center py-4 px-4 font-bold text-gray-900">Danh hiệu</th>
                             </tr>
                         </thead>
                         <tbody>

@@ -4,6 +4,7 @@ export interface IUserResponse {
   fullname: string
   islocked: boolean
   roleName: string
+  avatarUrl: string
 }
 
 export interface IUserUpdate {

@@ -86,6 +86,8 @@ namespace Domain.Services
                 Id = user?.Id,
                 Username = user?.Username,
                 RoleName = user?.RoleName,
+                Fullname = _user!.Find(f => f.Id == user.Id)?.Fullname,
+                AvatarUrl = _user!.Find(f => f.Id == user.Id)?.AvatarUrl,
             });
         }
         public async Task<HttpResponse> SetRole(string? username, string roleName)

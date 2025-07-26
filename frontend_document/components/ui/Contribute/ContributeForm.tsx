@@ -59,16 +59,12 @@ export default function ContributeForm() {
   const handleImagesChange = (newImages: ImageFile[]) => {
     setImages(newImages)
 
-    // Nếu chỉ có 1 ảnh, convert thành file để sẵn sàng submit
     if (newImages.length === 1) {
-      // Set ảnh đầu tiên làm file để submit
       setFormData((prev) => ({ ...prev, file: newImages[0].file }))
     } else if (newImages.length > 1) {
-      // Nếu có nhiều ảnh, clear file và mở preview modal
       setFormData((prev) => ({ ...prev, file: null }))
       setShowPreviewModal(true)
     } else {
-      // Nếu không có ảnh nào, clear file
       setFormData((prev) => ({ ...prev, file: null }))
     }
   }
@@ -97,7 +93,6 @@ export default function ContributeForm() {
     try {
       let fileToUpload = formData.file
 
-      // Nếu có nhiều ảnh và chưa có file, convert ảnh thành PDF
       if (images.length > 1 && !formData.file) {
         NotificationService.info({
           message: 'Đang chuyển đổi ảnh thành PDF...',
@@ -105,9 +100,7 @@ export default function ContributeForm() {
         })
 
         fileToUpload = await convertImagesToPDF(images, formData.name)
-      }
-      // Nếu có 1 ảnh và chưa có file, sử dụng ảnh đó
-      else if (images.length === 1 && !formData.file) {
+      } else if (images.length === 1 && !formData.file) {
         fileToUpload = images[0].file
       }
 
@@ -145,11 +138,11 @@ export default function ContributeForm() {
   }
 
   const isFormValid =
-    ((validateForm(formData) || // Form có file và thông tin đầy đủ
-      (images.length > 0 && // Hoặc có ảnh và thông tin cơ bản
+    (validateForm(formData) ||
+      (images.length > 0 &&
         formData.name.trim() !== '' &&
         formData.courseId > 0)) &&
-      userLoggedIn)
+    userLoggedIn
 
   const LoginRequiredBanner = () => (
     <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg p-4 sm:p-6 mb-6">
@@ -209,8 +202,9 @@ export default function ContributeForm() {
       {!userLoggedIn && <LoginRequiredBanner />}
 
       <form
-        className={`space-y-4 sm:space-y-6 ${!userLoggedIn ? 'opacity-60 pointer-events-none' : ''
-          }`}
+        className={`space-y-4 sm:space-y-6 ${
+          !userLoggedIn ? 'opacity-60 pointer-events-none' : ''
+        }`}
         onSubmit={(e) => e.preventDefault()}
       >
         {/* Document Name Field with responsive styling */}

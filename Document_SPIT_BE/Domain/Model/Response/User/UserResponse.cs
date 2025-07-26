@@ -14,5 +14,6 @@ namespace Domain.Model.Response.User
         public bool IsLocked { get; set; }
 
         public string? RoleName { get; set; }
+        public string? AvatarUrl { get; set; }
     }
 }

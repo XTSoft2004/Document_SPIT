@@ -74,21 +74,6 @@ export default function PageRegister() {
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2, duration: 0.3 }}
-                        >
-                            <CustomTextField
-                                control={control}
-                                errors={errors}
-                                name="password"
-                                type="password"
-                                placeholder="Tạo mật khẩu"
-                                icon={<KeyRound size={18} className="text-gray-400" />}
-                            />
-                        </motion.div>
-
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3, duration: 0.3 }}
                         >
                             <CustomTextField
@@ -98,6 +83,21 @@ export default function PageRegister() {
                                 type="text"
                                 placeholder="Nhập họ và tên"
                                 icon={<SquareUserRound size={18} className="text-gray-400" />}
+                            />
+                        </motion.div>
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2, duration: 0.3 }}
+                        >
+                            <CustomTextField
+                                control={control}
+                                errors={errors}
+                                name="password"
+                                type="password"
+                                placeholder="Tạo mật khẩu"
+                                icon={<KeyRound size={18} className="text-gray-400" />}
                             />
                         </motion.div>
                     </div>

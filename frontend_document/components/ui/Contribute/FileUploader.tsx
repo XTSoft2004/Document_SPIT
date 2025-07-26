@@ -14,13 +14,15 @@ interface FileUploaderProps {
     className?: string
 }
 
+const defaultMaxSize = parseInt(process.env.NEXT_PUBLIC_MAX_SIZE_FILE || '10')
+
 export default function FileUploader({
     file,
     images,
     onFileChange,
     onImagesChange,
     acceptedTypes = '.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.image,.jpg,.jpeg,.png',
-    maxSize = '50MB',
+    maxSize = `${defaultMaxSize}MB`,
     className = '',
 }: FileUploaderProps) {
     const [isDragOver, setIsDragOver] = useState(false)
