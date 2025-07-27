@@ -10,6 +10,7 @@ import {
   IShowResponse,
 } from '@/types/global'
 import { revalidateTag } from 'next/cache'
+import { ITokenInfoResponse } from '@/types/user'
 
 export const registerAccount = async (formData: IRegisterRequest) => {
   const response = await fetch(`${globalConfig.baseUrl}/auth/register`, {
@@ -110,4 +111,34 @@ export const checkAuthSecurity = async (password: string) => {
     status: response.status,
     ...data,
   } as IBaseResponse
+}
+
+export const refreshToken = async () => {
+  const response = await fetch(`${globalConfig.baseUrl}/auth/refresh-token`, {
+    method: 'GET',
+    headers: {
+      Authorization:
+        headers().get('Authorization') ||
+        `Bearer ${cookies().get('accessToken')?.value || ''}`,
+    },
+    next: {
+      tags: ['auth.refreshToken'],
+    },
+  })
+
+  //   if (!response.ok) throw response
+  var data = await response.json()
+
+  if (response.ok) {
+    cookies().delete('accessToken')
+    cookies().delete('refreshToken')
+
+    cookies().set('accessToken', data.data.accessToken)
+    cookies().set('refreshToken', data.data.refreshToken)
+  }
+  return {
+    ok: response.ok,
+    message: data.message,
+    ...data,
+  } as IShowResponse<ITokenInfoResponse>
 }

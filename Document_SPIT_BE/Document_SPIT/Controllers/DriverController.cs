@@ -1,6 +1,7 @@
 ﻿using Domain.Common.GoogleDriver.Interfaces;
 using Domain.Common.GoogleDriver.Model.Request;
 using Domain.Interfaces.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static Domain.Common.AppConstants;
@@ -19,6 +20,7 @@ namespace Document_SPIT_BE.Controllers
             _services = services;
             _documentServices = documentServices;
         }
+        [Authorize(Roles = "Admin")]
         [HttpGet("info")]
         public async Task<IActionResult> GetInfoDriver()
         {
@@ -30,6 +32,7 @@ namespace Document_SPIT_BE.Controllers
             
             return Ok(response);
         }
+        [Authorize(Roles = "Admin")]
         [HttpGet("create-folder")]
         public async Task<IActionResult> CreateFolder(string folderName, string parentId = "")
         {

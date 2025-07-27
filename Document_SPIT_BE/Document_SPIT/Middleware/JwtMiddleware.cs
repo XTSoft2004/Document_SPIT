@@ -32,7 +32,6 @@ namespace Server_Manager.Middleware
                 "/auth/login",
                 "/auth/register",
                 "/auth/sign-up",
-                "/auth/refresh-token",
                 "/document/view",
                 "/extension/",
                 "/auth/logout",
@@ -49,12 +48,18 @@ namespace Server_Manager.Middleware
                 "/document/recent",
                 "/statistical/ranking",
                 "/statistical/parameter-document",
-                "/user/profile",
+                "/user/profile/",
                 "/server",
             };
 
+            var specialRoutes = new[]
+            {
+                "/statistical/statistical-user",
+                "/user/profile",
+            };
+
             var requestPath = context.Request.Path.Value?.ToLower() ?? string.Empty;
-            if (bypassRoutes.Any(route => requestPath.Contains(route)))
+            if (bypassRoutes.Any(route => requestPath.Contains(route)) || specialRoutes.Any(route => requestPath.StartsWith(route)))
             {
                 await _next(context);
                 return;

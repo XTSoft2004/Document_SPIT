@@ -29,5 +29,11 @@ namespace Domain.Interfaces.Services
         /// </summary>
         /// <returns></returns>
         Task<HttpResponse> GetStatisticalAdmin();
+        /// <summary>
+        /// Trả về thống kê cho một người dùng
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns></returns>
+        Task<HttpResponse> GetStatisticalUser(string username);
     }
 }

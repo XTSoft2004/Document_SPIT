@@ -58,8 +58,14 @@ export default function ContributeForm() {
 
   const handleImagesChange = (newImages: ImageFile[]) => {
     setImages(newImages)
-    if (newImages.length > 1) {
+
+    if (newImages.length === 1) {
+      setFormData((prev) => ({ ...prev, file: newImages[0].file }))
+    } else if (newImages.length > 1) {
+      setFormData((prev) => ({ ...prev, file: null }))
       setShowPreviewModal(true)
+    } else {
+      setFormData((prev) => ({ ...prev, file: null }))
     }
   }
 
@@ -94,6 +100,8 @@ export default function ContributeForm() {
         })
 
         fileToUpload = await convertImagesToPDF(images, formData.name)
+      } else if (images.length === 1 && !formData.file) {
+        fileToUpload = images[0].file
       }
 
       if (!fileToUpload) {

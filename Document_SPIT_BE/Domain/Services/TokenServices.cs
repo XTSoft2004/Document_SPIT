@@ -55,6 +55,7 @@ namespace Domain.Services
                 new Claim("userName", user.Username),
                 new Claim("userId", user.Id.ToString()),
                 new Claim(ClaimTypes.Role, user.RoleName),
+                //new Claim("fullName", user.Fullname),
                 new Claim("deviceId", deviceId ?? string.Empty),
             };
 

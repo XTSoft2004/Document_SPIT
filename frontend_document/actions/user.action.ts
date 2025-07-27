@@ -9,7 +9,14 @@ import {
   IShowResponse,
 } from '@/types/global'
 import { revalidateTag } from 'next/cache'
-import { IUserCreateRequest, IUserResponse, IUserUpdate } from '@/types/user'
+import {
+  IProfile,
+  IUserCreateRequest,
+  IUserResponse,
+  IUserUpdate,
+  IUserUploadAvatar,
+} from '@/types/user'
+import { IInfoUserResponse } from '@/types/auth'
 
 export const getUsers = async (
   search: string = '',
@@ -58,6 +65,8 @@ export const updateUser = async (id: string, user: IUserUpdate) => {
 
   const data = (await response.json()) as IBaseResponse
   revalidateTag('user.index')
+  revalidateTag('user.me')
+  revalidateTag('user.profile')
 
   return {
     ...data,
@@ -215,4 +224,59 @@ export const changeStatusStar = async (documentId: number) => {
     status: response.status,
     ...data,
   }
+}
+
+export const getProfileUser = async (username: string) => {
+  const response = await fetch(
+    `${globalConfig.baseUrl}/user/profile/${username}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization:
+          headers().get('Authorization') ||
+          `Bearer ${cookies().get('accessToken')?.value || ' '}`,
+      },
+      next: {
+        tags: [`user.profile.${username}`],
+      },
+    },
+  )
+
+  const data = await response.json()
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    ...data,
+  } as IShowResponse<IInfoUserResponse>
+}
+
+export const uploadAvatar = async (
+  username: string,
+  userUpload: IUserUploadAvatar,
+) => {
+  const response = await fetch(`${globalConfig.baseUrl}/user/upload-avatar`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization:
+        headers().get('Authorization') ||
+        `Bearer ${cookies().get('accessToken')?.value || ' '}`,
+    },
+    body: JSON.stringify(userUpload),
+    next: {
+      tags: ['user.uploadAvatar'],
+    },
+  })
+
+  const data = await response.json()
+  revalidateTag(`user.profile.${username}`)
+  revalidateTag(`auth.refreshToken`)
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    ...data,
+  } as IBaseResponse
 }

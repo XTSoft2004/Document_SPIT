@@ -1,5 +1,7 @@
 ﻿using Domain.Base.Services;
 using Domain.Common;
+using Domain.Common.Gemini.Interfaces;
+using Domain.Common.Gemini.Models;
 using Domain.Common.GoogleDriver.Interfaces;
 using Domain.Common.GoogleDriver.Model.Request;
 using Domain.Common.GoogleDriver.Model.Response;
@@ -17,6 +19,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -33,13 +36,15 @@ namespace Domain.Services
         private readonly IRepositoryBase<DetailDocument>? _detailDocument;
         private readonly IRepositoryBase<User>? _user;
         private readonly IRepositoryBase<History> _history;
+        private readonly IRepositoryBase<StarDocument>? _starDocument;
         private readonly IGoogleDriverServices? _googleDriverServices;
         private readonly ICategoryTypeServices? _categoryTypeServices;
+        private readonly IGeminiServices? _geminiServices;
         private readonly ITokenServices? _tokenServices;
         private readonly IRepositoryBase<OneTimeToken>? _oneTimeToken;
         private UserTokenResponse? userMeToken;
 
-        public DocumentServices(IRepositoryBase<Document>? document, IRepositoryBase<User>? user, IGoogleDriverServices? googleDriverServices, IRepositoryBase<DetailDocument>? detailDocument, ITokenServices? tokenServices, IRepositoryBase<OneTimeToken>? oneTimeToken, IRepositoryBase<Course>? course, ICategoryTypeServices? categoryTypeServices, IRepositoryBase<CategoryType>? catetoryType, IRepositoryBase<DocumentCategory>? documentCategory, IHistoryServices historyServices)
+        public DocumentServices(IRepositoryBase<Document>? document, IRepositoryBase<User>? user, IGoogleDriverServices? googleDriverServices, IRepositoryBase<DetailDocument>? detailDocument, ITokenServices? tokenServices, IRepositoryBase<OneTimeToken>? oneTimeToken, IRepositoryBase<Course>? course, ICategoryTypeServices? categoryTypeServices, IRepositoryBase<CategoryType>? catetoryType, IRepositoryBase<DocumentCategory>? documentCategory, IHistoryServices historyServices, IRepositoryBase<StarDocument>? starDocument, IGeminiServices? geminiServices)
         {
             _document = document;
             _user = user;
@@ -51,10 +56,21 @@ namespace Domain.Services
             _course = course;
             _categoryTypeServices = categoryTypeServices;
             _catetoryType = catetoryType;
-            var envPath = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.Parent.FullName, ".env");
-            DotNetEnv.Env.Load(envPath);
             _documentCategory = documentCategory;
             _historyServices = historyServices;
+            _starDocument = starDocument;
+            _geminiServices = geminiServices;
+
+            var manualPath = Environment.GetEnvironmentVariable("DOTNET_ENV_PATH");
+            if (!string.IsNullOrEmpty(manualPath) && File.Exists(manualPath))
+            {
+                DotNetEnv.Env.Load(manualPath);
+            }
+            else
+            {
+                var envPath = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.Parent.FullName, ".env");
+                DotNetEnv.Env.Load(envPath);
+            }
         }
 
         public async Task<HttpResponse> CreatePending(DocumentPendingRequest documentCreatePending)
@@ -70,6 +86,14 @@ namespace Domain.Services
             // Kiểm tra thông tin tài liệu
             if (AppExtension.IsBase64String(base64Check) == false)
                 return HttpResponse.Error("Base64 không hợp lệ, vui lòng kiểm tra lại.", System.Net.HttpStatusCode.BadRequest);
+
+            var isCheckGemini = await _geminiServices.GeminiCheck(new UploadFileGeminiCheckRequest
+            {
+                base64File = base64Check,
+                mineType = AppDictionary.GetMimeTypeDriver(documentCreatePending.fileName)
+            });
+            if (isCheckGemini)
+                return HttpResponse.Error("Tài liệu có nội dung độc hại, không được phép tải lên.", HttpStatusCode.BadRequest);
 
             // Tính toán MD5 từ Base64
             var md5Hash = AppExtension.GetMd5FromBase64(base64Check);
@@ -367,9 +391,9 @@ namespace Domain.Services
             _detailDocument.Update(itemReacted);
             await UnitOfWork.CommitAsync();
         }
-        public async Task<(byte[] Data, string ContentType, string FileName)> DownloadFile(string FileId)
+        public async Task<(byte[] Data, string ContentType, string FileName)> DownloadFile(long? IdDocument)
         {
-            var document = _document!.Find(f => f.FileId == FileId);
+            var document = _document!.Find(f => f.Id == IdDocument);
             if (document == null)
                 return (null, null, null);
 
@@ -565,6 +589,53 @@ namespace Domain.Services
 
             var thumbnailBase64 = await _googleDriverServices.GetThumbnailBase64(document.FileId);
             return thumbnailBase64;
+        }
+        public async Task<HttpResponse> GetDocumentMe(string username)
+        {
+            var user = _user!.Find(f => f.Username == username);
+            if (user == null)
+                return HttpResponse.Error("Người dùng không tồn tại.", System.Net.HttpStatusCode.NotFound);
+
+            var document = _document!.All()
+                .Include(d => d.User)
+                .Include(d => d.DetaiDocument)
+                .Include(d => d.Course)
+                .Where(d => d.UserId == user.Id)
+                .OrderByDescending(d => d.CreatedDate)
+                .ToList();
+
+            var data = new List<DocumentUserResponse>();
+
+            foreach (var doc in document)
+            {
+                data.Add(new DocumentUserResponse
+                {
+                    Id = doc.Id,
+                    Name = doc.Name,
+                    FileName = doc.FileName,
+                    FileId = doc.FileId,
+                    TotalDownloads = doc.DetaiDocument?.TotalDownload ?? 0,
+                    TotalViews = doc.DetaiDocument?.TotalView ?? 0,
+                    StatusDocument = doc.StatusDocument.GetEnumDisplayName() ?? string.Empty,
+                    CourseName = doc.Course != null ? doc.Course.Name : string.Empty,
+                    CreatedDate = doc.CreatedDate,
+                    ModifiedDate = doc.ModifiedDate,
+                });
+            }
+
+            var allStars = _starDocument!.All().ToList();
+
+            var starGroups = allStars
+                .GroupBy(s => s.DocumentId)
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            foreach (var item in data)
+            {
+                starGroups.TryGetValue(item.Id, out var count);
+                item.TotalStars = count;
+            }
+
+            return HttpResponse.OK(data: data, message: "Lấy danh sách tài liệu của người dùng thành công.");
         }
     }
 }

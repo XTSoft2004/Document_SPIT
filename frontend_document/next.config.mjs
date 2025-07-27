@@ -4,7 +4,7 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    domains: ['localhost', 'xtcoder2004.io.vn'],
+    domains: ['localhost', 'xtcoder2004.io.vn', 'backend'],
     remotePatterns: [
       {
         protocol: 'https',

@@ -1,4 +1,4 @@
-import RankingPageClient from "@/components/ui/Ranking/RankingPageClient";
+import RankingPageWrapper from "@/components/ui/Ranking/RankingPageWrapper";
 
 export default function RankingPage() {
     return (
@@ -43,10 +43,8 @@ export default function RankingPage() {
                             </div>
                         </div>
 
-                        {/* Ranking Content with responsive container */}
-                        <div className="w-full">
-                            <RankingPageClient />
-                        </div>
+                        {/* Ranking Content */}
+                        <RankingPageWrapper />
                     </div>
                 </div>
             </main>

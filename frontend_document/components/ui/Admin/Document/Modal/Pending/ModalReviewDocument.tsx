@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Modal, Form, Input, Select, message, Button } from 'antd';
 import { IDocumentRequest, IDocumentResponse, IDocumentReviewRequest } from '@/types/document';
-import { reviewDocument } from '@/actions/document.actions';
+import { reviewDocument, updateDocument } from '@/actions/document.actions';
 import { IDepartmentResponse } from '@/types/department';
 import FolderSelector from '@/components/common/FolderSelector';
 import { ICourseResponse } from '@/types/course';
@@ -100,7 +100,7 @@ export default function ModalReviewDocument({
         if (visible) {
             fetchData();
         }
-    }, [visible, Document]);
+    }, [form, visible, Document]);
 
     const handleSubmit = async (statusDocument: string) => {
         try {
@@ -152,6 +152,23 @@ export default function ModalReviewDocument({
         }
     };
 
+    const handleReject = async (documentId: string) => {
+        const response = await updateDocument(documentId, { statusDocument: 'REJECTED' });
+        if (response.ok) {
+            NotificationService.success({
+                message: 'Từ chối tài liệu',
+                description: response.message || 'Tài liệu đã được từ chối thành công',
+            });
+            form.resetFields();
+            onCancel();
+        } else {
+            NotificationService.error({
+                message: 'Có lỗi xảy ra khi từ chối tài liệu',
+                description: response.message || 'Vui lòng kiểm tra lại thông tin!',
+            });
+        }
+    }
+
     const handleCancel = () => {
         form.resetFields();
         setSelectedFolderId(null);
@@ -194,7 +211,7 @@ export default function ModalReviewDocument({
                 <Button
                     key="reject"
                     danger
-                    onClick={() => handleSubmit('REJECTED')}
+                    onClick={() => handleReject(Document?.id?.toString() || '')}
                     loading={loading}
                 >
                     Từ chối

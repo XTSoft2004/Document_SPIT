@@ -2,6 +2,7 @@
 using Domain.Entities;
 using Domain.Interfaces.Services;
 using Domain.Model.Request.CategoryType;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using static Domain.Common.AppConstants;
 
@@ -17,7 +18,7 @@ namespace Document_SPIT_BE.Controllers
         {
             _services = categoryTypeServices;
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateAsync(CategoryTypeRequest categoryTypeRequest)
         {
@@ -27,6 +28,7 @@ namespace Document_SPIT_BE.Controllers
             var response = await _services.CreateAsync(categoryTypeRequest);
             return response.ToActionResult();
         }
+        [Authorize(Roles = "Admin")]
         [HttpPatch("{IdCategoryType}")]
         public async Task<IActionResult> UpdateAsync(long IdCategoryType, CategoryTypeRequest categoryTypeRequest)
         {
@@ -36,6 +38,7 @@ namespace Document_SPIT_BE.Controllers
             var response = await _services.UpdateAsync(IdCategoryType, categoryTypeRequest);
             return response.ToActionResult();
         }
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{IdCategoryType}")]
         public async Task<IActionResult> DeleteAsync(long IdCategoryType)
         {

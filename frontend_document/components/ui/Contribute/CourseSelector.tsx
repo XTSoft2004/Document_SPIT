@@ -24,18 +24,20 @@ export default function CourseSelector({
     const [courses, setCourses] = useState<ICourseResponse[]>([]);
     const debounceRef = useRef<NodeJS.Timeout | null>(null);
     const [loading, setLoading] = useState(false);
+
     const handleSearchCourse = async (search: string) => {
-        if (search && search.trim() !== '') {
-            setLoading(true);
-            const response = await getCourse(search, 1, 20);
-            if (response.ok) {
-                setCourses(response.data);
-            }
-            setLoading(false);
-        } else {
-            setCourses([]);
+        setLoading(true);
+        const response = await getCourse(search, 1, 20);
+        if (response.ok) {
+            setCourses(response.data);
         }
+        setLoading(false);
     }
+
+    // Load initial courses on mount (only once)
+    useEffect(() => {
+        handleSearchCourse('');
+    }, []);
 
     // Debounced search function
     const debouncedSearch = (search: string) => {

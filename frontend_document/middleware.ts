@@ -4,6 +4,7 @@ import { IShowResponse } from './types/global'
 import { IUserResponse } from './types/user'
 import globalConfig from './app.config'
 import { cookies, headers } from 'next/headers'
+import next from 'next'
 
 export const config = {
   matcher: [
@@ -70,6 +71,18 @@ export async function middleware(request: NextRequest) {
     response.cookies.delete('accessToken')
     response.cookies.delete('refreshToken')
     return response
+  }
+
+  if (nextUrl === '/profile') {
+    if (!userResponse.ok) {
+      return redirectTo('/', request)
+    }
+
+    if (isLocked) {
+      return redirectTo('/ban', request)
+    }
+
+    return redirectTo(`/profile/${userResponse.data.username}`, request)
   }
 
   if (nextUrl.startsWith('/auth')) {

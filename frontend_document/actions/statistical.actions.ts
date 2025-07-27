@@ -6,6 +6,7 @@ import {
   IParameterDocument,
   IRanking,
   IStatisticalAdmin,
+  IStatisticalUser,
 } from '@/types/statistical'
 import { cookies, headers } from 'next/headers'
 
@@ -86,4 +87,23 @@ export const getStatisticalAdmin = async () => {
     status: response.status,
     ...data,
   } as IShowResponse<IStatisticalAdmin>
+}
+
+export const getStatisticalUser = async (username: string) => {
+  const response = await fetch(
+    `${globalConfig.baseUrl}/statistical/statistical-user/${username}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    },
+  )
+
+  const data = await response.json()
+  return {
+    ok: response.ok,
+    status: response.status,
+    ...data,
+  } as IShowResponse<IStatisticalUser>
 }

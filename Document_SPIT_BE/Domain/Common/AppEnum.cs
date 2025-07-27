@@ -50,6 +50,7 @@ namespace Domain.Common
         Delete_Report,
         Create_User,
         Update_User,
+        Update_Avatar,
         Set_Role,
         Ban_User,
         Update_Status_Star,

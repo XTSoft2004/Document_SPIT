@@ -9,6 +9,7 @@ using Infrastructure.ContextDB;
 using Domain.Common.Extensions;
 using System.Reflection;
 using Domain.Common.GoogleDriver.Interfaces;
+using Domain.Common.Gemini.Interfaces;
 
 namespace WebApp.Configures.DIConfig
 {
@@ -28,6 +29,7 @@ namespace WebApp.Configures.DIConfig
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             // Add Interfaces Automatic
             services.AddServicesFromAssembly(typeof(IGoogleDriverServices).Assembly, "Domain.Interfaces");
+            services.AddServicesFromAssembly(typeof(IGeminiServices).Assembly, "Domain.Interfaces");
 
             //services.AddDatabaseDeveloperPageExceptionFilter();
 

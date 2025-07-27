@@ -21,7 +21,7 @@ namespace Document_SPIT_BE.Controllers
             _services = services;
         }
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpPost("create")]
         public async Task<IActionResult> CreateAsync(DocumentPendingRequest documentPending)
         {
@@ -31,6 +31,7 @@ namespace Document_SPIT_BE.Controllers
             var response = await _services.CreatePending(documentPending);
             return response.ToActionResult();
         }
+        [Authorize(Roles = "Admin")]
         [HttpPost("review/{IdDocument}")]
         public async Task<IActionResult> ReviewAsync(long? IdDocument, DocumentReviewRequest documentReview)
         {
@@ -75,13 +76,13 @@ namespace Document_SPIT_BE.Controllers
             var response = await _services.DeleteAsync(IdDocument);
             return response.ToActionResult();
         }
-        [HttpGet("download/{fileId}")]
-        public async Task<IActionResult> DownloadFile(string fileId)
+        [HttpGet("download/{idDocument}")]
+        public async Task<IActionResult> DownloadFile(long? idDocument)
         {
             if (!ModelState.IsValid)
                 return BadRequest(DefaultString.INVALID_MODEL);
 
-            var (data, contentType, fileName) = await _services.DownloadFile(fileId);
+            var (data, contentType, fileName) = await _services.DownloadFile(idDocument);
             if (data == null || contentType == null || fileName == null)
                 return NotFound(new { Message = "Không tồn tại file, vui lòng kiểm tra lại" });
 
@@ -144,6 +145,14 @@ namespace Document_SPIT_BE.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(DefaultString.INVALID_MODEL);
             var response = await _services.GetRecentDocuments(number);
+            return response.ToActionResult();
+        }
+        [HttpGet("user/{username}")]
+        public async Task<IActionResult> GetDocumentMe(string username)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+            var response = await _services.GetDocumentMe(username);
             return response.ToActionResult();
         }
     }

@@ -4,6 +4,7 @@ export interface IUserResponse {
   fullname: string
   islocked: boolean
   roleName: string
+  avatarUrl: string
 }
 
 export interface IUserUpdate {
@@ -26,4 +27,16 @@ export interface ITokenInfoResponse {
   deviceId: string
   isLocked: boolean
   roleName: string
+}
+
+export interface IProfile {
+  username: string
+  fullname: string
+  email: string
+  roleName: string
+  avatarUrl: string
+}
+
+export interface IUserUploadAvatar {
+  imageBase64: string
 }

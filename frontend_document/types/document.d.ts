@@ -61,3 +61,18 @@ export interface IDocumentRecentResponse {
   createdDate: date
   modifiedDate: date
 }
+
+export interface IDocumentUser {
+  id: number;
+  name: string;
+  fileName: string;
+  fileId: string;
+  totalDownloads: number;
+  totalViews: number;
+  totalStars: number;
+  statusDocument: string;
+  courseName: string;
+  typeFile: string;
+  createdDate: string;
+  modifiedDate: string;
+}

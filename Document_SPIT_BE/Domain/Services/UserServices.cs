@@ -1,14 +1,17 @@
 ﻿using Domain.Base.Services;
 using Domain.Common;
+using Domain.Common.GoogleDriver.Interfaces;
+using Domain.Common.GoogleDriver.Model.Request;
 using Domain.Common.Http;
 using Domain.Entities;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
 using Domain.Model.Request.History;
 using Domain.Model.Request.User;
-using Domain.Model.Response.Token;
 using Domain.Model.Response.Statistical;
+using Domain.Model.Response.Token;
 using Domain.Model.Response.User;
+using DotNetEnv;
 using HelperHttpClient;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.IdentityModel.Tokens;
@@ -16,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.WebSockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,8 +35,9 @@ namespace Domain.Services
         private readonly IRepositoryBase<Document>? _document;
         private readonly ITokenServices _tokenServices;
         private readonly IHistoryServices _historyServices;
+        private readonly IGoogleDriverServices _googleDriverServices;
         private UserTokenResponse? userMeToken;
-        public UserServices(IRepositoryBase<User>? user, IRepositoryBase<Role>? role, ITokenServices tokenServices, IRepositoryBase<History>? history, IRepositoryBase<StarDocument>? startDocument, IRepositoryBase<Document>? document, IHistoryServices historyServices)
+        public UserServices(IRepositoryBase<User>? user, IRepositoryBase<Role>? role, ITokenServices tokenServices, IRepositoryBase<History>? history, IRepositoryBase<StarDocument>? startDocument, IRepositoryBase<Document>? document, IHistoryServices historyServices, IGoogleDriverServices googleDriverServices)
         {
             _user = user;
             _role = role;
@@ -42,6 +47,17 @@ namespace Domain.Services
             userMeToken = _tokenServices.GetTokenBrowser();
             _startDocument = startDocument;
             _document = document;
+            _googleDriverServices = googleDriverServices;
+            var manualPath = Environment.GetEnvironmentVariable("DOTNET_ENV_PATH");
+            if (!string.IsNullOrEmpty(manualPath) && File.Exists(manualPath))
+            {
+                DotNetEnv.Env.Load(manualPath);
+            }
+            else
+            {
+                var envPath = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.Parent.FullName, ".env");
+                DotNetEnv.Env.Load(envPath);
+            }
         }
         public async Task<HttpResponse> UpdateAsync(long idUser, UserRequest userRequest)
         {
@@ -72,16 +88,15 @@ namespace Domain.Services
             if (userMeToken == null)
                 return HttpResponse.Error(message: "Không tìm thấy thông tin người dùng.", HttpStatusCode.Unauthorized);
 
-            var user = await _user!.FindAsync(f => f.Id == userMeToken.Id, "Role");
-            if (user == null)
-                return HttpResponse.Error(message: "Người dùng không tồn tại.", HttpStatusCode.NotFound);
+            var user = _tokenServices.GetInfoFromToken(_tokenServices.GetTokenFromHeader());
 
             return HttpResponse.OK(data: new UserResponse()
             {
                 Id = user?.Id,
                 Username = user?.Username,
-                Fullname = user?.Fullname,
-                RoleName = user.Role != null ? user.Role.DisplayName : string.Empty
+                RoleName = user?.RoleName,
+                Fullname = _user!.Find(f => f.Id == user.Id)?.Fullname,
+                AvatarUrl = _user!.Find(f => f.Id == user.Id)?.AvatarUrl,
             });
         }
         public async Task<HttpResponse> SetRole(string? username, string roleName)
@@ -296,6 +311,67 @@ namespace Domain.Services
                 data: recentUploads,
                 message: "Lấy danh sách tài liệu đã tải lên gần đây thành công."
             );
+        }
+        public async Task<HttpResponse> GetProfileUser(string username)
+        {
+            var user = _user!.Find(f => f.Username == username);
+            if (user == null)
+                return HttpResponse.Error(message: "Người dùng không tồn tại.", HttpStatusCode.NotFound);
+
+            var data = new ProfileResponse
+            {
+                UserId = user.Id,
+                Username = user.Username,
+                Fullname = user.Fullname,
+                Email = user.Email,
+                RoleName = _role.Find(r => r.Id == user.RoleId)?.DisplayName,
+                AvatarUrl = user.AvatarUrl,
+            };
+
+            return HttpResponse.OK(
+                data: data,
+                message: "Lấy thông tin người dùng thành công."
+            );
+        }
+        public async Task<HttpResponse> UploadAvatar(UploadAvatarRequest uploadAvatarRequest)
+        {
+            if (userMeToken == null)
+                return HttpResponse.Error(message: "Không tìm thấy thông tin người dùng.", HttpStatusCode.Unauthorized);
+           
+            if (uploadAvatarRequest == null || string.IsNullOrEmpty(uploadAvatarRequest.imageBase64))
+                return HttpResponse.Error(message: "Thông tin hình ảnh không hợp lệ.", HttpStatusCode.BadRequest);
+
+            var user = _user!.Find(f => f.Id == userMeToken.Id);
+            if (user == null)
+                return HttpResponse.Error(message: "Người dùng không tồn tại.", HttpStatusCode.NotFound);
+
+            string base64Check = uploadAvatarRequest.imageBase64.Split(',').Length == 2 ? uploadAvatarRequest.imageBase64.Split(',')[1] : string.Empty;
+            if (string.IsNullOrEmpty(base64Check))
+                return HttpResponse.Error("Base64 không hợp lệ, vui lòng kiểm tra lại.", System.Net.HttpStatusCode.BadRequest);
+
+            string FOLDER_AVATAR = Environment.GetEnvironmentVariable("FOLDER_AVATAR");
+            var infoUpload = await _googleDriverServices.UploadFile(new UploadFileBase64Request
+            {
+                Base64String = base64Check,
+                FileName = $"{user.Username}_avatar.png",
+                FolderId = FOLDER_AVATAR
+            });
+            
+            if(infoUpload != null)
+            {
+                user.AvatarUrl = $"https://drive.google.com/thumbnail?id={infoUpload.id}&sz=w500";
+                _user.Update(user);
+            }
+
+            await UnitOfWork.CommitAsync();
+            await _historyServices.CreateAsync(new HistoryRequest 
+            { 
+                Title = "Cập nhật ảnh đại diện", 
+                Description = $"Người dùng {user.Username} vừa cập nhật ảnh đại diện.", 
+                function_status = Function_Enum.Update_Avatar, 
+                UserId = userMeToken?.Id ?? -1 
+            });
+            return HttpResponse.OK(message: "Cập nhật ảnh đại diện thành công.");
         }
     } 
 }

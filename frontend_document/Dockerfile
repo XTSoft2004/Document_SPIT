@@ -1,46 +1,59 @@
-# Stage 1: Base
-FROM node:18-bullseye as base
+# --- Stage 1: Builder ---
+FROM node:20 AS builder
+
 WORKDIR /app
 
-# Cài g++ make python3-pip bằng apt (Debian)
-RUN apt-get update && \
-    apt-get install -y g++ make python3-pip && \
-    rm -rf /var/lib/apt/lists/*
+# Copy only lock files and package info to leverage caching
+COPY package.json package-lock.json* ./
 
-COPY package*.json ./
-
-# Stage 2: Builder
-FROM base as builder
-WORKDIR /app
-COPY . .
+# Install dependencies
 RUN npm install
+
+# Copy full source code
+COPY . .
+
+# Build Next.js app
 RUN npm run build
 
-# Stage 3: Production
-FROM node:18-bullseye as prod
+
+# --- Stage 2: Production runner ---
+FROM node:20-alpine AS runner
+
 WORKDIR /app
 
 ENV NODE_ENV=production
+ENV PORT=1111
 
+# Copy only necessary files from builder
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/next.config.mjs ./next.config.mjs
 
-# Tạo user không quyền root
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nextjs --ingroup nodejs
-USER nextjs
+# Optional: include env
+COPY .env.local .env.local
 
-EXPOSE 2222
-CMD ["npx", "next", "start"]
+EXPOSE 1111
 
-# Stage 4: Development
-FROM base as dev
+CMD ["npm", "start"]
+
+
+# --- Stage 3: Dev mode ---
+FROM node:20 AS dev
+
 WORKDIR /app
+
 ENV NODE_ENV=development
-COPY . .
+ENV PORT=1111
+
+# Copy package files & install
+COPY package.json package-lock.json* ./
 RUN npm install
-EXPOSE 2222
+
+# Copy full code
+COPY . .
+
+EXPOSE 1111
+
 CMD ["npm", "run", "dev"]

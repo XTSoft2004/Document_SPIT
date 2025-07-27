@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { ImageFile } from '@/utils/pdfUtils'
+import Image from 'next/image'
+
 
 interface ImagePreviewModalProps {
   isOpen: boolean
@@ -26,10 +28,10 @@ export default function ImagePreviewModal({
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768)
     }
-    
+
     checkMobile()
     window.addEventListener('resize', checkMobile)
-    
+
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
@@ -42,7 +44,7 @@ export default function ImagePreviewModal({
     } else {
       document.body.style.overflow = 'unset'
     }
-    
+
     return () => {
       document.body.style.overflow = 'unset'
     }
@@ -163,27 +165,23 @@ export default function ImagePreviewModal({
                   onDragStart={(e) => !isMobile && handleDragStart(e, index)}
                   onDragOver={!isMobile ? handleDragOver : undefined}
                   onDrop={(e) => !isMobile && handleDrop(e, index)}
-                  className={`relative bg-gray-50 rounded-lg p-2 sm:p-3 border-2 transition-all duration-200 ${
-                    !isMobile ? 'cursor-move' : ''
-                  } ${
-                    draggedIndex === index
+                  className={`relative bg-gray-50 rounded-lg p-2 sm:p-3 border-2 transition-all duration-200 ${!isMobile ? 'cursor-move' : ''
+                    } ${draggedIndex === index
                       ? 'border-blue-500 bg-blue-50 scale-105 shadow-lg'
                       : 'border-gray-200 hover:border-gray-300 active:border-blue-400'
-                  } ${isMobile ? 'pb-12' : ''}`}
+                    } ${isMobile ? 'pb-12' : ''}`}
                 >
                   {/* Page Number */}
-                  <div className={`absolute top-1 sm:top-2 left-1 sm:left-2 bg-blue-500 text-white text-xs font-bold rounded-full flex items-center justify-center ${
-                    isMobile ? 'w-6 h-6' : 'w-5 h-5 sm:w-6 sm:h-6'
-                  }`}>
+                  <div className={`absolute top-1 sm:top-2 left-1 sm:left-2 bg-blue-500 text-white text-xs font-bold rounded-full flex items-center justify-center ${isMobile ? 'w-6 h-6' : 'w-5 h-5 sm:w-6 sm:h-6'
+                    }`}>
                     {index + 1}
                   </div>
 
                   {/* Remove Button - Top Right */}
                   <button
                     onClick={() => removeImage(image.id)}
-                    className={`absolute top-1 sm:top-2 right-1 sm:right-2 bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-colors active:scale-95 shadow-md ${
-                      isMobile ? 'w-8 h-8 rounded-lg' : 'w-4 h-4 sm:w-5 sm:h-5 rounded-full'
-                    }`}
+                    className={`absolute top-1 sm:top-2 right-1 sm:right-2 bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-colors active:scale-95 shadow-md ${isMobile ? 'w-8 h-8 rounded-lg' : 'w-4 h-4 sm:w-5 sm:h-5 rounded-full'
+                      }`}
                   >
                     <svg
                       className={`${isMobile ? 'w-4 h-4' : 'w-2 h-2 sm:w-3 sm:h-3'}`}
@@ -202,7 +200,9 @@ export default function ImagePreviewModal({
 
                   {/* Image Preview */}
                   <div className="flex items-center space-x-2 sm:space-x-3 pt-4 sm:pt-6">
-                    <img
+                    <Image
+                      width={600}
+                      height={400}
                       src={image.preview}
                       alt={`Page ${index + 1}`}
                       className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded border flex-shrink-0"
@@ -300,7 +300,9 @@ export default function ImagePreviewModal({
 
                   {/* Page Content */}
                   <div className="p-2 sm:p-4 flex justify-center">
-                    <img
+                    <Image
+                      width={600}
+                      height={400}
                       src={image.preview}
                       alt={`Page ${index + 1}`}
                       className="max-w-full h-auto max-h-48 sm:max-h-96 object-contain border border-gray-100 rounded"
@@ -336,7 +338,7 @@ export default function ImagePreviewModal({
           </div>
         </div>
       </div>
-      
+
       {/* Enhanced mobile styles */}
       <style jsx global>{`
         /* Smooth scrolling for mobile */
