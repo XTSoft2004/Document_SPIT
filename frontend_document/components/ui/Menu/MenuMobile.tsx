@@ -1,9 +1,10 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { MenuOutlined, CloseOutlined, HomeOutlined, FolderOutlined, HeartOutlined, LogoutOutlined, LoginOutlined } from '@ant-design/icons';
+import { MenuOutlined, CloseOutlined, HomeOutlined, FolderOutlined, HeartOutlined, LogoutOutlined, LoginOutlined, UserOutlined } from '@ant-design/icons';
 import { Drawer } from 'antd';
 import NavigationLink from '@/components/ui/Navigation/NavigationLink';
+import { useAuth } from '@/context/AuthContext';
 
 interface MenuMobileProps {
     isLoggedIn?: boolean;
@@ -15,7 +16,7 @@ const MenuMobile = ({ isLoggedIn = false, onLogout }: MenuMobileProps) => {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
     const [activeItem, setActiveItem] = useState<string | null>(null);
-
+    const { getInfo } = useAuth();
     useEffect(() => {
         if (isDrawerOpen) {
             setIsVisible(true);
@@ -48,11 +49,30 @@ const MenuMobile = ({ isLoggedIn = false, onLogout }: MenuMobileProps) => {
     const activeTab = getActiveTab();
 
     const menuItems = [
+        // Conditionally add admin menu item if user is admin
+        ...(getInfo()?.roleName === 'Admin'
+            ? [{
+                key: 'admin/dashboard',
+                label: 'Quản trị',
+                icon: (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 0v4m0-4h4m-4 0H8m6 8H6a2 2 0 01-2-2V6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2h-6z" />
+                    </svg>
+                )
+            }]
+            : []
+        ),
+        {
+            key: 'profile',
+            label: 'Hồ sơ',
+            icon: <UserOutlined className="text-xl" />
+        },
         {
             key: 'home',
             label: 'Trang chủ',
             icon: <HomeOutlined className="text-xl" />
         },
+
         {
             key: 'document',
             label: 'Tài liệu',
@@ -100,9 +120,8 @@ const MenuMobile = ({ isLoggedIn = false, onLogout }: MenuMobileProps) => {
                 }}
             >
                 {/* Custom Header */}
-                <div className={`relative p-6 bg-gradient-to-br from-white/90 to-gray-50/90 backdrop-blur-sm border-b border-gray-200/50 transition-all duration-500 ${
-                    isVisible ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0'
-                }`} style={{ transitionDelay: '50ms' }}>
+                <div className={`relative p-6 bg-gradient-to-br from-white/90 to-gray-50/90 backdrop-blur-sm border-b border-gray-200/50 transition-all duration-500 ${isVisible ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0'
+                    }`} style={{ transitionDelay: '50ms' }}>
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <h3 className="text-lg font-bold text-gray-800">Menu</h3>
@@ -123,12 +142,11 @@ const MenuMobile = ({ isLoggedIn = false, onLogout }: MenuMobileProps) => {
                         {menuItems.map((item, index) => (
                             <div
                                 key={item.key}
-                                className={`transition-all duration-500 ease-out ${
-                                    isVisible 
-                                        ? 'translate-x-0 opacity-100' 
-                                        : 'translate-x-8 opacity-0'
-                                }`}
-                                style={{ 
+                                className={`transition-all duration-500 ease-out ${isVisible
+                                    ? 'translate-x-0 opacity-100'
+                                    : 'translate-x-8 opacity-0'
+                                    }`}
+                                style={{
                                     transitionDelay: `${100 + index * 75}ms`
                                 }}
                             >
@@ -146,25 +164,22 @@ const MenuMobile = ({ isLoggedIn = false, onLogout }: MenuMobileProps) => {
                                 >
                                     {/* Ripple effect background */}
                                     <div className="absolute inset-0 rounded-lg overflow-hidden">
-                                        <div className={`absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 scale-0 transition-transform duration-300 ease-out rounded-lg ${
-                                            activeItem === item.key ? 'scale-150' : 'group-active:scale-100'
-                                        }`} />
+                                        <div className={`absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 scale-0 transition-transform duration-300 ease-out rounded-lg ${activeItem === item.key ? 'scale-150' : 'group-active:scale-100'
+                                            }`} />
                                     </div>
 
                                     {/* Icon with enhanced animation */}
-                                    <div className={`transition-all duration-300 z-10 relative ${
-                                        activeTab === item.key 
-                                            ? 'scale-110 rotate-3' 
-                                            : 'group-hover:scale-110 group-hover:-rotate-3 group-active:scale-95'
-                                    }`}>
+                                    <div className={`transition-all duration-300 z-10 relative ${activeTab === item.key
+                                        ? 'scale-110 rotate-3'
+                                        : 'group-hover:scale-110 group-hover:-rotate-3 group-active:scale-95'
+                                        }`}>
                                         {item.icon}
                                     </div>
 
                                     {/* Text with slide animation */}
-                                    <span className={`font-semibold transition-all duration-300 z-10 relative ${
-                                        activeTab === item.key
-                                            ? 'text-white translate-x-1'
-                                            : 'text-gray-800 group-hover:text-blue-600 group-hover:translate-x-1'
+                                    <span className={`font-semibold transition-all duration-300 z-10 relative ${activeTab === item.key
+                                        ? 'text-white translate-x-1'
+                                        : 'text-gray-800 group-hover:text-blue-600 group-hover:translate-x-1'
                                         }`}>
                                         {item.label}
                                     </span>
@@ -191,11 +206,10 @@ const MenuMobile = ({ isLoggedIn = false, onLogout }: MenuMobileProps) => {
                     </div>
 
                     {/* Login/Logout Button with enhanced animation */}
-                    <div className={`mt-6 transition-all duration-500 ease-out ${
-                        isVisible 
-                            ? 'translate-y-0 opacity-100' 
-                            : 'translate-y-6 opacity-0'
-                    }`} style={{ transitionDelay: `${100 + menuItems.length * 75 + 50}ms` }}>
+                    <div className={`mt-6 transition-all duration-500 ease-out ${isVisible
+                        ? 'translate-y-0 opacity-100'
+                        : 'translate-y-6 opacity-0'
+                        }`} style={{ transitionDelay: `${100 + menuItems.length * 75 + 50}ms` }}>
                         <div className="relative group">
                             <div className="absolute inset-0 duration-1000 opacity-30 transition-all bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 rounded-xl blur-lg filter group-hover:opacity-50 group-hover:duration-200 group-hover:scale-105" />
                             {isLoggedIn ? (
@@ -208,7 +222,7 @@ const MenuMobile = ({ isLoggedIn = false, onLogout }: MenuMobileProps) => {
                                 >
                                     <LogoutOutlined className="mr-2 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-12" />
                                     <span className="transition-all duration-300 group-hover:translate-x-0.5">Logout</span>
-                                    
+
                                     {/* Animated background on hover */}
                                     <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-red-500/5 to-pink-500/5 scale-0 group-hover:scale-100 transition-transform duration-300 ease-out" />
                                 </button>
@@ -224,7 +238,7 @@ const MenuMobile = ({ isLoggedIn = false, onLogout }: MenuMobileProps) => {
                                         <path d="M0 5h7" className="transition-all duration-300 opacity-0 group-hover:opacity-100" />
                                         <path d="M1 1l4 4-4 4" className="transition-all duration-300 group-hover:translate-x-[3px]" />
                                     </svg>
-                                    
+
                                     {/* Animated background on hover */}
                                     <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500/5 to-purple-500/5 scale-0 group-hover:scale-100 transition-transform duration-300 ease-out" />
                                 </NavigationLink>
@@ -234,11 +248,10 @@ const MenuMobile = ({ isLoggedIn = false, onLogout }: MenuMobileProps) => {
                 </div>
 
                 {/* Footer with fade-in animation */}
-                <div className={`absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-white/95 to-transparent backdrop-blur-sm border-t border-gray-200/50 transition-all duration-700 ${
-                    isVisible 
-                        ? 'translate-y-0 opacity-100' 
-                        : 'translate-y-4 opacity-0'
-                }`} style={{ transitionDelay: `${100 + menuItems.length * 75 + 100}ms` }}>
+                <div className={`absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-white/95 to-transparent backdrop-blur-sm border-t border-gray-200/50 transition-all duration-700 ${isVisible
+                    ? 'translate-y-0 opacity-100'
+                    : 'translate-y-4 opacity-0'
+                    }`} style={{ transitionDelay: `${100 + menuItems.length * 75 + 100}ms` }}>
                     <p className="text-center text-sm text-gray-500 font-medium">
                         © 2025 SPIT TEAM
                     </p>

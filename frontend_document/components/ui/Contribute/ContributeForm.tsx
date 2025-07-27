@@ -13,6 +13,7 @@ import {
   ContributeFormData,
   createEmptyFormData,
   validateForm,
+  validateFormWithImages,
   uploadDocument,
 } from './contributeUtils'
 import NotificationService from '../Notification/NotificationService'
@@ -60,11 +61,14 @@ export default function ContributeForm() {
     setImages(newImages)
 
     if (newImages.length === 1) {
+      // Single image - set as file
       setFormData((prev) => ({ ...prev, file: newImages[0].file }))
     } else if (newImages.length > 1) {
+      // Multiple images - will be converted to PDF later
       setFormData((prev) => ({ ...prev, file: null }))
       setShowPreviewModal(true)
     } else {
+      // No images
       setFormData((prev) => ({ ...prev, file: null }))
     }
   }
@@ -93,6 +97,7 @@ export default function ContributeForm() {
     try {
       let fileToUpload = formData.file
 
+      // Handle multiple images
       if (images.length > 1 && !formData.file) {
         NotificationService.info({
           message: 'Đang chuyển đổi ảnh thành PDF...',
@@ -100,7 +105,9 @@ export default function ContributeForm() {
         })
 
         fileToUpload = await convertImagesToPDF(images, formData.name)
-      } else if (images.length === 1 && !formData.file) {
+      }
+      // Handle single image when no file is set
+      else if (images.length === 1 && !formData.file) {
         fileToUpload = images[0].file
       }
 
@@ -137,12 +144,12 @@ export default function ContributeForm() {
     }
   }
 
-  const isFormValid =
-    (validateForm(formData) ||
-      (images.length > 0 &&
-        formData.name.trim() !== '' &&
-        formData.courseId > 0)) &&
-    userLoggedIn
+  const isFormValid = (() => {
+    const formValidWithImages = validateFormWithImages(formData, images)
+    const hasAuth = userLoggedIn
+
+    return formValidWithImages && hasAuth
+  })()
 
   const LoginRequiredBanner = () => (
     <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg p-4 sm:p-6 mb-6">
@@ -202,9 +209,8 @@ export default function ContributeForm() {
       {!userLoggedIn && <LoginRequiredBanner />}
 
       <form
-        className={`space-y-4 sm:space-y-6 ${
-          !userLoggedIn ? 'opacity-60 pointer-events-none' : ''
-        }`}
+        className={`space-y-4 sm:space-y-6 ${!userLoggedIn ? 'opacity-60 pointer-events-none' : ''
+          }`}
         onSubmit={(e) => e.preventDefault()}
       >
         {/* Document Name Field with responsive styling */}

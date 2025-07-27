@@ -37,7 +37,10 @@ services:
       - "1111:1111"
     environment:
       - NODE_ENV=development
-      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+    volumes:
+      - ./frontend_document:/app
+      - /app/node_modules  # Cái này đúng, để tránh ghi đè bởi host
     restart: always
     stdin_open: true
     tty: true

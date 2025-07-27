@@ -6,7 +6,7 @@ const FAQ_DATA = [
     {
         id: 1,
         question: 'Tôi có thể đóng góp những loại tài liệu nào?',
-        answer: 'Bạn có thể đóng góp các loại tài liệu học tập như: đề cương môn học, đề thi cũ, bài tập, tài liệu tham khảo, slide bài giảng và các tài nguyên học tập khác liên quan đến các môn học trong các khoa của Trường Đại Học Khoa Học Huế. Các định dạng được hỗ trợ bao gồm PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX.'
+        answer: 'Bạn có thể đóng góp các loại tài liệu học tập như: đề cương môn học, đề thi cũ, bài tập, tài liệu tham khảo, slide bài giảng và các tài nguyên học tập khác liên quan đến các môn học trong các khoa của Trường Đại Học Khoa Học Huế. Các định dạng được hỗ trợ bao gồm PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, IMG, JPG, JPEG, PNG'
     },
     {
         id: 2,

@@ -110,7 +110,7 @@ export function SectionCards() {
             <span>{card.percent}%</span>
           </Badge>
         </CardDescription>
-        <CardTitle className="flex items-center gap-3 text-sm sm:text-lg lg:text-xl font-semibold text-gray-800">
+        <CardTitle className="flex items-center gap-3 text-lg lg:text-xl font-semibold text-gray-800">
           {card.icon}
           <span className="text-center max-w-[70] truncate">
             {card.value} {card.title}

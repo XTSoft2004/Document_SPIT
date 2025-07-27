@@ -56,6 +56,4 @@ COPY . .
 
 EXPOSE 1111
 
-ENV CHOKIDAR_USEPOLLING=true
-
 CMD ["npm", "run", "dev"]

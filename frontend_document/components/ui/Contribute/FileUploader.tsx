@@ -35,6 +35,7 @@ export default function FileUploader({
 
         if (selectedFiles.length === 1) {
             const selectedFile = selectedFiles[0]
+
             if (isImageFile(selectedFile)) {
                 try {
                     const imageFile = await createImageFile(selectedFile)
@@ -44,12 +45,17 @@ export default function FileUploader({
                     console.error('Error creating image file:', error)
                 }
             } else {
-                onFileChange(selectedFile)
+                // Clear images when uploading non-image file
                 onImagesChange([])
+                onFileChange(selectedFile)
             }
         } else {
+            // Multiple files selected
             const imageFiles = Array.from(selectedFiles).filter(isImageFile)
-            if (imageFiles.length > 0) {
+            const nonImageFiles = Array.from(selectedFiles).filter(file => !isImageFile(file))
+
+            if (imageFiles.length > 0 && nonImageFiles.length === 0) {
+                // All files are images
                 try {
                     const newImages = await Promise.all(
                         imageFiles.map((file) => createImageFile(file)),
@@ -59,6 +65,14 @@ export default function FileUploader({
                 } catch (error) {
                     console.error('Error creating image files:', error)
                 }
+            } else if (nonImageFiles.length === 1 && imageFiles.length === 0) {
+                // Single non-image file
+                onImagesChange([])
+                onFileChange(nonImageFiles[0])
+            } else {
+                // Mixed files or multiple non-image files - not supported
+                console.warn('Mixed files or multiple non-image files not supported')
+                alert('Vui lòng chọn một file tài liệu hoặc nhiều ảnh để tạo PDF')
             }
         }
 
@@ -74,6 +88,7 @@ export default function FileUploader({
 
         if (droppedFiles.length === 1) {
             const droppedFile = droppedFiles[0]
+
             if (isImageFile(droppedFile)) {
                 try {
                     const imageFile = await createImageFile(droppedFile)
@@ -83,12 +98,17 @@ export default function FileUploader({
                     console.error('Error creating image file:', error)
                 }
             } else {
-                onFileChange(droppedFile)
+                // Clear images when uploading non-image file
                 onImagesChange([])
+                onFileChange(droppedFile)
             }
         } else {
+            // Multiple files dropped
             const imageFiles = droppedFiles.filter(isImageFile)
-            if (imageFiles.length > 0) {
+            const nonImageFiles = droppedFiles.filter(file => !isImageFile(file))
+
+            if (imageFiles.length > 0 && nonImageFiles.length === 0) {
+                // All files are images
                 try {
                     const newImages = await Promise.all(
                         imageFiles.map((file) => createImageFile(file)),
@@ -98,6 +118,14 @@ export default function FileUploader({
                 } catch (error) {
                     console.error('Error creating image files:', error)
                 }
+            } else if (nonImageFiles.length === 1 && imageFiles.length === 0) {
+                // Single non-image file
+                onImagesChange([])
+                onFileChange(nonImageFiles[0])
+            } else {
+                // Mixed files or multiple non-image files - not supported
+                console.warn('Mixed files or multiple non-image files not supported')
+                alert('Vui lòng chọn một file tài liệu hoặc nhiều ảnh để tạo PDF')
             }
         }
     }
@@ -134,8 +162,8 @@ export default function FileUploader({
             </label>
             <div
                 className={`border-2 border-dashed rounded-lg p-4 sm:p-6 lg:p-8 text-center transition-all duration-200 ${isDragOver
-                        ? 'border-blue-500 bg-blue-50 scale-[1.02]'
-                        : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+                    ? 'border-blue-500 bg-blue-50 scale-[1.02]'
+                    : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
                     }`}
                 onDrop={handleFileDrop}
                 onDragOver={handleDragOver}

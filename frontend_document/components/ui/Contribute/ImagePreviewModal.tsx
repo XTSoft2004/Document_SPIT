@@ -37,7 +37,6 @@ export default function ImagePreviewModal({
 
   useEffect(() => {
     if (isOpen) {
-      console.log('Modal opened with images:', images)
       setOrderedImages(images)
       // Prevent body scroll on mobile
       document.body.style.overflow = 'hidden'
@@ -51,8 +50,6 @@ export default function ImagePreviewModal({
   }, [images, isOpen])
 
   if (!isOpen) return null
-
-  console.log('Rendering modal with orderedImages:', orderedImages)
 
   const handleDragStart = (e: React.DragEvent, index: number) => {
     setDraggedIndex(index)

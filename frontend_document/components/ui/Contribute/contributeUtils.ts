@@ -19,7 +19,17 @@ export const validateForm = (formData: ContributeFormData): boolean => {
     formData.name.trim() &&
     formData.file &&
     formData.subject &&
-    formData.courseId
+    formData.courseId > 0
+  )
+}
+
+export const validateFormWithImages = (formData: ContributeFormData, images: any[]): boolean => {
+  const hasFile = formData.file || images.length > 0
+  return !!(
+    formData.name.trim() &&
+    hasFile &&
+    formData.subject &&
+    formData.courseId > 0
   )
 }
 
@@ -55,8 +65,6 @@ export const uploadDocument = async (
     base64String,
     courseId: formData.courseId,
   })
-
-  console.log('Upload response:', uploadResponse)
 
   if (!uploadResponse.ok) {
     throw new Error(uploadResponse.message)
