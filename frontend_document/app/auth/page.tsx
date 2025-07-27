@@ -1,13 +1,13 @@
 'use client'
 import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import PageRegister from './register/page'
 import RotatingText from '@/components/animations/TextAnimations/RotatingText/RotatingText'
-import PageLogin from './login/page'
 import Image from 'next/image'
 import HeroSection from '@/components/ui/Auth/HeroSection'
 import ResponsiveHeroSection from '@/components/ui/Auth/ResponsiveHeroSection'
 import { useRouter } from 'next/navigation'
+import PageLogin from '@/components/ui/Auth/PageLogin'
+import PageRegister from '@/components/ui/Auth/PageRegister'
 
 // Animation variants for better performance
 const containerVariants = {
