@@ -11,7 +11,7 @@ import ModernAuthLoading from '@/components/ui/Loading/ModernAuthLoading';
 import NotificationService from '@/components/ui/Notification/NotificationService';
 import { motion } from 'framer-motion';
 
-export default function PageRegister() {
+export default function PageRegister({ setIsSignIn }: { setIsSignIn: (value: boolean) => void }) {
     const {
         control,
         handleSubmit,
@@ -30,11 +30,12 @@ export default function PageRegister() {
 
         const register = await registerAccount(registerRequest);
         if (register.ok) {
-            router.push('/auth');
             NotificationService.success({
                 message: 'Đăng ký thành công',
                 description: `Chào mừng bạn ${data.username} đã đăng ký thành công!`,
             });
+            setLoading(false);
+            setIsSignIn(true);
             return;
         }
         setLoading(false);

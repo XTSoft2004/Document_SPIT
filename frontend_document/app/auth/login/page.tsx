@@ -128,9 +128,17 @@ export default function PageLogin() {
           transition={{ delay: 0.4, duration: 0.3 }}
           className="text-center pt-2"
         >
-          <a href="#" className="text-sm text-blue-600 hover:underline">
+          <button
+            onClick={() => {
+              NotificationService.info({
+                message: 'Quên mật khẩu?',
+                description: 'Vui lòng liên hệ Admin để đặt lại mật khẩu.',
+              })
+            }}
+            className="text-sm text-blue-600 font-bold hover:scale-105 transition-transform duration-200"
+          >
             Quên mật khẩu?
-          </a>
+          </button>
         </motion.div>
       </div>
     </motion.div>
