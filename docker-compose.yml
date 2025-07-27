@@ -1,37 +1,53 @@
 version: "3.9"
 
 services:
-  backend:
-    build:
-      context: ./Document_SPIT_BE
-      target: final
-    ports:
-      - "5000:5000"
-    environment:
-      - NODE_ENV=production
-      - DOTNET_ENV_PATH=/app/.env
-    working_dir: /app
-    restart: always
-
   # backend:
   #   build:
   #     context: ./Document_SPIT_BE
-  #     target: dev
+  #     target: final
   #   ports:
   #     - "5000:5000"
-  #   volumes:
-  #     - ./Document_SPIT_BE:/src
   #   environment:
-  #     - DOTNET_ENVIRONMENT=Development
-  #   working_dir: /src
+  #     - NODE_ENV=production
+  #     - DOTNET_ENV_PATH=/app/.env
+  #   working_dir: /app
   #   restart: always
+
+  backend:
+    build:
+      context: ./Document_SPIT_BE
+      target: dev
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./Document_SPIT_BE:/src
+    environment:
+      - DOTNET_ENVIRONMENT=Development
+      - DOTNET_USE_POLLING_FILE_WATCHER=true
+    working_dir: /src
+    restart: always
+    stdin_open: true
+    tty: true
 
   frontend:
     build:
       context: ./frontend_document
-      target: runner
+      target: dev
     ports:
       - "1111:1111"
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
     restart: always
+    stdin_open: true
+    tty: true
+
+  # frontend:
+  #   build:
+  #     context: ./frontend_document
+  #     target: runner
+  #   ports:
+  #     - "1111:1111"
+  #   environment:
+  #     - NODE_ENV=production
+  #   restart: always

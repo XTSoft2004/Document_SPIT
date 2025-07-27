@@ -37,11 +37,15 @@ ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "Document_SPIT_BE.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # --- Development environment: dotnet watch ---
+# --- Development environment: dotnet watch ---
 FROM build AS dev
 WORKDIR /src
-ENV DOTNET_ENVIRONMENT=Development
-CMD ["dotnet", "watch", "--project", "Document_SPIT/Document_SPIT_BE.csproj", "run", "--urls", "http://0.0.0.0:5000"]
 
+ENV ASPNETCORE_URLS=http://+:5000
+ENV DOTNET_ENVIRONMENT=Development
+ENV DOTNET_USE_POLLING_FILE_WATCHER=true 
+
+CMD ["dotnet", "watch", "--project", "Document_SPIT/Document_SPIT_BE.csproj", "run", "--no-launch-profile", "--urls", "http://0.0.0.0:5000"]
 # --- Final production image ---
 FROM base AS final
 WORKDIR /app
