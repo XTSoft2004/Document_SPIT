@@ -85,7 +85,7 @@ export async function middleware(request: NextRequest) {
     return redirectTo(`/profile/${userResponse.data.username}`, request)
   }
 
-  if (nextUrl.startsWith('/auth')) {  
+  if (nextUrl.startsWith('/auth')) {
     if (isLocked) return redirectTo('/ban', request)
     return redirectTo('/', request)
   }

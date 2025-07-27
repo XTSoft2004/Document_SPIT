@@ -1,6 +1,7 @@
 'use client'
 import { IRanking } from "@/types/statistical";
 import { Skeleton } from "antd";
+import Link from "next/link";
 
 interface TopRankingTableProps {
     rankings: IRanking[];
@@ -193,17 +194,21 @@ export default function TopRankingTable({ rankings, loading }: TopRankingTablePr
                                                 <span className="text-2xl">{getRankEmoji(position)}</span>
                                             </div>
                                         </td>
+
                                         <td className="py-4 px-4">
-                                            <div className="flex items-center">
-                                                <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${avatar.gradient} flex items-center justify-center text-white font-bold shadow-lg mr-4`}>
-                                                    {avatar.initials}
+                                            <Link href={`/profile/${ranking.username}`} className="flex items-center flex-1 space-x-3">
+                                                <div className="flex items-center">
+                                                    <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${avatar.gradient} flex items-center justify-center text-white font-bold shadow-lg mr-4`}>
+                                                        {avatar.initials}
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="font-bold text-gray-900 text-base">{ranking.fullname}</h4>
+                                                        <p className="text-sm text-gray-600">Thành viên tích cực</p>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <h4 className="font-bold text-gray-900 text-base">{ranking.fullname}</h4>
-                                                    <p className="text-sm text-gray-600">Thành viên tích cực</p>
-                                                </div>
-                                            </div>
+                                            </Link>
                                         </td>
+
                                         <td className="py-4 px-4 text-center">
                                             <div className="flex items-center justify-center">
                                                 <svg className="w-4 h-4 text-blue-600 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

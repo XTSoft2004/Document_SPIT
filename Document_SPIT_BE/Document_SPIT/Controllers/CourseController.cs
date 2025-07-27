@@ -2,6 +2,7 @@
 using Domain.Entities;
 using Domain.Interfaces.Services;
 using Domain.Model.Request.Course;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using static Domain.Common.AppConstants;
 
@@ -29,6 +30,7 @@ namespace Document_SPIT_BE.Controllers
             return Ok(ResponseArray.ResponseList(courses, totalRecords, totalPages, pageNumber, pageSize));
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateAsync(CourseCreateRequest request)
         {
@@ -39,6 +41,7 @@ namespace Document_SPIT_BE.Controllers
             return response.ToActionResult();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPatch("{id}")]
         public async Task<IActionResult> UpdateAsync(long id, CourseRequest request)
         {
@@ -49,6 +52,7 @@ namespace Document_SPIT_BE.Controllers
             return response.ToActionResult();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAsync(long id)
         {

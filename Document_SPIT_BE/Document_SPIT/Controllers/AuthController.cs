@@ -1,5 +1,6 @@
 ﻿using Domain.Interfaces.Services;
 using Domain.Model.Request.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using static Domain.Common.AppConstants;
 
@@ -39,12 +40,14 @@ namespace Document_SPIT_BE.Controllers
             var response = await _sevices!.LogoutUser();
             return response.ToActionResult();
         }
+        [Authorize]
         [HttpGet("refresh-token")]
         public async Task<IActionResult> RefreshToken()
         {
             var response = await _sevices!.RefreshTokenAccount();
             return response.ToActionResult();
         }
+        [Authorize]
         [HttpPost("password-security")]
         public async Task<IActionResult> PasswordSecurity([FromBody] PasswordSecurityRequest passwordSecurityRequest)
         {

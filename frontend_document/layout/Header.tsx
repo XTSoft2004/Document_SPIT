@@ -26,9 +26,20 @@ const Header = () => {
   useEffect(() => {
     const fetchUser = async () => {
       const userData = await getMe()
+      // alert(userData.status + ' ' + islogin)
       setUser(userData.data)
-      if (userData.status === 200) setIsLogin(true)
-      else setIsLogin(false)
+      if (userData.status === 200) {
+        setIsLogin(true)
+        return;
+      }
+      if (userData.status == 401 && islogin) {
+        // alert('Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại')
+        NotificationService.warning({
+          message: 'Phiên đăng nhập đã hết hạn',
+          description: 'Vui lòng đăng nhập lại để tiếp tục sử dụng.',
+        })
+      }
+      setIsLogin(false)
     }
     fetchUser()
   }, [pathname])
@@ -98,15 +109,15 @@ const Header = () => {
                   {user?.username}
                 </span>
                 <button
-                    onClick={() => setShowProfileMenu((prev) => !prev)}
-                    className="flex items-center focus:outline-none hover:opacity-80 transition-opacity"
+                  onClick={() => setShowProfileMenu((prev) => !prev)}
+                  className="flex items-center focus:outline-none hover:opacity-80 transition-opacity"
                 >
-                    <Avatar
-                        size={36}
-                        src={user?.avatarUrl || undefined}
-                        icon={!user?.avatarUrl ? <span>{getAvatar(user?.fullname || '')}</span> : undefined}
-                        className="border-2 border-gray-200"
-                    />
+                  <Avatar
+                    size={36}
+                    src={user?.avatarUrl || undefined}
+                    icon={!user?.avatarUrl ? <span>{getAvatar(user?.fullname || '')}</span> : undefined}
+                    className="border-2 border-gray-200"
+                  />
                 </button>
                 {showProfileMenu && (
                   <div className="absolute right-0 top-full mt-2 z-50">

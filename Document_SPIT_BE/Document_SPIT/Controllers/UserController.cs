@@ -114,6 +114,7 @@ namespace Document_SPIT_BE.Controllers
             var response = await _services!.getStars();
             return response.ToActionResult();
         }
+        [Authorize]
         [HttpPost("change-status-star/{documentId}")]
         public async Task<IActionResult> ChangeStatusStar(long documentId)
         {

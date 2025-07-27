@@ -32,7 +32,6 @@ namespace Server_Manager.Middleware
                 "/auth/login",
                 "/auth/register",
                 "/auth/sign-up",
-                "/auth/refresh-token",
                 "/document/view",
                 "/extension/",
                 "/auth/logout",

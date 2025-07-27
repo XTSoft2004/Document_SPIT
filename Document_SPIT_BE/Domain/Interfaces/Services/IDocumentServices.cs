@@ -47,7 +47,7 @@ namespace Domain.Interfaces.Services
         /// </summary>
         /// <param name="IdDocument"></param>
         /// <returns></returns>
-        Task<(byte[] Data, string ContentType, string FileName)> DownloadFile(string FileId);
+        Task<(byte[] Data, string ContentType, string FileName)> DownloadFile(long? IdDocument);
         /// <summary>
         /// Lấy danh sách tài liệu với phân trang và tìm kiếm
         /// </summary>
@@ -92,6 +92,6 @@ namespace Domain.Interfaces.Services
         /// </summary>
         /// <param name="username"></param>
         /// <returns></returns>
-        Task<HttpResponse> GetMe(string username);
+        Task<HttpResponse> GetDocumentMe(string username);
     }
 }

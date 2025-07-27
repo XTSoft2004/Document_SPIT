@@ -32,10 +32,10 @@
 
   <ItemGroup>
     <Reference Include="HelperHttpClient">
-      <HintPath>..\..\DLL_Extension\HelperHttpClient.dll</HintPath>
+      <HintPath>..\DLL_Extension\HelperHttpClient.dll</HintPath>
     </Reference>
     <Reference Include="ModelsHelper">
-      <HintPath>..\..\DLL_Extension\ModelsHelper.dll</HintPath>
+      <HintPath>..\DLL_Extension\ModelsHelper.dll</HintPath>
     </Reference>
   </ItemGroup>
 

@@ -382,9 +382,9 @@ namespace Domain.Services
             _detailDocument.Update(itemReacted);
             await UnitOfWork.CommitAsync();
         }
-        public async Task<(byte[] Data, string ContentType, string FileName)> DownloadFile(string FileId)
+        public async Task<(byte[] Data, string ContentType, string FileName)> DownloadFile(long? IdDocument)
         {
-            var document = _document!.Find(f => f.FileId == FileId);
+            var document = _document!.Find(f => f.Id == IdDocument);
             if (document == null)
                 return (null, null, null);
 
@@ -581,7 +581,7 @@ namespace Domain.Services
             var thumbnailBase64 = await _googleDriverServices.GetThumbnailBase64(document.FileId);
             return thumbnailBase64;
         }
-        public async Task<HttpResponse> GetMe(string username)
+        public async Task<HttpResponse> GetDocumentMe(string username)
         {
             var user = _user!.Find(f => f.Username == username);
             if (user == null)

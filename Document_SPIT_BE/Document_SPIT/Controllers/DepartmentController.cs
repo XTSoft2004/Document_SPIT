@@ -1,6 +1,7 @@
 ﻿using Domain.Common.Http;
 using Domain.Interfaces.Services;
 using Domain.Model.Request.Department;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using static Domain.Common.AppConstants;
 
@@ -17,6 +18,7 @@ namespace Document_SPIT_BE.Controllers
             _sevices = sevices;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateAsync(DepartmentCreateRequest request)
         {
@@ -27,6 +29,7 @@ namespace Document_SPIT_BE.Controllers
             return Ok(response);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPatch("{id}")]
         public async Task<IActionResult> UpdateAsync(long id, DepartmentUpdateRequest request)
         {
@@ -36,6 +39,7 @@ namespace Document_SPIT_BE.Controllers
             return Ok(response);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAsync(long id)
         {
