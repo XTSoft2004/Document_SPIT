@@ -56,12 +56,21 @@ namespace Domain.Services
             _course = course;
             _categoryTypeServices = categoryTypeServices;
             _catetoryType = catetoryType;
-            var envPath = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.Parent.FullName, ".env");
-            DotNetEnv.Env.Load(envPath);
             _documentCategory = documentCategory;
             _historyServices = historyServices;
             _starDocument = starDocument;
             _geminiServices = geminiServices;
+
+            var manualPath = Environment.GetEnvironmentVariable("DOTNET_ENV_PATH");
+            if (!string.IsNullOrEmpty(manualPath) && File.Exists(manualPath))
+            {
+                DotNetEnv.Env.Load(manualPath);
+            }
+            else
+            {
+                var envPath = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.Parent.FullName, ".env");
+                DotNetEnv.Env.Load(envPath);
+            }
         }
 
         public async Task<HttpResponse> CreatePending(DocumentPendingRequest documentCreatePending)

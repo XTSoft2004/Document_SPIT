@@ -51,7 +51,9 @@ COPY --from=publish /app/publish .
 
 # Copy optional appsettings if needed
 COPY Document_SPIT/appsettings.json ./appsettings.json
-COPY Document_SPIT/appsettings.Production.json ./appsettings.Production.json
+
+# Copy .env into container
+COPY .env .env
 
 ENV DOTNET_ENVIRONMENT=Production
 

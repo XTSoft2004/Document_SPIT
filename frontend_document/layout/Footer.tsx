@@ -31,7 +31,7 @@ const Footer = () => {
                 href="/"
                 className="text-gray-300 hover:text-blue-400 transition-colors duration-200"
               >
-                Tài liệu
+                Trang chủ
               </NavigationLink>
               <NavigationLink
                 href="/document"

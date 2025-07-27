@@ -1,14 +1,17 @@
 ﻿using Domain.Base.Services;
 using Domain.Common;
+using Domain.Common.GoogleDriver.Interfaces;
+using Domain.Common.GoogleDriver.Model.Request;
 using Domain.Common.Http;
 using Domain.Entities;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
 using Domain.Model.Request.History;
 using Domain.Model.Request.User;
-using Domain.Model.Response.Token;
 using Domain.Model.Response.Statistical;
+using Domain.Model.Response.Token;
 using Domain.Model.Response.User;
+using DotNetEnv;
 using HelperHttpClient;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.IdentityModel.Tokens;
@@ -16,12 +19,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.WebSockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
-using System.Net.WebSockets;
-using Domain.Common.GoogleDriver.Interfaces;
-using Domain.Common.GoogleDriver.Model.Request;
 
 namespace Domain.Services
 {
@@ -47,8 +48,16 @@ namespace Domain.Services
             _startDocument = startDocument;
             _document = document;
             _googleDriverServices = googleDriverServices;
-            var envPath = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.Parent.FullName, ".env");
-            DotNetEnv.Env.Load(envPath);
+            var manualPath = Environment.GetEnvironmentVariable("DOTNET_ENV_PATH");
+            if (!string.IsNullOrEmpty(manualPath) && File.Exists(manualPath))
+            {
+                DotNetEnv.Env.Load(manualPath);
+            }
+            else
+            {
+                var envPath = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.Parent.FullName, ".env");
+                DotNetEnv.Env.Load(envPath);
+            }
         }
         public async Task<HttpResponse> UpdateAsync(long idUser, UserRequest userRequest)
         {
