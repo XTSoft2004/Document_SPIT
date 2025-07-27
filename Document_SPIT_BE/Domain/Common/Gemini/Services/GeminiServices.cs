@@ -58,16 +58,16 @@ namespace Domain.Common.Gemini.Services
 
             string API_KEY_GEMINI = Environment.GetEnvironmentVariable("API_KEY_GEMINI");
             var response = await _request.PostAsync($"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={API_KEY_GEMINI}", requestBody); 
-            if(!response.IsSuccessStatusCode)
+            if(response.IsSuccessStatusCode)
             {
                 var jsonResponse = JObject.Parse(_request.Content);
-                string? result = jsonResponse["candidates"]?[0]?["content"]?["part"]?[0]?["text"]?.ToString();
+                string? result = jsonResponse["candidates"]?[0]?["content"]?["parts"]?[0]?["text"]?.ToString();
                 if (!String.IsNullOrEmpty(result) && result.ToLower().Contains("Có"))
                     return true;
                 else
                     return false;
             }
-            return await Task.FromResult(true);
+            return true;
         }
     }
 }

@@ -153,6 +153,11 @@ export default function ModalReviewDocument({
     };
 
     const handleReject = async (documentId: string) => {
+        NotificationService.loading({
+            message: 'Từ chối tài liệu',
+            description: 'Đang xử lý yêu cầu từ chối tài liệu, vui lòng đợi trong giây lát...',
+            duration: 5,
+        });
         const response = await updateDocument(documentId, { statusDocument: 'REJECTED' });
         if (response.ok) {
             NotificationService.success({
