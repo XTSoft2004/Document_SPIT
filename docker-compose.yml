@@ -11,6 +11,7 @@ services:
       - NODE_ENV=production
       - DOTNET_ENV_PATH=/app/.env
     working_dir: /app
+    restart: always
 
   # backend:
   #   build:
@@ -23,6 +24,7 @@ services:
   #   environment:
   #     - DOTNET_ENVIRONMENT=Development
   #   working_dir: /src
+  #   restart: always
 
   frontend:
     build:
@@ -32,3 +34,4 @@ services:
       - "1111:1111"
     environment:
       - NODE_ENV=production
+    restart: always
