@@ -16,6 +16,11 @@ const nextConfig = {
         hostname: 'xtcoder2004.io.vn',
         pathname: '/document/thumbnail/**',
       },
+      {
+        protocol: 'http',
+        hostname: 'xtcoder2004.io.vn',
+        pathname: '/document/download/**',
+      },
     ],
   },
   experimental: {
