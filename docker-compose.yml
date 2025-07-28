@@ -13,6 +13,16 @@ services:
     working_dir: /app
     restart: always
 
+  frontend:
+    build:
+      context: ./frontend_document
+      target: runner
+    ports:
+      - "1111:1111"
+    environment:
+      - NODE_ENV=production
+    restart: always
+
   # backend:
   #   build:
   #     context: ./Document_SPIT_BE
@@ -44,13 +54,3 @@ services:
   #   restart: always
   #   stdin_open: true
   #   tty: true
-
-  frontend:
-    build:
-      context: ./frontend_document
-      target: runner
-    ports:
-      - "1111:1111"
-    environment:
-      - NODE_ENV=production
-    restart: always

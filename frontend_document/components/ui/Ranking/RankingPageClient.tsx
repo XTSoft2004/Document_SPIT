@@ -158,7 +158,7 @@ export default function RankingPageClient() {
                             {/* Second Place */}
                             {topThree[1] && (
                                 <div className="text-center relative">
-                                    <Link href={`/profile/${topThree[0].username}`} className="mb-4 lg:mb-6 relative">
+                                    <Link href={`/profile/${topThree[1].username}`} className="mb-4 lg:mb-6 relative">
                                         {topThree[1].avatarUrl ? (
                                             <img
                                                 src={topThree[1].avatarUrl}
