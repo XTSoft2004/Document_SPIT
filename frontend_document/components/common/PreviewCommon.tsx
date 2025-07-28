@@ -6,15 +6,26 @@ import Image from 'next/image';
 interface PreviewFilePopupProps {
     fileName: string;
     documentId: number;
+    scale?: number;
+    setScale?: React.Dispatch<React.SetStateAction<number>>;
+    translate?: { x: number; y: number };
+    setTranslate?: React.Dispatch<React.SetStateAction<{ x: number; y: number }>>;
 }
 
-export default function PreviewFile({ fileName, documentId }: PreviewFilePopupProps) {
+export default function PreviewFile({ 
+    fileName, 
+    documentId, 
+    scale: externalScale, 
+    setScale: externalSetScale, 
+    translate: externalTranslate, 
+    setTranslate: externalSetTranslate 
+}: PreviewFilePopupProps) {
     const imgRef = useRef<HTMLImageElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
-    const [scale, setScale] = useState(1);
+    const [internalScale, setInternalScale] = useState(1);
     const [isPanning, setIsPanning] = useState(false);
     const [origin, setOrigin] = useState({ x: 0, y: 0 });
-    const [translate, setTranslate] = useState({ x: 0, y: 0 });
+    const [internalTranslate, setInternalTranslate] = useState({ x: 0, y: 0 });
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [codeView, setCodeView] = useState<string | null>(null);
@@ -22,6 +33,12 @@ export default function PreviewFile({ fileName, documentId }: PreviewFilePopupPr
     const [isInitialized, setIsInitialized] = useState(false);
     const [isIframeLoading, setIsIframeLoading] = useState(false);
     const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
+
+    // Use external state if provided, otherwise use internal state
+    const scale = externalScale !== undefined ? externalScale : internalScale;
+    const setScale = externalSetScale || setInternalScale;
+    const translate = externalTranslate !== undefined ? externalTranslate : internalTranslate;
+    const setTranslate = externalSetTranslate || setInternalTranslate;
 
     const isImage = /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(fileName);
 
@@ -188,12 +205,18 @@ export default function PreviewFile({ fileName, documentId }: PreviewFilePopupPr
 
     // Mouse wheel zoom for images
     const handleWheel = React.useCallback((e: React.WheelEvent) => {
-        if (!isImage) return;
+        if (!isImage) {
+            // Even for non-images, prevent scroll propagation when inside preview
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+        }
 
         e.preventDefault();
+        e.stopPropagation();
         const delta = e.deltaY > 0 ? -0.1 : 0.1;
         setScale(prevScale => Math.max(0.2, Math.min(prevScale + delta, 5)));
-    }, [isImage]);
+    }, [isImage, setScale]);
 
     if (!documentId) {
         return (
@@ -216,7 +239,7 @@ export default function PreviewFile({ fileName, documentId }: PreviewFilePopupPr
             onMouseMove={isImage ? handleMouseMove : undefined}
             onMouseUp={isImage ? handleMouseUp : undefined}
             onMouseLeave={isImage ? handleMouseUp : undefined}
-            onWheel={isImage ? handleWheel : undefined}
+            onWheel={handleWheel}
         >
             {isLoading ? (
                 <div className="w-full max-w-3xl mx-auto p-8">

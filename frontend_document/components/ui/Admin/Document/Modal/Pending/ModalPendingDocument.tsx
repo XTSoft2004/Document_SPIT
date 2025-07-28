@@ -207,10 +207,6 @@ export default function ModalPendingDocument({
                 return;
             }
 
-            console.log('Submitting document:', values);
-            console.log('FinalFile:', finalFile);
-            console.log('FileList:', fileList);
-
             setLoading(true);
 
             let fileToUpload = finalFile;

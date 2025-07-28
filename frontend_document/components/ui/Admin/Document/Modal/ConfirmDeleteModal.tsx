@@ -56,11 +56,6 @@ const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
     }, [visible, form]);
 
     const handleSubmit = async () => {
-        console.log('🔍 Debug - handleSubmit called');
-        console.log('confirmationChecked:', confirmationChecked);
-        console.log('documentNameConfirmed:', documentNameConfirmed);
-        console.log('canDelete:', canDelete);
-
         // Mark that user has attempted to submit
         setHasSubmitted(true);
 
@@ -83,7 +78,6 @@ const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
             }
 
             if (!documentNameConfirmed) {
-                console.log('❌ Document name not confirmed - showing notification');
                 setPasswordError('Vui lòng xác nhận tên tài liệu');
                 return;
             }
@@ -93,7 +87,6 @@ const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
 
             const responseCheckSecurity = await checkAuthSecurity(values.password);
             if (!responseCheckSecurity.ok) {
-                console.log('❌ Security check failed - showing notification');
                 setPasswordError('Mật khẩu bảo mật không chính xác');
                 NotificationService.error({
                     message: 'Mật khẩu không đúng',
@@ -103,10 +96,8 @@ const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
             }
 
             setPasswordError('');
-            console.log('✅ Password: ', values.password);
             await onConfirm(values.password);
         } catch (error) {
-            console.log('❌ Error in handleSubmit:', error);
             if (error instanceof Error && error.message.includes('password')) {
                 setPasswordError('Mật khẩu bảo mật không chính xác');
                 NotificationService.error({

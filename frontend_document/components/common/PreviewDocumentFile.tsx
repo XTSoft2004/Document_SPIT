@@ -89,6 +89,25 @@ export default function PreviewDocumentFile({ open, onClose, fileName, documentI
     }, [open, isImage, onClose, handleZoomIn, handleZoomOut, handleReset, handleFullscreen]);
 
     // Mouse wheel zoom for images
+    const handleWheel = React.useCallback((e: React.WheelEvent) => {
+        if (!isImage) return;
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const delta = e.deltaY > 0 ? -0.1 : 0.1;
+        setScale(prevScale => Math.max(0.2, Math.min(prevScale + delta, 5)));
+    }, [isImage]);
+
+    // Prevent body scroll when modal is open
+    React.useEffect(() => {
+        if (open) {
+            document.body.style.overflow = 'hidden';
+            return () => {
+                document.body.style.overflow = 'unset';
+            };
+        }
+    }, [open]);
 
     if (!open) return null;
 
@@ -96,12 +115,14 @@ export default function PreviewDocumentFile({ open, onClose, fileName, documentI
         <div
             className="rounded-lg fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
             onClick={onClose}
+            onWheel={(e) => e.preventDefault()}
         >
             <div
                 ref={containerRef}
                 className={`bg-white rounded-2xl shadow-2xl w-[95vw] max-w-6xl h-[90vh] flex flex-col relative transform transition-all duration-300 animate-in zoom-in-95 ${isFullscreen ? 'w-screen h-screen max-w-none max-h-none rounded-none' : ''}`}
                 style={isFullscreen ? { width: '100vw', height: '100vh' } : {}}
                 onClick={e => e.stopPropagation()}
+                onWheel={handleWheel}
             >
                 {/* Enhanced Toolbar - 3 column layout */}
                 <div className="flex items-center justify-between py-4 px-6 border-b bg-gradient-to-r from-gray-50 to-white sticky top-0 z-10 rounded-t-2xl">
@@ -223,7 +244,14 @@ export default function PreviewDocumentFile({ open, onClose, fileName, documentI
                     </div>
                 </div>
                 {/* Content Area */}
-                <PreviewCommon documentId={documentId} fileName={fileName} />
+                <PreviewCommon 
+                    documentId={documentId} 
+                    fileName={fileName}
+                    scale={scale}
+                    setScale={setScale}
+                    translate={translate}
+                    setTranslate={setTranslate}
+                />
             </div>
         </div>
     );

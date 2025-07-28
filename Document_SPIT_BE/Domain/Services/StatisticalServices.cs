@@ -33,7 +33,11 @@ namespace Domain.Services
         {
             // Lấy danh sách người dùng và tài liệu
             var users = _user.All().ToList();
-            var documents = _document.All().ToList();
+            var documents = _document
+                        .All()
+                        .Where(d => d.StatusDocument == StatusDocument_Enum.Approved)
+                        .ToList();
+
 
             // Tạo bảng xếp hạng
             var ranking = new List<RankingResponse>();

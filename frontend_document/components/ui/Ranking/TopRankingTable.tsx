@@ -198,9 +198,13 @@ export default function TopRankingTable({ rankings, loading }: TopRankingTablePr
                                         <td className="py-4 px-4">
                                             <Link href={`/profile/${ranking.username}`} className="flex items-center flex-1 space-x-3">
                                                 <div className="flex items-center">
-                                                    <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${avatar.gradient} flex items-center justify-center text-white font-bold shadow-lg mr-4`}>
-                                                        {avatar.initials}
-                                                    </div>
+                                                    {ranking.avatarUrl ? (
+                                                        <img src={ranking.avatarUrl} alt={ranking.fullname} className="w-10 h-10 rounded-full object-cover mr-2" />
+                                                    ) : (
+                                                        <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${avatar.gradient} flex items-center justify-center text-white font-bold text-sm shadow-lg mr-2`}>
+                                                            {avatar.initials}
+                                                        </div>
+                                                    )}
                                                     <div>
                                                         <h4 className="font-bold text-gray-900 text-base">{ranking.fullname}</h4>
                                                         <p className="text-sm text-gray-600">Thành viên tích cực</p>

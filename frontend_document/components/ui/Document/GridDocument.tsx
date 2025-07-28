@@ -221,6 +221,7 @@ export default function GridDocument({ data, content, slug, path, treeData, mobi
                 <div className="flex-1 min-h-0 overflow-auto px-2 xs:px-3 sm:px-4 pb-3 xs:pb-4 sm:pb-5">
                     {mode === 'list' ? (
                         <GridDocumentList
+                            data={data}
                             content={displayContent}
                             url={url}
                             onPreviewFile={file => setPreviewFile({ fileName: file.name, documentId: file.documentId })}
