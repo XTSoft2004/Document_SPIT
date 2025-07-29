@@ -10,11 +10,75 @@ import DraggerUpload from "@/components/ui/Admin/Dashboard/dragger-upload";
 import RightSidebar, { RightSidebarMobile } from "@/components/ui/Admin/Dashboard/right-sidebar";
 import { GlobalPageLoader } from "@/components/ui/page-transition-loader";
 import { AuthProvider } from '@/context/AuthContext';
+import { Metadata } from 'next';
 
-export const metadata = {
-    title: "Trang chủ | Quản trị",
-    description: "Trang chủ quản trị hệ thống tài liệu SPIT.",
-};
+export const siteMetadata: Metadata = {
+    title: 'SPIT Document – Nền tảng chia sẻ tài liệu học tập | Khoa CNTT HUSC',
+    description:
+        'SPIT Document là nền tảng chia sẻ bài giảng, đề thi, slide, bài tập lớn và nhiều tài liệu học tập chất lượng khác. Giúp sinh viên Khoa CNTT HUSC học tập hiệu quả và lan tỏa tri thức.',
+    keywords: [
+        'SPIT',
+        'Spit-Husc',
+        'SPIT Document',
+        'chia sẻ tài liệu',
+        'tài liệu học tập',
+        'Khoa CNTT HUSC',
+        'bài giảng',
+        'đề thi',
+        'slide bài học',
+        'bài tập lớn',
+        'tài liệu đại học',
+        'câu lạc bộ lập trình',
+        'SPIT HUSC',
+        'CLB CNTT',
+        'CLB SPIT',
+        'CLB Lập trình',
+        'spit-husc.io.vn',
+        'document.spit-husc.io.vn',
+    ],
+    metadataBase: new URL('https://document.spit-husc.io.vn/'),
+    openGraph: {
+        type: 'website',
+        url: 'https://document.spit-husc.io.vn/',
+        title: 'SPIT Document – Nền tảng chia sẻ tài liệu học tập | Khoa CNTT HUSC',
+        description:
+            'Chia sẻ bài giảng, đề thi, slide, bài tập lớn và nhiều tài liệu học tập hữu ích khác cho sinh viên tại Khoa Công nghệ Thông tin – Đại học Khoa học Huế.',
+        siteName: 'SPIT Document',
+        images: [
+            {
+                url: 'https://document.spit-husc.io.vn/thumbnail.png',
+                width: 1200,
+                height: 630,
+                alt: 'Trang chủ của SPIT Document',
+            },
+            {
+                url: 'https://document.spit-husc.io.vn/contribute.png',
+                width: 1200,
+                height: 630,
+                alt: 'Trang đóng góp tài liệu của SPIT Document',
+            },
+        ],
+        locale: 'vi_VN',
+    },
+    twitter: {
+        card: 'summary_large_image',
+        title: 'SPIT Document – Nền tảng chia sẻ tài liệu học tập | Khoa CNTT HUSC',
+        description:
+            'Truy cập SPIT Document để tìm kiếm và chia sẻ tài liệu học tập chất lượng dành cho sinh viên CNTT HUSC.',
+        images: ['https://document.spit-husc.io.vn/thumbnail.png'],
+        // site: '@SPIT_Document', // Nếu có tài khoản Twitter chính thức
+    },
+    icons: {
+        icon: '/favicon.ico',
+    },
+    themeColor: '#ffffff',
+    viewport: {
+        width: 'device-width',
+        initialScale: 1,
+        maximumScale: 1,
+    },
+}
+
 
 export default function RootLayout({
     children,
@@ -23,6 +87,23 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="vi">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify({
+                        "@context": "https://schema.org",
+                        "@type": "Organization",
+                        "name": "SPIT Document",
+                        "url": "https://document.spit-husc.io.vn/",
+                        "description": "Chia sẻ bài giảng, đề thi, slide, tài liệu học tập chất lượng cho sinh viên HUSC.",
+                        "sameAs": [
+                            "https://www.facebook.com/clbhtlt.ithusc",
+                            "https://discord.gg/nEH7uvsBA4",
+                            "https://it.husc.edu.vn/"
+                        ]
+                    }),
+                }}
+            />
             <body>
                 <SidebarProvider>
                     <AuthProvider>
