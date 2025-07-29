@@ -36,34 +36,31 @@ const PreviewPanel = ({
     useEffect(() => {
         setLoading(true);
         setImageError(true);
-        if (selectedItem?.fileId) {
-            fetchDocumentCode(selectedItem);
-        }
-    }, [selectedItem, selectedItem?.fileId]);
+    }, []);
 
-    const fetchDocumentCode = async (document: IDocumentResponse) => {
-        const response = await getCodeView(document.id);
-        if (response.ok) {
-            setCodeView(response.data.code);
-            // NotificationService.success({
-            //     message: `Tải mã xem trước thành công | ${response.data.code || 'N/A'}`,
-            //     description: "Mã xem trước đã được tải thành công.",
-            // });
-            return;
-        }
-        // NotificationService.error({
-        //     message: response.message || "Không thể tải mã xem trước",
-        //     description: "Vui lòng thử lại sau.",
-        // });
-        setImageError(true);
-    }
+    // const fetchDocumentCode = async (document: IDocumentResponse) => {
+    //     const response = await getCodeView(document.id);
+    //     if (response.ok) {
+    //         setCodeView(response.data.code);
+    //         // NotificationService.success({
+    //         //     message: `Tải mã xem trước thành công | ${response.data.code || 'N/A'}`,
+    //         //     description: "Mã xem trước đã được tải thành công.",
+    //         // });
+    //         return;
+    //     }
+    //     // NotificationService.error({
+    //     //     message: response.message || "Không thể tải mã xem trước",
+    //     //     description: "Vui lòng thử lại sau.",
+    //     // });
+    //     setImageError(true);
+    // }
 
-    const reloadPreview = async () => {
-        setLoading(true);
-        if (selectedItem) {
-            await fetchDocumentCode(selectedItem);
-        }
-    }
+    // const reloadPreview = async () => {
+    //     setLoading(true);
+    //     if (selectedItem) {
+    //         await fetchDocumentCode(selectedItem);
+    //     }
+    // }
 
     if (!selectedItem) {
         return (
@@ -112,13 +109,13 @@ const PreviewPanel = ({
 
                         {showCloseButton && (
                             <div className="flex items-center gap-1">
-                                <Button
+                                {/* <Button
                                     type="text"
                                     size="small"
                                     onClick={reloadPreview}
                                     className="!p-2 hover:bg-white/60 dark:hover:bg-gray-700/60 rounded-lg transition-colors"
                                     icon={<RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />}
-                                />
+                                /> */}
                                 <Button
                                     type="text"
                                     size="small"
@@ -129,7 +126,7 @@ const PreviewPanel = ({
                             </div>
                         )}
 
-                        {!showCloseButton && (
+                        {/* {!showCloseButton && (
                             <Button
                                 type="text"
                                 size="small"
@@ -137,7 +134,7 @@ const PreviewPanel = ({
                                 className="!p-2 hover:bg-white/60 dark:hover:bg-gray-700/60 rounded-lg transition-colors"
                                 icon={<RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />}
                             />
-                        )}
+                        )} */}
                     </div>
 
                     {/* File info badges */}
