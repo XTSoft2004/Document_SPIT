@@ -12,6 +12,7 @@ using Domain.Model.Response.Course;
 using Domain.Model.Response.Department;
 using Domain.Model.Response.Token;
 using Domain.Model.Response.User;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -127,37 +128,34 @@ namespace Domain.Services
 
         public List<CourseResponse>? GetCourse(string search, int pageNumber, int pageSize, out int totalRecords)
         {
-            var query = _course!.All();
+            var query = _course.All()
+                .Select(c => new CourseResponse
+                {
+                    Id = c.Id,
+                    Code = c.Code,
+                    Name = c.Name,
+                    FolderId = c.FolderId,
+                    DepartmentId = c.DepartmentId,
+                });
+
             if (!string.IsNullOrEmpty(search))
             {
                 string searchLower = search.ToLower();
-
-                query = query.Where(d =>
-                    (d.Name != null && d.Name.ToLower().Contains(searchLower)) ||
-                    (d.Code != null && d.Code.ToLower().Contains(searchLower)) ||
-                    (d.Department != null && d.Department.Name != null && d.Department.Name.ToLower().Contains(searchLower))
+                query = query.Where(c =>
+                    (c.Name != null && c.Name.ToLower().Contains(searchLower)) ||
+                    (c.Code != null && c.Code.ToLower().Contains(searchLower))
                 );
             }
-            // Đếm số bản ghi trước khi phân trang
-            totalRecords = query.Count();
-            // Sắp xếp theo ModifiedDate
-            query = query.OrderByDescending(d => d.ModifiedDate);
-            if (pageNumber != -1 && pageSize != -1)
-            {
-                query = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
-            }
 
-            // Chuyển đổi sang danh sách DepartmentResponse
-            var coursesSearch = query.Select(c => new CourseResponse
-            {
-                Id = c.Id,
-                Code = c.Code,
-                Name = c.Name,
-                FolderId = c.FolderId,
-                DepartmentId = c.DepartmentId,
-            }).ToList();    
+            totalRecords = query.Count(); // Tổng số bản ghi trước phân trang
 
-            return coursesSearch;
+            // Phân trang
+            var paginatedCourses = query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return paginatedCourses;
         }
         public async Task<HttpResponse> GetCourseById(long? Id)
         {

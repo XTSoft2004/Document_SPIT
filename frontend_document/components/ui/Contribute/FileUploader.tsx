@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import FilePreviewDashboard from '@/components/common/FilePreviewDashboard';
 import { isImageFile, createImageFile, ImageFile } from '@/utils/pdfUtils'
+import NotificationService from '../Notification/NotificationService';
 
 interface FileUploaderProps {
     file: File | null
@@ -72,7 +73,10 @@ export default function FileUploader({
             } else {
                 // Mixed files or multiple non-image files - not supported
                 console.warn('Mixed files or multiple non-image files not supported')
-                alert('Vui lòng chọn một file tài liệu hoặc nhiều ảnh để tạo PDF')
+                NotificationService.error({
+                    message: 'Lỗi tải lên',
+                    description: 'Vui lòng chọn một file tài liệu hoặc nhiều ảnh để tạo PDF',
+                })
             }
         }
 
@@ -125,7 +129,10 @@ export default function FileUploader({
             } else {
                 // Mixed files or multiple non-image files - not supported
                 console.warn('Mixed files or multiple non-image files not supported')
-                alert('Vui lòng chọn một file tài liệu hoặc nhiều ảnh để tạo PDF')
+                NotificationService.error({
+                    message: 'Lỗi tải lên',
+                    description: 'Vui lòng chọn một file tài liệu hoặc nhiều ảnh để tạo PDF',
+                })
             }
         }
     }

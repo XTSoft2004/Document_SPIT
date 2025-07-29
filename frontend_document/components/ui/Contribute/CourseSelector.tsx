@@ -27,7 +27,7 @@ export default function CourseSelector({
 
     const handleSearchCourse = async (search: string) => {
         setLoading(true);
-        const response = await getCourse(search, 1, 20);
+        const response = await getCourse(search, 1, 10);
         if (response.ok) {
             setCourses(response.data);
         }

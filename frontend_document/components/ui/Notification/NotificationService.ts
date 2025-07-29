@@ -26,7 +26,7 @@ class NotificationService {
     width: '320px',
   }
 
-  private constructor() {}
+  private constructor() { }
 
   public static getInstance() {
     if (!NotificationService.instance) {
@@ -36,11 +36,16 @@ class NotificationService {
   }
 
   private withDefaults(options: NotificationArgsProps): NotificationArgsProps {
-    return {
-      ...options,
-      message: options.message || 'Thông báo',
+    const defaults = {
+      message: 'Thông báo',
       placement: this.defaultPlacement,
       duration: this.defaultDuration,
+      style: this.defaultStyle,
+    }
+
+    return {
+      ...defaults,
+      ...options,
       style: { ...this.defaultStyle, ...options.style },
     }
   }
@@ -48,7 +53,8 @@ class NotificationService {
   public loading(
     options: NotificationArgsProps & {
       icon?: React.ReactNode
-      message?: React.ReactNode
+      message?: React.ReactNode,
+      duration?: number
     },
   ) {
     const loadingIcon = React.createElement(LoadingOutlined, {
@@ -64,7 +70,7 @@ class NotificationService {
       ...this.withDefaults(options),
       icon: options.icon ?? loadingIcon,
       message: options.message ?? 'Đang xử lý...',
-      duration: 0,
+      duration: options.duration ?? 0, // Use options.duration if provided, otherwise 0 (persistent)
       key: options.key || 'loading',
       style: {
         ...this.defaultStyle,

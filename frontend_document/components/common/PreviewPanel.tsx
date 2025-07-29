@@ -8,6 +8,7 @@ import globalConfig from "@/app.config";
 import { getCodeView } from "@/actions/document.actions";
 import Image from "next/image";
 import PreviewCommon from "./PreviewCommon";
+import NotificationService from "../ui/Notification/NotificationService";
 
 interface PreviewPanelProps {
     selectedItem: IDocumentResponse;
@@ -177,13 +178,19 @@ const PreviewPanel = ({
                                 className="!p-1 text-gray-500 hover:text-blue-600 dark:hover:text-blue-400"
                                 icon={<Download className="w-3 h-3" />}
                                 onClick={() => {
-                                    const link = document.createElement('a');
-                                    link.href = `${globalConfig.baseUrl}/document/download/${selectedItem.fileId}`;
-                                    link.download = selectedItem.name;
-                                    link.target = '_blank';
-                                    document.body.appendChild(link);
-                                    link.click();
-                                    document.body.removeChild(link);
+                                    const downloadUrl = `${globalConfig.baseUrl}/document/download/${selectedItem.fileId}`;
+                                    const link = document.createElement('a')
+                                    link.href = downloadUrl
+                                    link.download = selectedItem.fileName || 'document'
+                                    link.style.display = 'none'
+                                    document.body.appendChild(link)
+                                    link.click()
+                                    document.body.removeChild(link)
+                                    NotificationService.loading({
+                                        message: 'Đang tải xuống',
+                                        description: `Vui lòng đợi trong giây lát...`,
+                                        duration: 3,
+                                    })
                                 }}
                             />
                         </div>

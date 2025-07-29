@@ -38,7 +38,7 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
     // Search courses function
     const handleSearchCourse = useCallback(async (search: string = '') => {
         try {
-            const response = await getCourse(search, 1, 20);
+            const response = await getCourse(search, 1, 10);
             if (response.ok) {
                 setCourses(response.data);
             }
@@ -233,7 +233,7 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
             width={900}
             centered
             destroyOnClose={true}
-            maskClosable={false}
+            maskClosable={true} // Đổi thành true để bấm ngoài thì close
             style={{
                 top: 10,
                 maxHeight: '90vh'

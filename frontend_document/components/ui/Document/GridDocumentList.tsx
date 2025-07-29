@@ -8,6 +8,7 @@ import NotFound from '../NotFound'
 import HeartButton from './HeartButton'
 import globalConfig from '@/app.config'
 import getFileIcon from '@/components/common/IconFile'
+import NotificationService from '../Notification/NotificationService'
 
 interface GridDocumentListProps {
   data: IDriveResponse[]
@@ -155,12 +156,25 @@ export default function GridDocumentList({
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <a
-                    href={`${globalConfig.baseUrl}/document/download/${item.documentId}`}
-                    download={item.name || 'document'}
+                  <button
                     className="p-1 hover:bg-blue-100 rounded transition-colors"
                     title="Tải xuống"
-                    onClick={e => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      const downloadUrl = `${globalConfig.baseUrl}/document/download/${item.documentId}`
+                      const link = document.createElement('a')
+                      link.href = downloadUrl
+                      link.download = item.name || 'document'
+                      link.style.display = 'none'
+                      document.body.appendChild(link)
+                      link.click()
+                      document.body.removeChild(link)
+                      NotificationService.loading({
+                        message: 'Đang tải xuống',
+                        description: `Vui lòng đợi trong giây lát...`,
+                        duration: 3,
+                      })
+                    }}
                   >
                     <svg
                       className="w-4 h-4 text-gray-500 group-hover:text-blue-600"
@@ -175,7 +189,7 @@ export default function GridDocumentList({
                         d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                       />
                     </svg>
-                  </a>
+                  </button>
                   {isLogin && (
                     <HeartButton
                       documentId={item.documentId}
