@@ -57,9 +57,13 @@ namespace Domain.Common.Gemini.Services
 
 
             string API_KEY_GEMINI = Environment.GetEnvironmentVariable("API_KEY_GEMINI");
-            var response = await _request.PostAsync($"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={API_KEY_GEMINI}", requestBody); 
+            string url = $"https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key={API_KEY_GEMINI}";
+            var response = await _request.PostAsync(url, requestBody); 
             Console.WriteLine("=== GeminiCheck: Đã gửi yêu cầu kiểm tra file/ảnh ===");
-            if(response.IsSuccessStatusCode)
+            Console.WriteLine("Url: " + url);
+            // Replace line 64 with the following to output the request body as JSON
+            Console.WriteLine("Nội dung yêu cầu: " + Newtonsoft.Json.JsonConvert.SerializeObject(requestBody, Newtonsoft.Json.Formatting.Indented));
+            if (response.IsSuccessStatusCode)
             {
                 var jsonResponse = JObject.Parse(_request.Content);
                 Console.WriteLine("=== GeminiCheck: Nhận phản hồi thành công ===");
