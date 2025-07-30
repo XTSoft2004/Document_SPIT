@@ -58,15 +58,32 @@ namespace Domain.Common.Gemini.Services
 
             string API_KEY_GEMINI = Environment.GetEnvironmentVariable("API_KEY_GEMINI");
             var response = await _request.PostAsync($"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={API_KEY_GEMINI}", requestBody); 
+            Console.WriteLine("=== GeminiCheck: Đã gửi yêu cầu kiểm tra file/ảnh ===");
             if(response.IsSuccessStatusCode)
             {
                 var jsonResponse = JObject.Parse(_request.Content);
+                Console.WriteLine("=== GeminiCheck: Nhận phản hồi thành công ===");
+                Console.WriteLine("Phản hồi JSON: " + jsonResponse.ToString());
                 string? result = jsonResponse["candidates"]?[0]?["content"]?["parts"]?[0]?["text"]?.ToString();
-                if (!String.IsNullOrEmpty(result) && result.ToLower().Contains("Có"))
+                string icon = "";
+                if (!String.IsNullOrEmpty(result) && result.ToLower().Contains("có"))
+                {
+                    icon = "❌"; // icon cho nội dung độc hại
+                    Console.WriteLine($"{icon} GeminiCheck: Phát hiện nội dung độc hại hoặc không lành mạnh.");
+                    Console.WriteLine("Kết quả kiểm tra: " + result);
                     return true;
+                }
                 else
+                {
+                    icon = "✅"; // icon cho nội dung an toàn
+                    Console.WriteLine($"{icon} GeminiCheck: Không phát hiện nội dung độc hại hoặc không lành mạnh.");
+                    Console.WriteLine("Kết quả kiểm tra: " + result);
                     return false;
+                }
             }
+            Console.WriteLine("=== GeminiCheck: Không thể kiểm tra file độc hại, vui lòng kiểm tra lại !!! ===");
+            if (!string.IsNullOrEmpty(_request.Content))
+                Console.WriteLine("Phản hồi lỗi: " + _request.Content);
             return true;
         }
     }
