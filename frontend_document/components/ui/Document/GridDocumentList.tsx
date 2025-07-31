@@ -159,21 +159,74 @@ export default function GridDocumentList({
                   <button
                     className="p-1 hover:bg-blue-100 rounded transition-colors"
                     title="Tải xuống"
-                    onClick={(e) => {
+                    onClick={async (e) => {
                       e.stopPropagation()
-                      const downloadUrl = `${globalConfig.baseUrl}/document/download/${item.documentId}`
-                      const link = document.createElement('a')
-                      link.href = downloadUrl
-                      link.download = item.name || 'document'
-                      link.style.display = 'none'
-                      document.body.appendChild(link)
-                      link.click()
-                      document.body.removeChild(link)
-                      NotificationService.loading({
-                        message: 'Đang tải xuống',
-                        description: `Vui lòng đợi trong giây lát...`,
-                        duration: 3,
-                      })
+                      const downloadKey = `download-${item.documentId}`;
+
+                      try {
+                        NotificationService.loading({
+                          message: 'Đang chuẩn bị tải xuống',
+                          description: `Đang xử lý file "${item.name}"...`,
+                          key: downloadKey,
+                          duration: 0,
+                        });
+
+                        const downloadUrl = `/api/download/${item.documentId}`;
+
+                        // Check if file exists first
+                        const response = await fetch(downloadUrl, {
+                          method: 'GET',
+                          // headers: {
+                          //   'Authorization': localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : '',
+                          // },
+                        });
+
+                        if (!response.ok) {
+                          throw new Error(`File không tồn tại hoặc không có quyền truy cập (${response.status})`);
+                        }
+
+                        // Update notification
+                        NotificationService.loading({
+                          message: 'Đang tải xuống',
+                          description: `Đang tải file "${item.name}"...`,
+                          key: downloadKey,
+                          duration: 0,
+                        });
+
+                        // Create download link
+                        const link = document.createElement('a');
+                        link.href = downloadUrl;
+                        link.download = item.name || 'document';
+                        link.style.display = 'none';
+
+                        // Add auth if available
+                        if (localStorage.getItem('token')) {
+                          link.setAttribute('crossorigin', 'use-credentials');
+                        }
+
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+
+                        // Success notification
+                        NotificationService.destroy(downloadKey);
+                        NotificationService.success({
+                          message: 'Tải xuống thành công',
+                          description: `File "${item.name}" đã được tải xuống vào thư mục Downloads`,
+                          duration: 3,
+                        });
+
+                      } catch (error) {
+                        console.error('Download error:', error);
+                        NotificationService.destroy(downloadKey);
+
+                        const errorMessage = error instanceof Error ? error.message : 'Lỗi không xác định';
+                        NotificationService.error({
+                          message: 'Lỗi tải xuống',
+                          description: `Không thể tải xuống file: ${errorMessage}`,
+                          duration: 5,
+                        });
+                      }
                     }}
                   >
                     <svg

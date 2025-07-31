@@ -4,7 +4,7 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    domains: ['localhost', 'document.spit-husc.io.vn', 'xtcoder2004.io.vn', 'backend', '192.168.1.20'],
+    domains: ['localhost', 'document.spit-husc.io.vn', 'xtcoder2004.io.vn', 'xtcoder2004.io.vn:1122', 'backend', '192.168.1.20'],
     remotePatterns: [
       {
         protocol: 'https',
@@ -18,7 +18,7 @@ const nextConfig = {
       },
       {
         protocol: 'http',
-        hostname: 'xtcoder2004.io.vn',
+        hostname: 'xtcoder2004.io.vn:1122',
         pathname: '/document/download/**',
       },
     ],

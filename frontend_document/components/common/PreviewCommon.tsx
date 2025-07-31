@@ -12,13 +12,13 @@ interface PreviewFilePopupProps {
     setTranslate?: React.Dispatch<React.SetStateAction<{ x: number; y: number }>>;
 }
 
-export default function PreviewFile({ 
-    fileName, 
-    documentId, 
-    scale: externalScale, 
-    setScale: externalSetScale, 
-    translate: externalTranslate, 
-    setTranslate: externalSetTranslate 
+export default function PreviewFile({
+    fileName,
+    documentId,
+    scale: externalScale,
+    setScale: externalSetScale,
+    translate: externalTranslate,
+    setTranslate: externalSetTranslate
 }: PreviewFilePopupProps) {
     const imgRef = useRef<HTMLImageElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);

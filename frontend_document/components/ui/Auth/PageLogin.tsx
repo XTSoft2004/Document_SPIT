@@ -31,16 +31,29 @@ export default function PageLogin() {
       password: data.password,
       deviceId: deviceId,
     }
-    NotificationService.info({
+    
+    const loadingKey = 'login-loading'
+    NotificationService.loading({
       message: 'Đang đăng nhập...',
       description: 'Vui lòng đợi trong giây lát.',
+      key: loadingKey,
+      duration: 0,
     })
 
-    await loginUser(loginRequest)
-
-    router.push('/')
-
-    setLoading(false)
+    try {
+      await loginUser(loginRequest)
+      // Clear loading notification on success
+      NotificationService.destroy(loadingKey)
+      // Only redirect on successful login
+      router.push('/')
+    } catch (error) {
+      // Clear loading notification on error
+      NotificationService.destroy(loadingKey)
+      // Login failed - stay on login page
+      console.error('Login failed:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

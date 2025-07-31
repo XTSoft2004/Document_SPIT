@@ -60,7 +60,7 @@ namespace Document_SPIT_BE.Controllers
 
             return Ok(ResponseArray.ResponseList(users, totalRecords, totalPages, pageNumber, pageSize));
         }
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         [HttpPatch("{Id}")]
         public async Task<IActionResult> UpdateAsync(long Id, UserRequest userRequest)
         {

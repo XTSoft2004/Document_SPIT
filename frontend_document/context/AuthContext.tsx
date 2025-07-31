@@ -45,15 +45,14 @@ export const AuthProvider: React.FC<{
         try {
             const response = await loginAccount(loginRequest);
 
-            if (response.ok) {
-                // Map ILoginResponse to IInfoUserResponse
+            if (response.ok && response.data) {
                 const userInfo: IInfoUserResponse = {
                     userId: response.data.userId,
                     username: response.data.username,
                     fullname: response.data.fullname,
-                    roleName: response.data.roleName || 'User', // Default role if not provided
+                    roleName: response.data.roleName || 'User',
                     email: response.data.email,
-                    avatarUrl: response.data.avatarUrl || '', // Ensure avatarUrl is set
+                    avatarUrl: response.data.avatarUrl || '',
                 };
                 setInfo(userInfo);
                 setIsLoggedIn(true);
@@ -64,21 +63,47 @@ export const AuthProvider: React.FC<{
                     description: `Chào mừng bạn ${response.data.username} đã đăng nhập thành công!`,
                 });
             } else {
+                setInfo(null);
+                setIsLoggedIn(false);
+                localStorage.removeItem('user');
+                localStorage.setItem('isLoggedIn', 'false');
+
                 NotificationService.error({
-                    message: response.message || 'Đăng nhập thất bại',
+                    message: 'Đăng nhập thất bại',
+                    description: response.message || 'Tên đăng nhập hoặc mật khẩu không chính xác. Vui lòng kiểm tra lại.',
+                    duration: 5,
                 });
+
+                throw new Error(response.message || 'Đăng nhập thất bại');
             }
         } catch (error) {
+            // Ensure user stays logged out on error
+            setInfo(null);
+            setIsLoggedIn(false);
+            localStorage.removeItem('user');
+            localStorage.setItem('isLoggedIn', 'false');
+
             console.error("Login error:", error);
-            NotificationService.error({
-                message: "Lỗi kết nối đến server",
-            });
+            throw error;
+            // Check if it's our custom login failure error
+            // if (error instanceof Error && error.message.includes('Đăng nhập thất bại')) {
+            //     // Don't show additional error notification for login failures
+            //     throw error; // Re-throw to prevent redirect
+            // } else {
+            //     // Network or other errors
+            //     NotificationService.error({
+            //         message: "Lỗi kết nối",
+            //         description: "Không thể kết nối đến server. Vui lòng thử lại sau.",
+            //         duration: 5,
+            //     });
+            //     throw error; // Re-throw to prevent redirect
+            // }
         }
     };
 
     const getInfo = (): IInfoUserResponse | null => {
         if (typeof window === 'undefined') return null;
-        
+
         if (localStorage.getItem('isLoggedIn') === 'false')
             return null;
 
