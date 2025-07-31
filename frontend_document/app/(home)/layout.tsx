@@ -9,9 +9,22 @@ import React, { useState, useEffect } from 'react'
 import { AuthProvider } from '@/context/AuthContext'
 
 export const metadata: Metadata = {
-  title: 'Trang chủ',
+  title: 'Trang chủ - SPIT Document',
   description:
-    'Trang chủ của SPIT - Nơi chia sẻ tài liệu học tập và đóng góp kiến thức',
+    'Khám phá hàng ngàn tài liệu học tập chất lượng cao từ sinh viên Khoa CNTT HUSC. Chia sẻ bài giảng, đề thi, slide và kiến thức để cùng nhau phát triển.',
+  keywords: [
+    'trang chủ SPIT',
+    'tài liệu CNTT HUSC',
+    'chia sẻ kiến thức',
+    'học tập trực tuyến',
+    'cộng đồng sinh viên CNTT'
+  ],
+  openGraph: {
+    title: 'Trang chủ - SPIT Document',
+    description: 'Khám phá hàng ngàn tài liệu học tập chất lượng cao từ sinh viên Khoa CNTT HUSC',
+    type: 'website',
+    url: 'https://document.spit-husc.io.vn/',
+  },
   icons: {
     icon: '/logo/logo-500x500.png',
   },
