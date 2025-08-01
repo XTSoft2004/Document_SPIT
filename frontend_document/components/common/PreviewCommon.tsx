@@ -292,7 +292,8 @@ export default function PreviewFile({
                     >
                         <Image
                             ref={imgRef}
-                            src={`${globalConfig.baseUrl}/document/view/${codeView}`}
+                            // src={`${globalConfig.baseUrl}/document/view/${codeView}`}
+                            src={`/api/view/${codeView}`}
                             alt={fileName}
                             width={0}
                             height={0}
@@ -347,7 +348,7 @@ export default function PreviewFile({
                     )}
 
                     <iframe
-                        src={`${globalConfig.baseUrl}/document/view/${codeView}#toolbar=0&navpanes=0&scrollbar=0`}
+                        src={`/api/view/${codeView}#toolbar=0&navpanes=0&scrollbar=0`}
                         className="w-full h-full border-0"
                         style={{
                             minHeight: '400px',
