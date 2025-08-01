@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { getStatisticalUser } from "@/actions/statistical.actions";
 import { useEffect, useState } from "react";
 import { IInfoUserResponse } from "@/types/auth";
+import Image from "next/image";
 
 export default function RankingPageClient() {
     const { rankings, loading, error } = useRankingData();
@@ -124,9 +125,11 @@ export default function RankingPageClient() {
                                         }`}>
                                         <div className="relative mr-4">
                                             {ranking.avatarUrl ? (
-                                                <img
+                                                <Image
                                                     src={ranking.avatarUrl}
                                                     alt={ranking.fullname}
+                                                    width={64}
+                                                    height={64}
                                                     className="w-16 h-16 rounded-full object-cover shadow-lg"
                                                 />
                                             ) : (
@@ -160,9 +163,11 @@ export default function RankingPageClient() {
                                 <div className="text-center relative">
                                     <Link href={`/profile/${topThree[1].username}`} className="mb-4 lg:mb-6 relative">
                                         {topThree[1].avatarUrl ? (
-                                            <img
+                                            <Image
                                                 src={topThree[1].avatarUrl}
                                                 alt={topThree[1].fullname}
+                                                width={128}
+                                                height={128}
                                                 className="w-24 lg:w-32 h-24 lg:h-32 rounded-full object-cover shadow-xl mx-auto"
                                             />
                                         ) : (
@@ -185,9 +190,11 @@ export default function RankingPageClient() {
                                     <div className="mb-4 lg:mb-6 relative">
                                         <Link href={`/profile/${topThree[0].username}`} className="flex flex-col items-center">
                                             {topThree[0].avatarUrl ? (
-                                                <img
+                                                <Image
                                                     src={topThree[0].avatarUrl}
                                                     alt={topThree[0].fullname}
+                                                    width={160}
+                                                    height={160}
                                                     className="w-28 lg:w-40 h-28 lg:h-40 rounded-full object-cover shadow-2xl mx-auto ring-4 lg:ring-8 ring-yellow-300"
                                                 />
                                             ) : (
@@ -213,9 +220,11 @@ export default function RankingPageClient() {
                                 <div className="text-center relative">
                                     <Link href={`/profile/${topThree[2].username}`} className="mb-4 lg:mb-6 relative">
                                         {topThree[2].avatarUrl ? (
-                                            <img
+                                            <Image
                                                 src={topThree[2].avatarUrl}
                                                 alt={topThree[2].fullname}
+                                                width={128}
+                                                height={128}
                                                 className="w-24 lg:w-32 h-24 lg:h-32 rounded-full object-cover shadow-xl mx-auto"
                                             />
                                         ) : (

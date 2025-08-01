@@ -8,6 +8,7 @@ import ResponsiveHeroSection from '@/components/ui/Auth/ResponsiveHeroSection'
 import { useRouter } from 'next/navigation'
 import PageLogin from '@/components/ui/Auth/PageLogin'
 import PageRegister from '@/components/ui/Auth/PageRegister'
+import globalConfig from '@/app.config'
 
 // Animation variants for better performance
 const containerVariants = {
@@ -114,7 +115,7 @@ export default function PageAuth() {
                       SPIT Document
                     </h1>
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700 animate-bounce">
-                      Beta
+                      v{globalConfig.version}
                     </span>
                   </div>
                   <div className="mb-2 h-5 sm:h-6 lg:h-7 overflow-hidden flex items-center justify-center sm:justify-start w-full">

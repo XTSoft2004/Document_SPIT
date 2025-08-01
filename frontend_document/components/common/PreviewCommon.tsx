@@ -42,12 +42,12 @@ export default function PreviewFile({
 
     const isImage = /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(fileName);
 
-    const handleZoomIn = React.useCallback(() => setScale((s) => Math.min(s + 0.2, 5)), []);
-    const handleZoomOut = React.useCallback(() => setScale((s) => Math.max(s - 0.2, 0.2)), []);
+    const handleZoomIn = React.useCallback(() => setScale((s) => Math.min(s + 0.2, 5)), [setScale]);
+    const handleZoomOut = React.useCallback(() => setScale((s) => Math.max(s - 0.2, 0.2)), [setScale]);
     const handleReset = React.useCallback(() => {
         setScale(1);
         setTranslate({ x: 0, y: 0 });
-    }, []);
+    }, [setScale, setTranslate]);
 
     const handleMouseDown = (e: React.MouseEvent) => {
         setIsPanning(true);

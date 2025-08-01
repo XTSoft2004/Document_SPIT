@@ -2,6 +2,7 @@
 import { IRanking } from "@/types/statistical";
 import { Skeleton } from "antd";
 import Link from "next/link";
+import Image from "next/image";
 
 interface TopRankingTableProps {
     rankings: IRanking[];
@@ -196,10 +197,16 @@ export default function TopRankingTable({ rankings, loading }: TopRankingTablePr
                                         </td>
 
                                         <td className="py-4 px-4">
-                                            <Link href={`/profile/${ranking.username}`} className="flex items-center flex-1 space-x-3">
-                                                <div className="flex items-center">
+                                            <div>
+                                                <Link href={`/profile/${ranking.username}`} className="flex items-center flex-1 space-x-3">
                                                     {ranking.avatarUrl ? (
-                                                        <img src={ranking.avatarUrl} alt={ranking.fullname} className="w-10 h-10 rounded-full object-cover mr-2" />
+                                                        <Image
+                                                            src={ranking.avatarUrl}
+                                                            alt={ranking.fullname}
+                                                            width={40}
+                                                            height={40}
+                                                            className="w-10 h-10 rounded-full object-cover mr-2"
+                                                        />
                                                     ) : (
                                                         <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${avatar.gradient} flex items-center justify-center text-white font-bold text-sm shadow-lg mr-2`}>
                                                             {avatar.initials}
@@ -209,8 +216,8 @@ export default function TopRankingTable({ rankings, loading }: TopRankingTablePr
                                                         <h4 className="font-bold text-gray-900 text-base">{ranking.fullname}</h4>
                                                         <p className="text-sm text-gray-600">Thành viên tích cực</p>
                                                     </div>
-                                                </div>
-                                            </Link>
+                                                </Link>
+                                            </div>
                                         </td>
 
                                         <td className="py-4 px-4 text-center">
@@ -240,17 +247,19 @@ export default function TopRankingTable({ rankings, loading }: TopRankingTablePr
             </div>
 
             {/* Empty State */}
-            {topTen.length === 0 && (
-                <div className="text-center py-12">
-                    <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
+            {
+                topTen.length === 0 && (
+                    <div className="text-center py-12">
+                        <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </div>
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">Chưa có dữ liệu xếp hạng</h3>
+                        <p className="text-gray-500">Hãy trở thành người đầu tiên đóng góp tài liệu!</p>
                     </div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Chưa có dữ liệu xếp hạng</h3>
-                    <p className="text-gray-500">Hãy trở thành người đầu tiên đóng góp tài liệu!</p>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 }
