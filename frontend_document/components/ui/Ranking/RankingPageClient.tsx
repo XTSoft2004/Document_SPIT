@@ -8,6 +8,7 @@ import { getStatisticalUser } from "@/actions/statistical.actions";
 import { useEffect, useState } from "react";
 import { IInfoUserResponse } from "@/types/auth";
 import Image from "next/image";
+import { AvatarImage } from "@radix-ui/react-avatar";
 
 export default function RankingPageClient() {
     const { rankings, loading, error } = useRankingData();
@@ -170,6 +171,11 @@ export default function RankingPageClient() {
                                                 height={128}
                                                 className="w-24 lg:w-32 h-24 lg:h-32 rounded-full object-cover shadow-xl mx-auto"
                                             />
+                                            // <AvatarImage
+                                            //     src={topThree[1].avatarUrl}
+                                            //     alt={topThree[1].fullname}
+                                            //     className="w-24 lg:w-32 h-24 lg:h-32 rounded-full object-cover shadow-xl mx-auto"
+                                            // />
                                         ) : (
                                             <div className={`w-24 lg:w-32 h-24 lg:h-32 rounded-full bg-gradient-to-br ${getAvatar(topThree[1].fullname).gradient} flex items-center justify-center text-white font-bold text-2xl lg:text-3xl shadow-xl mx-auto`}>
                                                 {getAvatar(topThree[1].fullname).initials}
