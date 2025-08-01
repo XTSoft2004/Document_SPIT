@@ -10,6 +10,7 @@ using Domain.Common.Extensions;
 using System.Reflection;
 using Domain.Common.GoogleDriver.Interfaces;
 using Domain.Common.Gemini.Interfaces;
+using HelperHttpClient;
 
 namespace WebApp.Configures.DIConfig
 {
@@ -27,6 +28,7 @@ namespace WebApp.Configures.DIConfig
             services.AddDbContext<AppDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
             // Inject UnitOfWork
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<RequestHttpClient>();
             // Add Interfaces Automatic
             services.AddServicesFromAssembly(typeof(IGoogleDriverServices).Assembly, "Domain.Interfaces");
             services.AddServicesFromAssembly(typeof(IGeminiServices).Assembly, "Domain.Interfaces");

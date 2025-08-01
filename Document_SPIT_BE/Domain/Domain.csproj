@@ -8,7 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Common\BackgroudServices\" />
     <Folder Include="Model\Request\Statistical\" />
   </ItemGroup>
 

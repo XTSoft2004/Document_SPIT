@@ -1,4 +1,5 @@
 ﻿using Domain.Base.Services;
+using Domain.Common.BackgroudServices;
 using Domain.Common.GoogleDriver.Interfaces;
 using Domain.Common.GoogleDriver.Model;
 using Domain.Common.GoogleDriver.Model.Request;
@@ -474,7 +475,7 @@ namespace Domain.Common.GoogleDriver.Services
         public async Task<List<TreeDocumentResponse>> GetTreeDocument(string rootFolderId)
         {
             await GetAccessToken();
-            var allItems = await GetAllDriveItems();
+            var allItems = ReloadTreeDrive.listFileDrive;
             return await BuildDriveTree(allItems, rootFolderId);
         }
     }

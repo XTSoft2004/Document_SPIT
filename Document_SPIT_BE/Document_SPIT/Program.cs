@@ -1,5 +1,4 @@
-﻿using System.Security.Claims;
-using System.Text;
+﻿using Domain.Common.BackgroudServices;
 using Domain.Common.Gemini.Interfaces;
 using Domain.Common.Gemini.Services;
 using Domain.Common.GoogleDriver.Interfaces;
@@ -12,6 +11,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Server_Manager.Middleware;
+using System.Security.Claims;
+using System.Text;
 using WebApp.Configures.DIConfig;
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
@@ -113,6 +114,8 @@ builder.Services.AddScoped<IGeminiServices, GeminiServices>();
 builder.Services.AddScoped<IGeminiServices, GeminiServices>();
 builder.Services.AddScoped(typeof(IRepositoryBase<>), typeof(RepositoryBase<>));
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddHostedService<CheckOneTimeToken>();
+builder.Services.AddHostedService<ReloadTreeDrive>();
 
 var app = builder.Build();
 

@@ -38,6 +38,17 @@ namespace Domain.Common
                 return false;
             }
         }
+        public static void PrintWithRandomColor(string message)
+        {
+            var random = new Random();
+            // Lấy một màu ngẫu nhiên từ ConsoleColor
+            var colors = (ConsoleColor[])Enum.GetValues(typeof(ConsoleColor));
+            var randomColor = colors[random.Next(colors.Length)];
 
+            var originalColor = Console.ForegroundColor; // Lưu lại màu sắc gốc của console
+            Console.ForegroundColor = randomColor; // Đặt màu sắc ngẫu nhiên
+            Console.WriteLine(message); // In thông báo
+            Console.ForegroundColor = originalColor; // Khôi phục lại màu sắc gốc
+        }
     }
 }
