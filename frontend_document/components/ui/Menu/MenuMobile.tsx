@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { MenuOutlined, CloseOutlined, HomeOutlined, FolderOutlined, HeartOutlined, LogoutOutlined, LoginOutlined, UserOutlined } from '@ant-design/icons';
 import { Drawer } from 'antd';
 import NavigationLink from '@/components/ui/Navigation/NavigationLink';
@@ -14,11 +14,13 @@ interface MenuMobileProps {
 
 const MenuMobile = ({ isLoggedIn = false, onLogout }: MenuMobileProps) => {
     const pathname = usePathname();
+    const router = useRouter();
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
     const [activeItem, setActiveItem] = useState<string | null>(null);
     const { getInfo } = useAuth();
     const [userInfo, setUserInfo] = useState<IInfoUserResponse | null>(null);
+
     useEffect(() => {
         setUserInfo(getInfo());
     }, [getInfo]);
@@ -37,26 +39,44 @@ const MenuMobile = ({ isLoggedIn = false, onLogout }: MenuMobileProps) => {
         if (pathname.startsWith('/document')) return 'document';
         if (pathname.startsWith('/contribute')) return 'contribute';
         if (pathname.startsWith('/ranking')) return 'ranking';
+        if (pathname.startsWith('/profile')) return 'profile';
+        if (pathname.startsWith('/admin')) return 'admin/dashboard';
         return 'home';
     };
 
-    const handleNavigationClick = () => {
+    const handleNavigationClick = (itemKey: string) => {
+        // Đóng drawer ngay lập tức
         setIsDrawerOpen(false);
+
+        // Điều hướng đến trang mới
+        let href = '';
+        if (itemKey === 'home') {
+            href = '/';
+        } else if (itemKey === 'admin/dashboard') {
+            href = '/admin/dashboard';
+        } else {
+            href = `/${itemKey}`;
+        }
+
+        // Sử dụng router để điều hướng
+        router.push(href);
     };
 
     const handleMenuItemClick = (itemKey: string) => {
         setActiveItem(itemKey);
+
+        // Delay nhỏ để hiển thị animation
         setTimeout(() => {
             setActiveItem(null);
-            handleNavigationClick();
-        }, 150);
+            handleNavigationClick(itemKey);
+        }, 100);
     };
 
     const activeTab = getActiveTab();
 
     const menuItems = [
         // Conditionally add admin menu item if user is admin
-        ...(userInfo?.roleName === 'Admin'
+        ...(userInfo && userInfo.roleName === 'Admin'
             ? [{
                 key: 'admin/dashboard',
                 label: 'Quản trị',
@@ -68,12 +88,12 @@ const MenuMobile = ({ isLoggedIn = false, onLogout }: MenuMobileProps) => {
             }]
             : []
         ),
-        ...(userInfo?.username !== null && userInfo?.username !== ''
+        ...(userInfo && userInfo.username
             ? [{
                 key: 'profile',
                 label: 'Hồ sơ',
                 icon: <UserOutlined className="text-xl" />
-            },]
+            }]
             : []
         ),
         {
@@ -159,8 +179,7 @@ const MenuMobile = ({ isLoggedIn = false, onLogout }: MenuMobileProps) => {
                                     transitionDelay: `${100 + index * 75}ms`
                                 }}
                             >
-                                <NavigationLink
-                                    href={item.key === 'home' ? '/' : `/${item.key}`}
+                                <button
                                     onClick={() => handleMenuItemClick(item.key)}
                                     className={`
                                         group relative w-full flex items-center gap-4 px-4 py-3 rounded-lg text-left transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] transform-gpu
@@ -209,7 +228,7 @@ const MenuMobile = ({ isLoggedIn = false, onLogout }: MenuMobileProps) => {
                                             </svg>
                                         </div>
                                     )}
-                                </NavigationLink>
+                                </button>
                             </div>
                         ))}
                     </div>
@@ -225,7 +244,7 @@ const MenuMobile = ({ isLoggedIn = false, onLogout }: MenuMobileProps) => {
                                 <button
                                     onClick={() => {
                                         onLogout?.();
-                                        handleNavigationClick();
+                                        setIsDrawerOpen(false);
                                     }}
                                     className="group relative inline-flex items-center justify-center w-full text-base rounded-xl bg-white px-6 py-3 font-semibold text-red-600 transition-all duration-300 hover:bg-red-50 hover:shadow-lg hover:-translate-y-1 hover:shadow-red-300/30 border border-red-200 active:scale-95 active:translate-y-0 transform-gpu"
                                 >
@@ -238,7 +257,7 @@ const MenuMobile = ({ isLoggedIn = false, onLogout }: MenuMobileProps) => {
                             ) : (
                                 <NavigationLink
                                     href="/auth"
-                                    onClick={handleNavigationClick}
+                                    onClick={() => setIsDrawerOpen(false)}
                                     className="group relative inline-flex items-center justify-center w-full text-base rounded-xl bg-white px-6 py-3 font-semibold text-gray-900 transition-all duration-300 hover:bg-gray-50 hover:shadow-lg hover:-translate-y-1 hover:shadow-gray-300/30 border border-gray-200 active:scale-95 active:translate-y-0 transform-gpu overflow-hidden"
                                 >
                                     <LoginOutlined className="mr-2 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12" />
