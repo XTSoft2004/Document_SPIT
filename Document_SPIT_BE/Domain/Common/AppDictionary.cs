@@ -9,6 +9,13 @@ namespace Domain.Common
 {
     public class AppDictionary
     {
+        public static Dictionary<string, int> pointUser = new()
+        {
+            { "Document", 7},
+            { "Star", 10},
+            { "Download", 5},
+            { "View", 2},
+        };
         public static readonly Dictionary<string, string> MimeTypes = new()
         {
             // 📝 Text

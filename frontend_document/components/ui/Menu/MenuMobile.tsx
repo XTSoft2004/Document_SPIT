@@ -5,6 +5,7 @@ import { MenuOutlined, CloseOutlined, HomeOutlined, FolderOutlined, HeartOutline
 import { Drawer } from 'antd';
 import NavigationLink from '@/components/ui/Navigation/NavigationLink';
 import { useAuth } from '@/context/AuthContext';
+import { IInfoUserResponse } from '@/types/auth';
 
 interface MenuMobileProps {
     isLoggedIn?: boolean;
@@ -17,6 +18,11 @@ const MenuMobile = ({ isLoggedIn = false, onLogout }: MenuMobileProps) => {
     const [isVisible, setIsVisible] = useState(false);
     const [activeItem, setActiveItem] = useState<string | null>(null);
     const { getInfo } = useAuth();
+    const [userInfo, setUserInfo] = useState<IInfoUserResponse | null>(null);
+    useEffect(() => {
+        setUserInfo(getInfo());
+    }, [getInfo]);
+
     useEffect(() => {
         if (isDrawerOpen) {
             setIsVisible(true);
@@ -50,7 +56,7 @@ const MenuMobile = ({ isLoggedIn = false, onLogout }: MenuMobileProps) => {
 
     const menuItems = [
         // Conditionally add admin menu item if user is admin
-        ...(getInfo()?.roleName === 'Admin'
+        ...(userInfo?.roleName === 'Admin'
             ? [{
                 key: 'admin/dashboard',
                 label: 'Quản trị',
@@ -62,11 +68,14 @@ const MenuMobile = ({ isLoggedIn = false, onLogout }: MenuMobileProps) => {
             }]
             : []
         ),
-        {
-            key: 'profile',
-            label: 'Hồ sơ',
-            icon: <UserOutlined className="text-xl" />
-        },
+        ...(userInfo?.username !== null && userInfo?.username !== ''
+            ? [{
+                key: 'profile',
+                label: 'Hồ sơ',
+                icon: <UserOutlined className="text-xl" />
+            },]
+            : []
+        ),
         {
             key: 'home',
             label: 'Trang chủ',

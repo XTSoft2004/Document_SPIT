@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Domain.Model.Response.Statistical
@@ -12,5 +13,7 @@ namespace Domain.Model.Response.Statistical
         public string? AvatarUrl { get; set; }
         public string? Fullname { get; set; }
         public long? TotalUpload { get; set; }
+        [JsonIgnore]
+        public long? Point { get; set; } = 0;
     }
 }

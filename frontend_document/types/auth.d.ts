@@ -25,7 +25,7 @@ export interface IRegisterRequest {
 }
 
 export interface IInfoUserResponse {
-  userId: number
+  userId: string
   username: string
   fullname: string
   roleName: string

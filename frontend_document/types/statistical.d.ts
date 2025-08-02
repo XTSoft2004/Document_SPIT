@@ -8,6 +8,7 @@ export interface IRanking {
   avatarUrl: string
   fullname: string
   totalUpload: number
+  point: number
 }
 
 export interface IParameterDocument {

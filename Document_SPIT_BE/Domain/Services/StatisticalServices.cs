@@ -6,10 +6,12 @@ using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
 using Domain.Model.Response.Statistical;
 using Domain.Model.Response.User;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using Sprache;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 
 
 namespace Domain.Services
@@ -31,33 +33,43 @@ namespace Domain.Services
 
         public async Task<HttpResponse> GetRanking()
         {
-            // Lấy danh sách người dùng và tài liệu
             var users = _user.All().ToList();
             var documents = _document
-                        .All()
-                        .Where(d => d.StatusDocument == StatusDocument_Enum.Approved)
-                        .ToList();
+                .All()
+                .Include(d => d.DetaiDocument)
+                .Where(d => d.StatusDocument == StatusDocument_Enum.Approved)
+                .ToList();
+            var stars = _starDocument.All().ToList();
 
+            var ranking = users
+                .Select(user =>
+                {
+                    var documentUser = documents.Where(d => d.UserId == user.Id).ToList();
+                    if (documentUser.Count == 0) return null;
 
-            // Tạo bảng xếp hạng
-            var ranking = new List<RankingResponse>();
+                    var starUserCount = stars.Count(s => s.UserId == user.Id);
+                    var downloadSum = documentUser.Sum(d => d.DetaiDocument?.TotalDownload ?? 0);
+                    var viewSum = documentUser.Sum(d => d.DetaiDocument?.TotalView ?? 0);
 
-            foreach (var user in users)
-            {
-                // Lấy số lượng tài liệu đã tải lên của người dùng
-                var documentCount = documents.Count(d => d.UserId == user.Id);
-                // Thêm vào bảng xếp hạng
-                if (documentCount != 0)
-                    ranking.Add(new RankingResponse
+                    var point =
+                        downloadSum * AppDictionary.pointUser["Download"] +
+                        viewSum * AppDictionary.pointUser["View"] +
+                        starUserCount * AppDictionary.pointUser["Star"];
+
+                    return new RankingResponse
                     {
                         Username = user.Username,
                         AvatarUrl = user.AvatarUrl,
                         Fullname = user.Fullname,
-                        TotalUpload = documentCount,
-                    });
-            }
+                        TotalUpload = documentUser.Count,
+                        Point = point
+                    };
+                })
+                .Where(r => r != null)
+                .OrderByDescending(r => r.TotalUpload)
+                .ThenByDescending(r => r.Point)
+                .ToList();
 
-            // Trả kết quả
             return HttpResponse.OK(
                 message: "Lấy bảng xếp hạng thành công.",
                 data: ranking

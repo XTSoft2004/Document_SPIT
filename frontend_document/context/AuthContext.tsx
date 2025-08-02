@@ -1,14 +1,15 @@
 'use client'
 import { loginAccount } from "@/actions/auth.actions"
+import { getMe } from "@/actions/user.action"
 import NotificationService from "@/components/ui/Notification/NotificationService"
 import { IInfoUserResponse, ILoginRequest, ILoginResponse } from "@/types/auth"
+import { IUserResponse } from "@/types/user"
 import React, { useContext } from "react"
 import { createContext, useState } from "react"
 
 type AuthContextType = {
     info: IInfoUserResponse | null
     isLoggedIn: boolean
-    setInfo: (info: ILoginResponse | null) => void
     loginUser: (loginRequest: ILoginRequest) => Promise<void>
     logout: () => void
     getInfo: () => IInfoUserResponse | null
@@ -17,7 +18,6 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType>({
     info: null,
     isLoggedIn: false,
-    setInfo: () => { },
     loginUser: async () => { },
     logout: () => { },
     getInfo: () => null,
@@ -29,17 +29,17 @@ export const AuthProvider: React.FC<{
     const [info, setInfoState] = useState<IInfoUserResponse | null>(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-    const setInfo = (info: IInfoUserResponse | null) => {
-        setInfoState(info);
-        setIsLoggedIn(!!info);
-        if (info) {
-            localStorage.setItem('user', JSON.stringify(info));
-            localStorage.setItem('isLoggedIn', 'true');
-        } else {
-            localStorage.removeItem('user');
-            localStorage.setItem('isLoggedIn', 'false');
-        }
-    };
+    // const setInfo = (info: IInfoUserResponse | null) => {
+    //     setInfoState(info);
+    //     setIsLoggedIn(!!info);
+    //     if (info) {
+    //         localStorage.setItem('user', JSON.stringify(info));
+    //         localStorage.setItem('isLoggedIn', 'true');
+    //     } else {
+    //         localStorage.removeItem('user');
+    //         localStorage.setItem('isLoggedIn', 'false');
+    //     }
+    // };
 
     const loginUser = async (loginRequest: ILoginRequest): Promise<void> => {
         try {
@@ -47,15 +47,13 @@ export const AuthProvider: React.FC<{
 
             if (response.ok && response.data) {
                 const userInfo: IInfoUserResponse = {
-                    userId: response.data.userId,
+                    userId: response.data.userId.toString(),
                     username: response.data.username,
                     fullname: response.data.fullname,
                     roleName: response.data.roleName || 'User',
-                    email: response.data.email,
                     avatarUrl: response.data.avatarUrl || '',
                 };
-                setInfo(userInfo);
-                setIsLoggedIn(true);
+                // setInfo(userInfo);
                 localStorage.setItem('user', JSON.stringify(userInfo));
                 localStorage.setItem('isLoggedIn', 'true');
                 NotificationService.success({
@@ -63,8 +61,6 @@ export const AuthProvider: React.FC<{
                     description: `Chào mừng bạn ${response.data.username} đã đăng nhập thành công!`,
                 });
             } else {
-                setInfo(null);
-                setIsLoggedIn(false);
                 localStorage.removeItem('user');
                 localStorage.setItem('isLoggedIn', 'false');
 
@@ -78,7 +74,6 @@ export const AuthProvider: React.FC<{
             }
         } catch (error) {
             // Ensure user stays logged out on error
-            setInfo(null);
             setIsLoggedIn(false);
             localStorage.removeItem('user');
             localStorage.setItem('isLoggedIn', 'false');
@@ -101,22 +96,30 @@ export const AuthProvider: React.FC<{
         }
     };
 
+    // Fetch user data
     const getInfo = (): IInfoUserResponse | null => {
-        if (typeof window === 'undefined') return null;
+        try {
+            const storedUser = localStorage.getItem('user');
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
 
-        if (localStorage.getItem('isLoggedIn') === 'false')
+            if (storedUser && isLoggedIn) {
+                const userInfo: IInfoUserResponse = JSON.parse(storedUser);
+                setIsLoggedIn(true);
+                setInfoState(userInfo);
+                return userInfo;
+            } else {
+                setIsLoggedIn(false);
+                setInfoState(null);
+                return null;
+            }
+        } catch (error) {
+            setIsLoggedIn(false);
+            setInfoState(null);
             return null;
-
-        const user = localStorage.getItem('user');
-        const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-        if (user && isLoggedIn) {
-            return JSON.parse(user) as IInfoUserResponse;
         }
-        return null;
-    };
+    }
 
     const logout = () => {
-        setInfo(null);
         setIsLoggedIn(false);
         NotificationService.success({
             message: 'Đăng xuất thành công',
@@ -125,7 +128,7 @@ export const AuthProvider: React.FC<{
     };
 
     return (
-        <AuthContext.Provider value={{ info, isLoggedIn, setInfo, loginUser, logout, getInfo }}>
+        <AuthContext.Provider value={{ info, isLoggedIn, loginUser, logout, getInfo }}>
             {children}
         </AuthContext.Provider>
     );

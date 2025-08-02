@@ -13,7 +13,9 @@ export function useRankingData() {
             try {
                 setLoading(true);
                 const response = await getRanking();
+                console.log('Response:', response.data);
                 setRankings(response.data);
+                console.log('Rankings fetched successfully:', rankings);
             } catch (err) {
                 setError('Có lỗi xảy ra khi tải dữ liệu');
                 console.error('Error fetching rankings:', err);

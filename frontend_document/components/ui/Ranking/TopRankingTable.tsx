@@ -13,6 +13,9 @@ export default function TopRankingTable({ rankings, loading }: TopRankingTablePr
     const topTen = rankings.slice(0, 10);
 
     const getAvatar = (name: string) => {
+        if (name == null || name === '')
+            return { initials: '??', gradient: 'from-gray-400 to-gray-600' };
+
         const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
         const colors = [
             'from-red-400 to-red-600',

@@ -49,6 +49,8 @@ export default function RankingPageClient() {
     };
 
     const getAvatar = (name: string) => {
+        if (name == null || name === '')
+            return { initials: '??', gradient: 'from-gray-400 to-gray-600' };
         // Generate a simple avatar from name initials
         const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
         const colors = [
