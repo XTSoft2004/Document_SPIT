@@ -51,6 +51,18 @@ const Footer = () => {
               >
                 Bảng xếp hạng
               </NavigationLink>
+              <NavigationLink
+                href="/terms-of-service"
+                className="text-gray-300 hover:text-blue-400 transition-colors duration-200"
+              >
+                Điều khoản dịch vụ
+              </NavigationLink>
+              <NavigationLink
+                href="/privacy-policy"
+                className="text-gray-300 hover:text-green-400 transition-colors duration-200"
+              >
+                Chính sách bảo mật
+              </NavigationLink>
             </div>
           </div>
 

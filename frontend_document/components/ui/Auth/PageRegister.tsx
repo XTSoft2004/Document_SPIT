@@ -142,9 +142,21 @@ export default function PageRegister({ setIsSignIn }: { setIsSignIn: (value: boo
                 >
                     <p className="leading-relaxed">
                         Bằng việc tạo tài khoản, bạn đồng ý với{' '}
-                        <a href="#" className="text-blue-600 hover:underline">Điều khoản dịch vụ</a>
+                        <button
+                            type="button"
+                            onClick={() => router.push('/terms-of-service')}
+                            className="font-semibold text-purple-600 hover:text-purple-800 underline underline-offset-4 transition-colors px-1 rounded focus:outline-none focus:ring-2 focus:ring-purple-400"
+                        >
+                            Điều khoản dịch vụ
+                        </button>
                         {' '}và{' '}
-                        <a href="#" className="text-blue-600 hover:underline">Chính sách bảo mật</a>
+                        <button
+                            type="button"
+                            onClick={() => router.push('/privacy-policy')}
+                            className="font-semibold text-blue-600 hover:text-blue-800 underline underline-offset-4 transition-colors px-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        >
+                            Chính sách bảo mật
+                        </button>
                     </p>
                 </motion.div>
             </div>
