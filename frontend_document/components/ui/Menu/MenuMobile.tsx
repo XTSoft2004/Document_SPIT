@@ -103,7 +103,7 @@ const MenuMobile = ({ isLoggedIn = false, onLogout }: MenuMobileProps) => {
         },
 
         {
-            key: 'document',
+            key: 'document/tai-lieu',
             label: 'Tài liệu',
             icon: <FolderOutlined className="text-xl" />
         },
