@@ -52,7 +52,19 @@ export const uploadDocument = async (
     throw new Error('Vui lòng chọn file')
   }
 
+  // Kiểm tra giới hạn dung lượng file (5MB)
+  const maxSize = 5 * 1024 * 1024 // 5MB
+  if (formData.file.size > maxSize) {
+    throw new Error('File vượt quá giới hạn 5MB. Vui lòng chọn file nhỏ hơn 5MB.')
+  }
+
   const base64String = await fileToBase64(formData.file)
+
+  // Kiểm tra lại kích thước base64 (phòng trường hợp encode tăng size)
+  const base64Size = (base64String.length * 3) / 4 - (base64String.endsWith('==') ? 2 : base64String.endsWith('=') ? 1 : 0)
+  if (base64Size > maxSize) {
+    throw new Error('File vượt quá giới hạn 5MB. Vui lòng chọn file nhỏ hơn 5MB.')
+  }
 
   const pendingFolderId = process.env.NEXT_PUBLIC_FOLDER_ID_PENDING
   if (!pendingFolderId) {

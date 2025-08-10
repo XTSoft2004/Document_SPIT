@@ -108,6 +108,10 @@ export default function ContributeForm() {
       }
       // Handle single image when no file is set
       else if (images.length === 1 && !formData.file) {
+        NotificationService.info({
+          message: 'Đang upload file lên hệ thống',
+          description: 'Vui lòng đợi trong giây lát.',
+        })
         fileToUpload = images[0].file
       }
 
