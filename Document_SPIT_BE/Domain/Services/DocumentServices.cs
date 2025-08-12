@@ -87,13 +87,19 @@ namespace Domain.Services
             if (AppExtension.IsBase64String(base64Check) == false)
                 return HttpResponse.Error("Base64 không hợp lệ, vui lòng kiểm tra lại.", System.Net.HttpStatusCode.BadRequest);
 
-            var isCheckGemini = await _geminiServices.GeminiCheck(new UploadFileGeminiCheckRequest
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".webp", ".pdf", ".txt" };
+            var fileExtension = Path.GetExtension(documentCreatePending.fileName ?? string.Empty).ToLowerInvariant();
+
+            if (allowedExtensions.Contains(fileExtension))
             {
-                base64File = base64Check,
-                mineType = AppDictionary.GetMimeTypeDriver(documentCreatePending.fileName)
-            });
-            if (isCheckGemini)
-                return HttpResponse.Error("Tài liệu có nội dung độc hại, không được phép tải lên.", HttpStatusCode.BadRequest);
+                var isCheckGemini = await _geminiServices.GeminiCheck(new UploadFileGeminiCheckRequest
+                {
+                    base64File = base64Check,
+                    mineType = AppDictionary.GetMimeTypeDriver(documentCreatePending.fileName)
+                });
+                if (isCheckGemini)
+                    return HttpResponse.Error("Tài liệu có nội dung độc hại, không được phép tải lên.", HttpStatusCode.BadRequest);
+            }
 
             // Tính toán MD5 từ Base64
             var md5Hash = AppExtension.GetMd5FromBase64(base64Check);
