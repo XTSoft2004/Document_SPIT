@@ -147,10 +147,9 @@ const Menu = ({ allItems, onMobileSearch }: MenuProps) => {
                 transition={{ duration: 0.3, delay: 0.3 }}
               >
                 <NavigationLink
-                  href="/document"
-                  className={`tab-link ${
-                    activeTab === 'document' ? 'active' : ''
-                  }`}
+                  href="/document/tai-lieu"
+                  className={`tab-link ${activeTab === 'document' ? 'active' : ''
+                    }`}
                 >
                   <motion.label
                     className="tab_label"
@@ -172,9 +171,8 @@ const Menu = ({ allItems, onMobileSearch }: MenuProps) => {
               >
                 <NavigationLink
                   href="/contribute"
-                  className={`tab-link ${
-                    activeTab === 'contribute' ? 'active' : ''
-                  }`}
+                  className={`tab-link ${activeTab === 'contribute' ? 'active' : ''
+                    }`}
                 >
                   <motion.label
                     className="tab_label"
@@ -196,9 +194,8 @@ const Menu = ({ allItems, onMobileSearch }: MenuProps) => {
               >
                 <NavigationLink
                   href="/ranking"
-                  className={`tab-link ${
-                    activeTab === 'ranking' ? 'active' : ''
-                  }`}
+                  className={`tab-link ${activeTab === 'ranking' ? 'active' : ''
+                    }`}
                 >
                   <motion.label
                     className="tab_label"

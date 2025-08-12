@@ -46,33 +46,34 @@ namespace Domain.Services
         }
         public async Task<HttpResponse> RegisterAsync(RegisterRequest registerRequest)
         {
-            var user = _user!.Find(f => f.Username == registerRequest.Username.Trim());
+            var user = _user!.Find(f => f.Username.ToLower() == registerRequest.Username.ToLower().Trim());
             if (user != null)
                 return HttpResponse.OK(message: "Tên đăng nhập đã tồn tại.");
 
-            var response = await HttpRequest._client.PostAsync("auth/login", new Dictionary<string, string?>
+            //var response = await HttpRequest._client.PostAsync("auth/login", new Dictionary<string, string?>
+            //{
+            //    { "username", registerRequest.Username?.Trim() ?? string.Empty },
+            //    { "password", registerRequest.Password?.Trim() ?? string.Empty }
+            //});
+            //if (!response.IsSuccessStatusCode)
+            //{
+            //}
+
+            //// Nếu đăng ký không thành công thì trả về thông báo lỗi từ server CLB SPIT
+            //return HttpResponse.OK(message: "Tên đăng nhập đã tồn tại trên server CLB SPIT, vui lòng chọn tên khác.");
+
+            _user.Insert(new User()
             {
-                { "username", registerRequest.Username?.Trim() ?? string.Empty },
-                { "password", registerRequest.Password?.Trim() ?? string.Empty }
+                Username = registerRequest.Username.Trim(),
+                Password = registerRequest.Password.Trim(),
+                Fullname = registerRequest.Fullname.Trim(),
+                isLocked = false,
+                CreatedDate = DateTime.Now,
             });
-            if (!response.IsSuccessStatusCode)
-            {
-                _user.Insert(new User()
-                {
-                    Username = registerRequest.Username.Trim(),
-                    Password = registerRequest.Password.Trim(),
-                    Fullname = registerRequest.Fullname.Trim(),
-                    isLocked = false,
-                    CreatedDate = DateTime.Now,
-                });
-                await UnitOfWork.CommitAsync();
+            await UnitOfWork.CommitAsync();
 
-                await _userServices.SetRole(registerRequest.Username.Trim(), "User");
-                return HttpResponse.OK(message: "Đăng ký thành công.");
-            }
-
-            // Nếu đăng ký không thành công thì trả về thông báo lỗi từ server CLB SPIT
-            return HttpResponse.OK(message: "Tên đăng nhập đã tồn tại trên server CLB SPIT, vui lòng chọn tên khác.");
+            await _userServices.SetRole(registerRequest.Username.Trim(), "User");
+            return HttpResponse.OK(message: "Đăng ký thành công.");
         }
         public async Task<HttpResponse> LoginUser(LoginRequest loginRequest)
         {

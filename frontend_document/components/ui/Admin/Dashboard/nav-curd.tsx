@@ -222,22 +222,20 @@ export function NavCRUD() {
 
                 {/* Children menu with smooth animation */}
                 {hasChildren && (
-                    <div 
-                        className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                            isOpen 
-                                ? 'max-h-96 opacity-100' 
-                                : 'max-h-0 opacity-0'
-                        }`}
+                    <div
+                        className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen
+                            ? 'max-h-96 opacity-100'
+                            : 'max-h-0 opacity-0'
+                            }`}
                     >
                         <SidebarMenuSub className="animate-in slide-in-from-top-2 duration-200">
                             {item.children!.map((child, index) => (
-                                <SidebarMenuSubItem 
+                                <SidebarMenuSubItem
                                     key={child.name}
-                                    className={`transition-all duration-200 ease-out ${
-                                        isOpen 
-                                            ? 'translate-x-0 opacity-100' 
-                                            : '-translate-x-2 opacity-0'
-                                    }`}
+                                    className={`transition-all duration-200 ease-out ${isOpen
+                                        ? 'translate-x-0 opacity-100'
+                                        : '-translate-x-2 opacity-0'
+                                        }`}
                                     style={{
                                         transitionDelay: isOpen ? `${index * 50}ms` : '0ms'
                                     }}

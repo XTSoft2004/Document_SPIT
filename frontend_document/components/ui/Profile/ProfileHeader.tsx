@@ -169,7 +169,7 @@ export default function ProfileHeader({
               </h1>
               <Badge
                 variant="secondary"
-                className={`w-fit bg-white/20 text-white border-white/30 backdrop-blur-sm ${getRoleBadgeColor(userInfo.roleName)}`}
+                className={`w-fit bg-white/20 text-white border-white/30 backdrop-blur-sm mt-[8px] ${getRoleBadgeColor(userInfo.roleName)}`}
               >
                 {userInfo.roleName}
               </Badge>
