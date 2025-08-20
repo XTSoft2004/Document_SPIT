@@ -11,6 +11,8 @@ using System.Reflection;
 using Domain.Common.GoogleDriver.Interfaces;
 using Domain.Common.Gemini.Interfaces;
 using HelperHttpClient;
+using Domain.Common.Telegram.Interfaces;
+using Domain.Common.Telegram.Services;
 
 namespace WebApp.Configures.DIConfig
 {
@@ -27,6 +29,7 @@ namespace WebApp.Configures.DIConfig
 
             services.AddDbContext<AppDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
             // Inject UnitOfWork
+            services.AddScoped<ITelegramServices, TelegramServices>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<RequestHttpClient>();
             // Add Interfaces Automatic

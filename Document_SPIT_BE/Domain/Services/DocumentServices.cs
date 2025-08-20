@@ -6,6 +6,7 @@ using Domain.Common.GoogleDriver.Interfaces;
 using Domain.Common.GoogleDriver.Model.Request;
 using Domain.Common.GoogleDriver.Model.Response;
 using Domain.Common.Http;
+using Domain.Common.Telegram.Interfaces;
 using Domain.Entities;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
@@ -43,8 +44,8 @@ namespace Domain.Services
         private readonly ITokenServices? _tokenServices;
         private readonly IRepositoryBase<OneTimeToken>? _oneTimeToken;
         private UserTokenResponse? userMeToken;
-
-        public DocumentServices(IRepositoryBase<Document>? document, IRepositoryBase<User>? user, IGoogleDriverServices? googleDriverServices, IRepositoryBase<DetailDocument>? detailDocument, ITokenServices? tokenServices, IRepositoryBase<OneTimeToken>? oneTimeToken, IRepositoryBase<Course>? course, ICategoryTypeServices? categoryTypeServices, IRepositoryBase<CategoryType>? catetoryType, IRepositoryBase<DocumentCategory>? documentCategory, IHistoryServices historyServices, IRepositoryBase<StarDocument>? starDocument, IGeminiServices? geminiServices)
+        private readonly ITelegramServices? _telegramServices;
+        public DocumentServices(IRepositoryBase<Document>? document, IRepositoryBase<User>? user, IGoogleDriverServices? googleDriverServices, IRepositoryBase<DetailDocument>? detailDocument, ITokenServices? tokenServices, IRepositoryBase<OneTimeToken>? oneTimeToken, IRepositoryBase<Course>? course, ICategoryTypeServices? categoryTypeServices, IRepositoryBase<CategoryType>? catetoryType, IRepositoryBase<DocumentCategory>? documentCategory, IHistoryServices historyServices, IRepositoryBase<StarDocument>? starDocument, IGeminiServices? geminiServices, ITelegramServices? telegramServices)
         {
             _document = document;
             _user = user;
@@ -60,6 +61,7 @@ namespace Domain.Services
             _historyServices = historyServices;
             _starDocument = starDocument;
             _geminiServices = geminiServices;
+            _telegramServices = telegramServices;
 
             var manualPath = Environment.GetEnvironmentVariable("DOTNET_ENV_PATH");
             if (!string.IsNullOrEmpty(manualPath) && File.Exists(manualPath))
@@ -155,6 +157,10 @@ namespace Domain.Services
                 function_status = Function_Enum.Create_Document,
                 UserId = userMeToken.Id ?? -1
             });
+
+            await _telegramServices.SendMessage(
+                $" <b>Tạo tài liệu chờ duyệt</b>\n<b>Có tài liệu mới đang chờ duyệt</b>\n<b>Tên tài liệu</b>: {documentCreate.Name}\n<b>Mã môn học</b>: {course.Code}\n<b>Tên môn học</b>: {course.Name}"
+            );
 
             return HttpResponse.OK(message: "Tạo tài liệu thành công, đang chờ xét duyệt.");
         }
