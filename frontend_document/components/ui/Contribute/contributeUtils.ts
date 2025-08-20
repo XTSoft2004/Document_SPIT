@@ -52,10 +52,17 @@ export const uploadDocument = async (
     throw new Error('Vui lòng chọn file')
   }
 
-  // Kiểm tra giới hạn dung lượng file (5MB)
-  const maxSize = 5 * 1024 * 1024 // 5MB
+  // Kiểm tra giới hạn dung lượng file (30MB)
+  const limitSizeStr = process.env.NEXT_PUBLIC_LIMIT_SIZE ?? '5'
+  const limitSize = Number(limitSizeStr)
+  const maxSize = (!isNaN(limitSize) && limitSize > 0 ? limitSize : 5) * 1024 * 1024 // 5MB default
+
+  if (!formData.file || typeof formData.file.size !== 'number') {
+    throw new Error('File không hợp lệ hoặc không có thông tin kích thước.')
+  }
+
   if (formData.file.size > maxSize) {
-    throw new Error('File vượt quá giới hạn 5MB. Vui lòng chọn file nhỏ hơn 5MB.')
+    throw new Error(`File vượt quá giới hạn ${maxSize / (1024 * 1024)}MB. Vui lòng chọn file nhỏ hơn ${maxSize / (1024 * 1024)}MB.`)
   }
 
   const base64String = await fileToBase64(formData.file)
@@ -63,7 +70,7 @@ export const uploadDocument = async (
   // Kiểm tra lại kích thước base64 (phòng trường hợp encode tăng size)
   const base64Size = (base64String.length * 3) / 4 - (base64String.endsWith('==') ? 2 : base64String.endsWith('=') ? 1 : 0)
   if (base64Size > maxSize) {
-    throw new Error('File vượt quá giới hạn 5MB. Vui lòng chọn file nhỏ hơn 5MB.')
+    throw new Error(`File vượt quá giới hạn ${maxSize / (1024 * 1024)}MB. Vui lòng chọn file nhỏ hơn ${maxSize / (1024 * 1024)}MB.`)
   }
 
   const pendingFolderId = process.env.NEXT_PUBLIC_FOLDER_ID_PENDING
