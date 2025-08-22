@@ -17,11 +17,13 @@ import { useRouter } from 'next/navigation'
 interface ProfileHeaderProps {
   userInfo: IInfoUserResponse
   onEditClick?: () => void
+  isOwnProfile?: boolean
 }
 
 export default function ProfileHeader({
   userInfo,
   onEditClick,
+  isOwnProfile
 }: ProfileHeaderProps) {
   const router = useRouter()
 
@@ -150,15 +152,19 @@ export default function ProfileHeader({
               </AvatarFallback>
             </Avatar>
             {/* Upload Avatar Button */}
-            <label className="absolute bottom-2 right-2 bg-white/80 rounded-full p-2 cursor-pointer shadow hover:bg-white transition">
-              <Edit3 className="w-5 h-5 text-blue-600" />
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleUploadAvatar}
-              />
-            </label>
+
+            {isOwnProfile == true ?
+              <label className="absolute bottom-2 right-2 bg-white/80 rounded-full p-2 cursor-pointer shadow hover:bg-white transition">
+                <Edit3 className="w-5 h-5 text-blue-600" />
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleUploadAvatar}
+                />
+              </label> : undefined
+            }
+
           </div>
 
           {/* User Info */}

@@ -31,12 +31,6 @@ export default function ProfilePage({ userInfo, userStats, username }: ProfilePa
         if (response.ok) {
           setMe(response.data)
         }
-        // else {
-        //   NotificationService.error({
-        //     message: 'Lỗi',
-        //     description: response.message || 'Không thể lấy thông tin người dùng'
-        //   })
-        // }
       } catch (error) {
         console.error('Error fetching user:', error)
       }
@@ -100,6 +94,7 @@ export default function ProfilePage({ userInfo, userStats, username }: ProfilePa
       <ProfileHeader
         userInfo={currentUserInfo}
         onEditClick={handleEditProfile}
+        isOwnProfile={me?.username === username}
       />
 
       {/* Stats Section */}

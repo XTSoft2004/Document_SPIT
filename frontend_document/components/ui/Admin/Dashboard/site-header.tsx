@@ -17,7 +17,7 @@ export function SiteHeader() {
           </div>
           <div className="flex items-center justify-center flex-1 ml-[-13%] lg:hidden">
             <Image
-              src="/images/logo/logo_clb.png"
+              src="/logo/logo-500x500.png"
               alt="Logo"
               width={30}
               height={30}

@@ -47,7 +47,7 @@ namespace Domain.Services
                 UserId = historyRequest.UserId,
 
                 CreatedDate = DateTime.Now,
-                ModifiedBy = userMeToken.Username,
+                CreatedBy = userMeToken.Username,
             };
 
             _history.Insert(history);
@@ -130,7 +130,7 @@ namespace Domain.Services
                     FunctionStatus = s.function_status.HasValue ? s.function_status.ToString() : null,
                     UserId = s.UserId,
                     Fullname = "",
-                    ModifiedDate = s.ModifiedDate
+                    ModifiedDate = s.ModifiedDate,
                 })
                 .ToList();
 

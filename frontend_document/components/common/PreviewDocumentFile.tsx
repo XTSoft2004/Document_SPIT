@@ -91,10 +91,10 @@ export default function PreviewDocumentFile({ open, onClose, fileName, documentI
     // Mouse wheel zoom for images
     const handleWheel = React.useCallback((e: React.WheelEvent) => {
         if (!isImage) return;
-        
+
         e.preventDefault();
         e.stopPropagation();
-        
+
         const delta = e.deltaY > 0 ? -0.1 : 0.1;
         setScale(prevScale => Math.max(0.2, Math.min(prevScale + delta, 5)));
     }, [isImage]);
@@ -244,8 +244,8 @@ export default function PreviewDocumentFile({ open, onClose, fileName, documentI
                     </div>
                 </div>
                 {/* Content Area */}
-                <PreviewCommon 
-                    documentId={documentId} 
+                <PreviewCommon
+                    documentId={documentId}
                     fileName={fileName}
                     scale={scale}
                     setScale={setScale}

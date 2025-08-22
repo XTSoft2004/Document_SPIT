@@ -7,6 +7,7 @@ import DataGrid from '@/components/ui/Table/DataGrid'
 import { getHistory } from '@/actions/history.actions'
 import { IHistory } from '@/types/history'
 import { renderFunctionStatusTag } from '@/utils/historyFormat'
+import { convertIsoToLocaleString } from '@/utils/convertDateTime'
 
 interface HistoryTableProps {
   nameTable: string
@@ -49,7 +50,10 @@ export default function HistoryTable({
         title: 'Thời gian',
         dataIndex: 'modifiedDate',
         key: 'modifiedDate',
-        render: (value: string) => new Date(value).toLocaleString(),
+        // render: (value: string) => new Date(value).toLocaleDateString(),
+        render: (value: string) => {
+          return convertIsoToLocaleString(value);
+        }
       },
     ],
     [],

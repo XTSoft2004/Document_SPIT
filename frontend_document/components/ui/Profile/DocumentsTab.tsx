@@ -8,6 +8,7 @@ import { Search, FileText, Calendar, Eye, Download, Star, File } from 'lucide-re
 import { getDocumentUser } from '@/actions/document.actions'
 import { IDocumentUser } from '@/types/document'
 import { HiFolderOpen } from 'react-icons/hi2'
+import PreviewDocumentFile from '@/components/common/PreviewDocumentFile'
 
 interface DocumentsTabProps {
   username: string
@@ -73,129 +74,137 @@ export default function DocumentsTab({
     return '📄'
   }
 
-  return (
-    <div className="space-y-6">
-      {/* Search */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <Input
-              placeholder="Tìm kiếm tài liệu..."
-              value={searchTerm}
-              onChange={(e) => onSearchChange(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </CardContent>
-      </Card>
+  const [previewFile, setPreviewFile] = useState<{ fileName: string, documentId: number } | null>(null);
 
-      {/* Documents List */}
-      <Card>
-        <CardHeader className='py-5 ml-2'>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="w-5 h-5" />
-            Tài liệu đã đóng góp
-            {!loading && (
-              <Badge variant="secondary" className="ml-2">
-                {filteredDocuments.length}
-              </Badge>
-            )}
-          </CardTitle>
-          <CardDescription>
-            Danh sách tài liệu được đóng góp bởi @{username}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Đang tải tài liệu...</p>
-            </div>
-          ) : error ? (
-            <div className="text-center py-12">
-              <FileText className="w-16 h-16 text-red-300 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-red-600 mb-2">
-                Lỗi tải tài liệu
-              </h3>
-              <p className="text-red-500">{error}</p>
-            </div>
-          ) : filteredDocuments.length === 0 ? (
-            <div className="text-center py-12">
-              <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-600 mb-2">
-                {documents.length === 0 ? 'Chưa có tài liệu' : 'Không tìm thấy tài liệu'}
-              </h3>
-              <p className="text-gray-500">
-                {documents.length === 0
-                  ? 'Người dùng này chưa đóng góp tài liệu nào.'
-                  : 'Thử thay đổi từ khóa tìm kiếm.'
-                }
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {filteredDocuments.map((document) => (
-                <div
-                  key={document.id}
-                  className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow bg-gradient-to-r from-white to-gray-50"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="text-2xl">{getFileIcon(document.typeFile)}</span>
-                        <div>
-                          <h3 className="font-semibold text-lg text-gray-900 hover:text-blue-600 transition-colors">
-                            {document.name}
-                          </h3>
-                          {/* <p className="text-sm text-gray-500">
+  return (
+    <>
+      <PreviewDocumentFile
+        open={!!previewFile}
+        onClose={() => setPreviewFile(null)}
+        fileName={previewFile?.fileName || ''}
+        documentId={previewFile?.documentId || 0}
+      />
+
+      <div className="space-y-6">
+        {/* Documents List */}
+        <Card>
+          <CardHeader className='py-5 ml-2'>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5" />
+              Tài liệu đã đóng góp
+              {!loading && (
+                <Badge variant="secondary" className="ml-2">
+                  {filteredDocuments.length}
+                </Badge>
+              )}
+            </CardTitle>
+            <CardDescription>
+              Danh sách tài liệu được đóng góp bởi @{username}
+            </CardDescription>
+            <CardContent className="px-0 py-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  placeholder="Tìm kiếm tài liệu..."
+                  value={searchTerm}
+                  onChange={(e) => onSearchChange(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </CardContent>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <p className="text-gray-600">Đang tải tài liệu...</p>
+              </div>
+            ) : error ? (
+              <div className="text-center py-12">
+                <FileText className="w-16 h-16 text-red-300 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-red-600 mb-2">
+                  Lỗi tải tài liệu
+                </h3>
+                <p className="text-red-500">{error}</p>
+              </div>
+            ) : filteredDocuments.length === 0 ? (
+              <div className="text-center py-12">
+                <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-600 mb-2">
+                  {documents.length === 0 ? 'Chưa có tài liệu' : 'Không tìm thấy tài liệu'}
+                </h3>
+                <p className="text-gray-500">
+                  {documents.length === 0
+                    ? 'Người dùng này chưa đóng góp tài liệu nào.'
+                    : 'Thử thay đổi từ khóa tìm kiếm.'
+                  }
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredDocuments.map((document) => (
+                  <div
+                    key={document.id}
+                    className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow bg-gradient-to-r from-white to-gray-50"
+                    onClick={() => setPreviewFile({ fileName: document.name, documentId: document.id })}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <span className="text-2xl">{getFileIcon(document.typeFile)}</span>
+                          <div>
+                            <h3 className="font-semibold text-lg text-gray-900 hover:text-blue-600 transition-colors">
+                              {document.name}
+                            </h3>
+                            {/* <p className="text-sm text-gray-500">
                             {`${document.name}.${document.typeFile}`}
                           </p> */}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                          <span className="flex items-center gap-1">
+                            <HiFolderOpen className="w-4 h-4 text-yellow-500 fill-yellow-400" />
+                            {document.courseName}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-4 h-4" />
+                            {new Date(document.createdDate).toLocaleDateString('vi-VN')}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-4 text-sm">
+                          <span className="flex items-center gap-1 text-green-600">
+                            <Eye className="w-4 h-4" />
+                            {document.totalViews.toLocaleString()} lượt xem
+                          </span>
+                          <span className="flex items-center gap-1 text-blue-600">
+                            <Download className="w-4 h-4" />
+                            {document.totalDownloads.toLocaleString()} tải xuống
+                          </span>
+                          <span className="flex items-center gap-1 text-red-600">
+                            <Star className="w-4 h-4" />
+                            {document.totalStars} yêu thích
+                          </span>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
-                        <span className="flex items-center gap-1">
-                          <HiFolderOpen className="w-4 h-4 text-yellow-500 fill-yellow-400" />
-                          {document.courseName}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-4 h-4" />
-                          {new Date(document.createdDate).toLocaleDateString('vi-VN')}
-                        </span>
+                      <div className="ml-4">
+                        <Badge
+                          variant="outline"
+                          className={`${getStatusBadgeColor(document.statusDocument)} font-medium`}
+                        >
+                          {document.statusDocument}
+                        </Badge>
                       </div>
-
-                      <div className="flex items-center gap-4 text-sm">
-                        <span className="flex items-center gap-1 text-green-600">
-                          <Eye className="w-4 h-4" />
-                          {document.totalViews.toLocaleString()} lượt xem
-                        </span>
-                        <span className="flex items-center gap-1 text-blue-600">
-                          <Download className="w-4 h-4" />
-                          {document.totalDownloads.toLocaleString()} tải xuống
-                        </span>
-                        <span className="flex items-center gap-1 text-red-600">
-                          <Star className="w-4 h-4" />
-                          {document.totalStars} yêu thích
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="ml-4">
-                      <Badge
-                        variant="outline"
-                        className={`${getStatusBadgeColor(document.statusDocument)} font-medium`}
-                      >
-                        {document.statusDocument}
-                      </Badge>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </>
   )
 }
