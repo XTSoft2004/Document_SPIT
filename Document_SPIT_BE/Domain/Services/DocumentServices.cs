@@ -159,7 +159,12 @@ namespace Domain.Services
             });
 
             await _telegramServices.SendMessage(
-                $" <b>Tạo tài liệu chờ duyệt</b>\n<b>Có tài liệu mới đang chờ duyệt</b>\n<b>Tên tài liệu</b>: {documentCreate.Name}\n<b>Mã môn học</b>: {course.Code}\n<b>Tên môn học</b>: {course.Name}"
+                $"<b>📄 Tạo tài liệu chờ duyệt</b>\n" +
+                $"⏳ <b>Có một tài liệu mới đang chờ duyệt</b>\n" +
+                $"📌 <b>Tên tài liệu</b>: {documentCreate.Name}\n" +
+                $"🏷️ <b>Mã môn học</b>: {course.Code}\n" +
+                $"📚 <b>Tên môn học</b>: {course.Name}\n" +
+                $"👤 <b>Người đóng góp</b>: {user.Fullname}"
             );
 
             return HttpResponse.OK(message: "Tạo tài liệu thành công, đang chờ xét duyệt.");
@@ -492,8 +497,8 @@ namespace Domain.Services
                     CourseId = s.CourseId,
                     CourseName = s.Course != null ? s.Course.Name : string.Empty,
                     CategoryIds = s.DocumentCategories.Select(s => s.CategoryId).ToList(),
-                    CreatedDate = s.CreatedDate.AddHours(7),
-                    ModifiedDate = s.ModifiedDate.AddHours(7),
+                    CreatedDate = s.CreatedDate.ToLocalTime(),
+                    ModifiedDate = s.ModifiedDate.ToLocalTime(),
                 }).ToList();
 
             return documentsSearch;
@@ -579,8 +584,8 @@ namespace Domain.Services
                 Fullname = s.User != null ? s.User.Fullname : string.Empty,
                 TotalDownloads = s.DetaiDocument?.TotalDownload ?? 0,
                 TotalViews = s.DetaiDocument?.TotalView ?? 0,
-                CreatedDate = s.CreatedDate.AddHours(7),
-                ModifiedDate = s.ModifiedDate.AddHours(7)
+                CreatedDate = s.CreatedDate.ToLocalTime(),
+                ModifiedDate = s.ModifiedDate.ToLocalTime()
             }).ToList();
 
             //foreach (var doc in responseList)
@@ -630,8 +635,8 @@ namespace Domain.Services
                     TotalViews = doc.DetaiDocument?.TotalView ?? 0,
                     StatusDocument = doc.StatusDocument.GetEnumDisplayName() ?? string.Empty,
                     CourseName = doc.Course != null ? doc.Course.Name : string.Empty,
-                    CreatedDate = doc.CreatedDate,
-                    ModifiedDate = doc.ModifiedDate,
+                    CreatedDate = doc.CreatedDate.ToLocalTime(),
+                    ModifiedDate = doc.ModifiedDate.ToLocalTime(),
                 });
             }
 

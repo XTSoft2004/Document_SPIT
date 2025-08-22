@@ -33,7 +33,7 @@ namespace Domain.Common.Telegram.Services
             string Message_Thread_ID = Environment.GetEnvironmentVariable("MESSAGE_THREAD_ID");
 
             DateTime dateTime = DateTime.Now;
-            string messageQuery = $"[{dateTime:dd-MM-yyyy HH:mm:ss}] {message}";
+            string messageQuery = $"<b>[{dateTime:dd-MM-yyyy hh:mm:ss tt}]</b> {message}";
 
             RequestHttpClient _request = new RequestHttpClient();
             var response = await _request.GetAsync(
