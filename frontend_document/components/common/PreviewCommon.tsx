@@ -2,7 +2,6 @@ import globalConfig from '@/app.config';
 import React, { useRef, useState, useEffect } from 'react';
 import { getCodeView } from '@/actions/document.actions';
 import Image from 'next/image';
-import SecureIframeWrapper from './SecureIframeWrapper';
 
 interface PreviewFilePopupProps {
     fileName: string;
