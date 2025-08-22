@@ -47,7 +47,6 @@ namespace Domain.Services
                 UserId = historyRequest.UserId,
 
                 CreatedDate = DateTime.Now,
-                CreatedBy = userMeToken.Username,
             };
 
             _history.Insert(history);
