@@ -19,7 +19,7 @@ namespace Document_SPIT_BE.Controllers
             _services = services;
         }
         [HttpGet]
-        public IActionResult GetCourse(string search = "", int pageNumber = -1, int pageSize = -1)
+        public IActionResult GetCourse(string search = "", int pageNumber = 1, int pageSize = 10)
         {
             if (!ModelState.IsValid)
                 return BadRequest(DefaultString.INVALID_MODEL);

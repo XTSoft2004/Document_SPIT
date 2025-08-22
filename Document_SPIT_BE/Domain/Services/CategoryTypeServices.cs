@@ -43,7 +43,10 @@ namespace Domain.Services
             var newCategoryType = new CategoryType()
             {
                 Name = categoryTypeRequest.Name.Trim(),
-                Description = categoryTypeRequest.Description?.Trim()
+                Description = categoryTypeRequest.Description?.Trim(),
+
+                CreatedDate = DateTime.Now,
+                CreatedBy = userMeToken.Username
             };
 
             _categoryType.Insert(newCategoryType);
@@ -68,6 +71,9 @@ namespace Domain.Services
             
             categoryType.Name = categoryTypeRequest.Name?.Trim() ?? categoryType.Name;
             categoryType.Description = categoryTypeRequest.Description?.Trim() ?? categoryType.Description;
+
+            categoryType.ModifiedDate = DateTime.Now;
+            categoryType.ModifiedBy = userMeToken.Username;
 
             _categoryType.Update(categoryType);
             await UnitOfWork.CommitAsync();

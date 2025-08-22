@@ -69,8 +69,9 @@ namespace Domain.Services
 
             user.Fullname = userRequest.Fullname ?? user.Fullname;
             user.Password = !string.IsNullOrEmpty(userRequest.Password) ? userRequest.Password : user.Password;
+            
             user.ModifiedDate = DateTime.Now;
-
+            user.ModifiedBy = userMeToken.Username;
             await UnitOfWork.CommitAsync();
             
             await _historyServices.CreateAsync(new HistoryRequest 
@@ -110,6 +111,10 @@ namespace Domain.Services
             {
                 user.RoleId = role.Id;
                 user.Role = role;
+
+                user.ModifiedDate = DateTime.Now;
+                user.ModifiedBy = userMeToken.Username;
+
                 await UnitOfWork.CommitAsync();
                 
                 await _historyServices.CreateAsync(new HistoryRequest 
@@ -204,11 +209,12 @@ namespace Domain.Services
                 Username = userRequest.Username,
                 Fullname = userRequest.Fullname,
                 Password = userRequest.Password,
-                CreatedDate = DateTime.Now,
-                ModifiedDate = DateTime.Now,
                 isLocked = false,
                 Role = role,
                 RoleId = role.Id,
+            
+                CreatedDate = DateTime.Now,
+                ModifiedDate = DateTime.Now,
             };
             _user!.Insert(user);
             await UnitOfWork.CommitAsync();
@@ -360,6 +366,8 @@ namespace Domain.Services
             if(infoUpload != null)
             {
                 user.AvatarUrl = $"https://drive.google.com/thumbnail?id={infoUpload.id}&sz=w500";
+                user.ModifiedBy = userMeToken.Username;
+                user.ModifiedDate = DateTime.Now;   
                 _user.Update(user);
             }
 

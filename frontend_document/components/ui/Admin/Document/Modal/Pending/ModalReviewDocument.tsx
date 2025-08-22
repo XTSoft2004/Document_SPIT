@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Modal, Form, Input, Select, message, Button } from 'antd';
 import { IDocumentRequest, IDocumentResponse, IDocumentReviewRequest } from '@/types/document';
 import { reviewDocument, updateDocument } from '@/actions/document.actions';
@@ -33,12 +33,16 @@ export default function ModalReviewDocument({
     const [currentFolderId, setCurrentFolderId] = useState<string>('');
 
     const [courses, setCourses] = useState<ICourseResponse[]>([]);
-    const handleSearchCourse = async (search: string = '') => {
-        const response = await getCourse(search, 1, 20);
-        if (response.ok) {
-            setCourses(response.data);
+    const handleSearchCourse = useCallback(async (search: string = '') => {
+        try {
+            const response = await getCourse(search, 1, 10);
+            if (response.ok) {
+                setCourses(response.data);
+            }
+        } catch (error) {
+            console.error('Error fetching courses:', error);
         }
-    }
+    }, []);
 
     const [categories, setCategories] = useState<ICategoryResponse[]>([]);
 
@@ -85,8 +89,9 @@ export default function ModalReviewDocument({
             await Promise.all([
                 fetchInitialCourse(),
                 fetchCategories(),
-                handleSearchCourse(''),
             ]);
+
+            handleSearchCourse('');
 
             form.setFieldsValue({
                 name: Document?.name,
@@ -246,8 +251,9 @@ export default function ModalReviewDocument({
                         </Form.Item>
 
                         <Form.Item
-                            label="Môn học:"
+                            label="Môn học"
                             name="courseId"
+                            className="mb-3"
                             rules={[{ required: true, message: "Vui lòng chọn môn học!" }]}
                         >
                             <Select

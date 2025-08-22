@@ -54,7 +54,10 @@ namespace Domain.Services
             {
                 Code = request.Code,
                 Name = request.Name,
-                DepartmentId = department.Id
+                DepartmentId = department.Id,
+
+                CreatedDate = DateTime.Now,
+                CreatedBy = userMeToken.Username,
             };
             _course.Insert(course);
             await UnitOfWork.CommitAsync();
@@ -85,6 +88,10 @@ namespace Domain.Services
             course.Code = request.Code ?? course.Code;
             course.Name = request.Name ?? course.Name;
             course.FolderId = request.FolderId ?? course.FolderId;
+
+
+            course.ModifiedDate = DateTime.Now;
+            course.ModifiedBy = userMeToken.Username;
             if (request.DepartmentId.HasValue)
             {
                 var department = _department.Find(f => f.Id == request.DepartmentId.Value);

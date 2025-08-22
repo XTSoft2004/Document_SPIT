@@ -335,8 +335,8 @@ namespace Domain.Services
             document.StatusDocument = enumStatusDocument ?? document.StatusDocument;
 
             // Cập nhật thông tin người dùng
-            document.UserId = userMeToken.Id ?? document.UserId;
-            document.User = user;
+            //document.UserId = userMeToken.Id ?? document.UserId;
+            //document.User = user;
 
             document.ModifiedDate = DateTime.Now;
             document.ModifiedBy = userMeToken.Username ?? document.ModifiedBy;
@@ -492,8 +492,8 @@ namespace Domain.Services
                     CourseId = s.CourseId,
                     CourseName = s.Course != null ? s.Course.Name : string.Empty,
                     CategoryIds = s.DocumentCategories.Select(s => s.CategoryId).ToList(),
-                    CreatedDate = s.CreatedDate,
-                    ModifiedDate = s.ModifiedDate
+                    CreatedDate = s.CreatedDate.AddHours(7),
+                    ModifiedDate = s.ModifiedDate.AddHours(7),
                 }).ToList();
 
             return documentsSearch;
@@ -579,8 +579,8 @@ namespace Domain.Services
                 Fullname = s.User != null ? s.User.Fullname : string.Empty,
                 TotalDownloads = s.DetaiDocument?.TotalDownload ?? 0,
                 TotalViews = s.DetaiDocument?.TotalView ?? 0,
-                CreatedDate = s.CreatedDate,
-                ModifiedDate = s.ModifiedDate
+                CreatedDate = s.CreatedDate.AddHours(7),
+                ModifiedDate = s.ModifiedDate.AddHours(7)
             }).ToList();
 
             //foreach (var doc in responseList)

@@ -50,7 +50,9 @@ namespace Domain.Services
                 DocumentId = reportRequest.DocumentId,
                 Title = reportRequest.Title,
                 Description = reportRequest.Description,
-                CreatedDate = DateTime.Now
+
+                CreatedDate = DateTime.Now,
+                CreatedBy = userMeToken.Username,
             };
 
             _report.Insert(report);
@@ -82,6 +84,8 @@ namespace Domain.Services
             report.Title = reportRequest.Title;
             report.Description = reportRequest.Description;
 
+            report.ModifiedDate = DateTime.Now;
+            report.ModifiedBy = userMeToken.Username;
             _report.Update(report);
             await UnitOfWork.CommitAsync();
 

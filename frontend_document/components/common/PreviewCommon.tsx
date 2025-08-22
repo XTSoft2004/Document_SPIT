@@ -2,6 +2,7 @@ import globalConfig from '@/app.config';
 import React, { useRef, useState, useEffect } from 'react';
 import { getCodeView } from '@/actions/document.actions';
 import Image from 'next/image';
+import SecureIframeWrapper from './SecureIframeWrapper';
 
 interface PreviewFilePopupProps {
     fileName: string;
@@ -294,6 +295,7 @@ export default function PreviewFile({
                             ref={imgRef}
                             // src={`${globalConfig.baseUrl}/document/view/${codeView}`}
                             src={`/api/view/${codeView}`}
+                            onContextMenu={e => e.preventDefault()}
                             alt={fileName}
                             width={0}
                             height={0}
@@ -346,7 +348,6 @@ export default function PreviewFile({
                             </div>
                         </div>
                     )}
-
                     <iframe
                         src={`/api/view/${codeView}#toolbar=0&navpanes=0&scrollbar=0`}
                         className="w-full h-full border-0"

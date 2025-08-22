@@ -55,6 +55,9 @@ namespace Domain.Services
             {
                 Code = request.Code,
                 Name = request.Name,
+
+                CreatedDate = DateTime.Now,
+                CreatedBy = userMeToken.Username,
             };
             _department.Insert(department);
             await UnitOfWork.CommitAsync();
@@ -88,6 +91,8 @@ namespace Domain.Services
             department.Name = request.Name ?? department.Name;
             department.FolderId = request.FolderId ?? department.FolderId;
 
+            department.ModifiedDate = DateTime.Now;
+            department.ModifiedBy = userMeToken.Username;
             _department.Update(department);
             await UnitOfWork.CommitAsync();
 

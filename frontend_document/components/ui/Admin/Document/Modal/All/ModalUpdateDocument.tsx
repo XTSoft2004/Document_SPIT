@@ -287,6 +287,31 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
                         </Form.Item>
 
                         <Form.Item
+                            label="Môn học"
+                            name="courseId"
+                            className="mb-3"
+                            rules={[{ required: true, message: "Vui lòng chọn môn học!" }]}
+                        >
+                            <Select
+                                showSearch
+                                placeholder={loadingInfo ? "Đang tải môn học..." : "Tìm kiếm và chọn môn học..."}
+                                size="middle"
+                                optionFilterProp="children"
+                                filterOption={false}
+                                loading={loadingInfo}
+                                allowClear
+                                notFoundContent={loadingInfo ? 'Đang tải...' : 'Không tìm thấy môn học'}
+                                options={courses.map(course => ({
+                                    value: course.id,
+                                    label: `${course.code} - ${course.name}`
+                                }))}
+                                onChange={handleCourseChange}
+                                onSearch={handleSearchCourse}
+                                disabled={loadingInfo}
+                            />
+                        </Form.Item>
+
+                        <Form.Item
                             label="Loại danh mục:"
                             name="categoryIds"
                             rules={[{ required: true, message: "Vui lòng chọn loại danh mục!" }]}
@@ -328,31 +353,6 @@ const ModalUpdateDocument: React.FC<ModalUpdateDocumentProps> = ({ visible, Docu
                                     </div>
                                 )}
                                 style={{ width: '100%' }}
-                                disabled={loadingInfo}
-                            />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="Môn học"
-                            name="courseId"
-                            className="mb-3"
-                            rules={[{ required: true, message: "Vui lòng chọn môn học!" }]}
-                        >
-                            <Select
-                                showSearch
-                                placeholder={loadingInfo ? "Đang tải môn học..." : "Tìm kiếm và chọn môn học..."}
-                                size="middle"
-                                optionFilterProp="children"
-                                filterOption={false}
-                                loading={loadingInfo}
-                                allowClear
-                                notFoundContent={loadingInfo ? 'Đang tải...' : 'Không tìm thấy môn học'}
-                                options={courses.map(course => ({
-                                    value: course.id,
-                                    label: `${course.code} - ${course.name}`
-                                }))}
-                                onChange={handleCourseChange}
-                                onSearch={handleSearchCourse}
                                 disabled={loadingInfo}
                             />
                         </Form.Item>

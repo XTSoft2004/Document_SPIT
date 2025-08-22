@@ -6,6 +6,7 @@ using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
 using Domain.Model.Request.History;
 using Domain.Model.Response.History;
+using Domain.Model.Response.User;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,10 +20,14 @@ namespace Domain.Services
     {
         private readonly IRepositoryBase<History>? _history;
         private readonly IRepositoryBase<User>? _user;
-        public HistoryServices(IRepositoryBase<History>? history, IRepositoryBase<User>? user)
+        private readonly ITokenServices _tokenServices;
+        private UserTokenResponse? userMeToken;
+        public HistoryServices(IRepositoryBase<History>? history, IRepositoryBase<User>? user, ITokenServices tokenServices)
         {
             _history = history;
             _user = user;
+            _tokenServices = tokenServices;
+            userMeToken = _tokenServices.GetTokenBrowser();
         }
 
         public async Task<HttpResponse> CreateAsync(HistoryRequest historyRequest)
@@ -40,8 +45,9 @@ namespace Domain.Services
                 Description = historyRequest.Description,
                 function_status = historyRequest.function_status,
                 UserId = historyRequest.UserId,
+
                 CreatedDate = DateTime.Now,
-                ModifiedDate = DateTime.Now,
+                ModifiedBy = userMeToken.Username,
             };
 
             _history.Insert(history);
@@ -64,8 +70,9 @@ namespace Domain.Services
             history.Description = historyRequest.Description ?? history.Description;
             history.function_status = historyRequest.function_status ?? history.function_status;
             history.UserId = historyRequest.UserId;
-            history.ModifiedDate = DateTime.Now;
 
+            history.ModifiedDate = DateTime.Now;
+            history.ModifiedBy = userMeToken.Username;
             _history.Update(history);
             await UnitOfWork.CommitAsync();
 

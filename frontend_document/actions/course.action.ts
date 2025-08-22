@@ -79,11 +79,14 @@ export const deleteCourse = async (
 
 export const getCourse = async (
   search: string = '',
-  pageNumber: number = -1,
-  pageSize: number = -1,
+  pageNumber: number = 1,
+  pageSize: number = 10,
 ) => {
-  const response = await fetch(
-    `${globalConfig.baseUrl}/course?search=${search}&pageNumber=${pageNumber}&pageSize=${pageSize}`,
+  let url = `${globalConfig.baseUrl}/course?pageNumber=${pageNumber}&pageSize=${pageSize}`
+  if (search && search != '') {
+    url += `&search=${search}`
+  }
+  const response = await fetch(url,
     {
       method: 'GET',
       headers: {
