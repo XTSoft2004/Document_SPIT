@@ -1,4 +1,6 @@
-﻿using Domain.Entities;
+﻿using Domain.Common.ExceptionLogger.Interfaces;
+using Domain.Common.ExceptionLogger.Services;
+using Domain.Entities;
 using Domain.Interfaces.Services;
 //using Domain.Model.Response.Auth;
 using Domain.Model.Response.User;
@@ -17,12 +19,14 @@ namespace Server_Manager.Middleware
         private readonly string _secretKey;
         private readonly ITokenServices _tokenServices;
         private readonly IUserServices _userServices;
-        public JwtMiddleware(RequestDelegate next, IConfiguration config, ITokenServices tokenServices, IUserServices userServices)
+        private readonly IExceptionLoggerServices _exceptionLoggerServices;
+        public JwtMiddleware(RequestDelegate next, IConfiguration config, ITokenServices tokenServices, IUserServices userServices, IExceptionLoggerServices exceptionLoggerServices)
         {
             _next = next;
             _secretKey = config["JwtSettings:Secret"];
             _tokenServices = tokenServices;
             _userServices = userServices;
+            _exceptionLoggerServices = exceptionLoggerServices;
         }
 
         public async Task Invoke(HttpContext context)
@@ -58,58 +62,69 @@ namespace Server_Manager.Middleware
                 "/user/profile",
             };
 
-            var requestPath = context.Request.Path.Value?.ToLower() ?? string.Empty;
-            if (bypassRoutes.Any(route => requestPath.Contains(route)) || specialRoutes.Any(route => requestPath.StartsWith(route)))
-            {
-                await _next(context);
-                return;
-            }
-
-            var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
-
-            if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
-            {
-                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                await context.Response.WriteAsJsonAsync(new { Message = "Token không hợp lệ hoặc không tồn tại" });
-                return;
-            }
-
-            var token = authHeader.Substring("Bearer ".Length).Trim();
-
             try
             {
-                var dateTimeNow = DateTime.Now;
-
-                UserTokenResponse AuthInfo = _tokenServices.GetInfoFromToken(token);
-                if(AuthInfo == null || AuthInfo.ExpiryDate < dateTimeNow)
+                var requestPath = context.Request.Path.Value?.ToLower() ?? string.Empty;
+                if (bypassRoutes.Any(route => requestPath.Contains(route)) || specialRoutes.Any(route => requestPath.StartsWith(route)))
                 {
+                    await _next(context);
+                    return;
+                }
+
+                var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
+
+                if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
+                {
+                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    await context.Response.WriteAsJsonAsync(new { Message = "Token không hợp lệ hoặc không tồn tại" });
+                    return;
+                }
+
+                var token = authHeader.Substring("Bearer ".Length).Trim();
+
+                try
+                {
+                    var dateTimeNow = DateTime.Now;
+
+                    UserTokenResponse AuthInfo = _tokenServices.GetInfoFromToken(token);
+                    if (AuthInfo == null || AuthInfo.ExpiryDate < dateTimeNow)
+                    {
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        await context.Response.WriteAsJsonAsync(new { Message = "Token không hợp lệ hoặc đã hết hạn" });
+                        return;
+                    }
+
+                    var refresh_token_old = _tokenServices.GetRefreshToken(AuthInfo.Id);
+                    UserTokenResponse AuthRefreshToken = _tokenServices.GetInfoFromToken(refresh_token_old);
+                    if (AuthRefreshToken?.ExpiryDate < dateTimeNow)
+                    {
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        await context.Response.WriteAsJsonAsync(new { Message = "Refresh Token đã hết hạn" });
+                        return;
+                    }
+
+                    await _next(context);
+
+                    if (context.Response.StatusCode == (int)StatusCodes.Status403Forbidden)
+                    {
+                        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                        await context.Response.WriteAsJsonAsync(new { Message = "Bạn không có quyền truy cập tài nguyên này!" });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    await _exceptionLoggerServices.LogExceptionAsync(ex);
                     context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                     await context.Response.WriteAsJsonAsync(new { Message = "Token không hợp lệ hoặc đã hết hạn" });
-                    return;
-                }
-
-                var refresh_token_old = _tokenServices.GetRefreshToken(AuthInfo.Id);
-                UserTokenResponse AuthRefreshToken = _tokenServices.GetInfoFromToken(refresh_token_old);
-                if (AuthRefreshToken?.ExpiryDate < dateTimeNow)
-                {
-                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                    await context.Response.WriteAsJsonAsync(new { Message = "Refresh Token đã hết hạn" });
-                    return;
-                }
-
-                await _next(context);
-
-                if (context.Response.StatusCode == (int)StatusCodes.Status403Forbidden)
-                {
-                    context.Response.StatusCode = StatusCodes.Status403Forbidden;
-                    await context.Response.WriteAsJsonAsync(new { Message = "Bạn không có quyền truy cập tài nguyên này!" });
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
+                await _exceptionLoggerServices.LogExceptionAsync(ex);
                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                await context.Response.WriteAsJsonAsync(new { Message = "Token không hợp lệ hoặc đã hết hạn" });
+                await context.Response.WriteAsJsonAsync(new { Message = "Đã có lỗi xảy ra, vui lòng báo cáo admin để khắc phục sớm nhất!" });
             }
         }
     }

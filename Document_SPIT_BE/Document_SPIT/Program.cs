@@ -1,4 +1,5 @@
 ﻿using Domain.Common.BackgroudServices;
+using Domain.Common.ExceptionLogger.Interfaces;
 using Domain.Common.Gemini.Interfaces;
 using Domain.Common.Gemini.Services;
 using Domain.Common.GoogleDriver.Interfaces;
@@ -8,6 +9,7 @@ using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
 using Infrastructure.ContextDB.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Server_Manager.Middleware;
@@ -133,7 +135,7 @@ app.Use(async (context, next) =>
 {
     using (var scope = context.RequestServices.CreateScope())
     {
-        var middleware = new JwtMiddleware(next, context.RequestServices.GetRequiredService<IConfiguration>(), scope.ServiceProvider.GetRequiredService<ITokenServices>(), scope.ServiceProvider.GetRequiredService<IUserServices>());
+        var middleware = new JwtMiddleware(next, context.RequestServices.GetRequiredService<IConfiguration>(), scope.ServiceProvider.GetRequiredService<ITokenServices>(), scope.ServiceProvider.GetRequiredService<IUserServices>(), scope.ServiceProvider.GetRequiredService<IExceptionLoggerServices>());
         await middleware.Invoke(context);
     }
 });

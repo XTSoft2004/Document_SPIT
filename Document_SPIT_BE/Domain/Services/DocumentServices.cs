@@ -165,7 +165,7 @@ namespace Domain.Services
                 $"🏷️ <b>Mã môn học</b>: {course.Code}\n" +
                 $"📚 <b>Tên môn học</b>: {course.Name}\n" +
                 $"👤 <b>Người đóng góp</b>: {user.Fullname}"
-            );
+            , "2");
 
             return HttpResponse.OK(message: "Tạo tài liệu thành công, đang chờ xét duyệt.");
         }

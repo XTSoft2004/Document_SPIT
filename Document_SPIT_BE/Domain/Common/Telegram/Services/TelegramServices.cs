@@ -26,14 +26,13 @@ namespace Domain.Common.Telegram.Services
                 DotNetEnv.Env.Load(envPath);
             }
         }
-        public async Task<bool> SendMessage(string message)
+        public async Task<bool> SendMessage(string message, string Message_Thread_ID)
         {
             string BotToken = Environment.GetEnvironmentVariable("BOT_TOKEN");
             string ChatID = Environment.GetEnvironmentVariable("CHAT_ID");
-            string Message_Thread_ID = Environment.GetEnvironmentVariable("MESSAGE_THREAD_ID");
 
-            DateTime dateTime = DateTime.Now;
-            string messageQuery = $"<b>[{dateTime:dd-MM-yyyy hh:mm:ss tt}]</b> {message}";
+            DateTime dateTime = DateTime.Now.ToLocalTime();
+            string messageQuery = $"<b>[{dateTime:dd-MM-yyyy hh:mm:ss tt}]</b>\n{message}";
 
             RequestHttpClient _request = new RequestHttpClient();
             var response = await _request.GetAsync(
@@ -42,5 +41,6 @@ namespace Domain.Common.Telegram.Services
 
             return response.IsSuccessStatusCode;
         }
+
     }
 }
