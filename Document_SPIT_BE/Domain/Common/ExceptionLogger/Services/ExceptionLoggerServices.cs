@@ -20,7 +20,6 @@ namespace Domain.Common.ExceptionLogger.Services
         {
             this.telegramServices = telegramServices;
         }
-
         public async Task LogExceptionAsync(Exception ex)
         {
             if (ex == null) return;
@@ -44,18 +43,34 @@ namespace Domain.Common.ExceptionLogger.Services
             var frames = st.GetFrames();
             if (frames != null && frames.Length > 0)
             {
-                sb.AppendLine("📂 ---- <b>Stack Trace (Top 5)</b> ----");
+                sb.AppendLine("📂 ---- <b>Stack Trace (Top 2)</b> ----");
                 sb.AppendLine("<pre>");
                 int index = 1;
-                foreach (var frame in frames.Take(5))
+                foreach (var frame in frames.Take(3))
                 {
                     var method = frame.GetMethod();
-                    var file = frame.GetFileName() ?? "N/A";
+                    var file = frame.GetFileName();
                     var line = frame.GetFileLineNumber();
 
                     sb.AppendLine($"{index}) {EscapeForTelegram(method?.DeclaringType?.FullName)}.{EscapeForTelegram(method?.Name)}");
-                    sb.AppendLine($"    File: {EscapeForTelegram(file)}");
+                    sb.AppendLine($"    File: {EscapeForTelegram(file ?? "N/A")}");
                     sb.AppendLine($"    Line: {line}");
+
+                    // 📌 Đọc code xung quanh dòng bị lỗi (10 trước, 10 sau)
+                    if (!string.IsNullOrEmpty(file) && File.Exists(file) && line > 0)
+                    {
+                        var allLines = File.ReadAllLines(file);
+                        int start = Math.Max(0, line - 11);
+                        int end = Math.Min(allLines.Length - 1, line + 9);
+
+                        sb.AppendLine("    ---- Code Context ----");
+                        for (int i = start; i <= end; i++)
+                        {
+                            string marker = (i + 1 == line) ? ">> " : "   ";
+                            sb.AppendLine($"{marker}{i + 1,4}: {EscapeForTelegram(allLines[i])}");
+                        }
+                    }
+
                     sb.AppendLine();
                     index++;
                 }
@@ -64,6 +79,7 @@ namespace Domain.Common.ExceptionLogger.Services
 
             await telegramServices.SendMessage(sb.ToString(), "114");
         }
+
         private string EscapeForTelegram(string text)
         {
             if (string.IsNullOrEmpty(text)) return text;
