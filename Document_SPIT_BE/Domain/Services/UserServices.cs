@@ -113,7 +113,6 @@ namespace Domain.Services
                 user.Role = role;
 
                 user.ModifiedDate = DateTime.Now;
-                user.ModifiedBy = userMeToken.Username;
 
                 await UnitOfWork.CommitAsync();
                 
