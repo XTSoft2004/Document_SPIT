@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   backend:
     build:
@@ -7,13 +5,13 @@ services:
       target: final
     ports:
       - "5000:5000"
-    networks:
-      - internal
     environment:
       - NODE_ENV=production
       - DOTNET_ENV_PATH=/app/.env
     working_dir: /app
     restart: always
+    networks:
+      - internal
 
   frontend:
     build:
@@ -21,8 +19,12 @@ services:
       target: runner
     ports:
       - "1111:1111"
-    networks:
-      - internal
     environment:
       - NODE_ENV=production
     restart: always
+    networks:
+      - internal  
+
+networks:
+  internal:
+    driver: bridge
