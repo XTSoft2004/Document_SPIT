@@ -4,7 +4,6 @@ import { IShowResponse } from './types/global'
 import { IUserResponse } from './types/user'
 import globalConfig from './app.config'
 import { cookies, headers } from 'next/headers'
-import next from 'next'
 
 export const config = {
   matcher: [
@@ -18,6 +17,25 @@ export const config = {
      */
     '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|images).*)',
   ],
+}
+
+const refreshToken = async () => {
+  const response = await fetch(`${globalConfig.baseUrl}/auth/refresh-token`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization:
+        headers().get('Authorization') ||
+        `Bearer ${cookies().get('refreshToken')?.value || ' '}`,
+    },
+  })
+
+  const data = await response.json()
+  return {
+    ok: response.ok,
+    message: data.message,
+    ...data,
+  } as IShowResponse<ITokenInfoResponse>
 }
 
 const getMe = async () => {
@@ -52,7 +70,7 @@ export async function middleware(request: NextRequest) {
 
   const nextUrl = request.nextUrl.pathname
   const accessToken = cookies().get('accessToken')?.value
-  const res = NextResponse.next()
+  let res = NextResponse.next()
 
   // Nếu không có token thì chỉ cho vào /auth
   if (!accessToken) {
@@ -62,32 +80,30 @@ export async function middleware(request: NextRequest) {
     return res
   }
 
-  const userResponse = await getMe()
-  const isLocked = userResponse.data?.islocked
+  let userResponse = await getMe()
   const isExpired = userResponse.status === 401 || userResponse.status === 403
-
   if (isExpired) {
-    const response = redirectTo('/', request)
-    response.cookies.delete('accessToken')
-    response.cookies.delete('refreshToken')
-    return response
+    const refreshResponse = await refreshToken()
+    if (!refreshResponse.ok) return redirectTo('/', request)
+
+    res = NextResponse.redirect(request.url)
+    res.cookies.set('accessToken', refreshResponse.data.accessToken)
+    res.cookies.set('refreshToken', refreshResponse.data.refreshToken)
+
+    return res
   }
 
-  if (nextUrl === '/profile') {
-    if (!userResponse.ok) {
-      return redirectTo('/', request)
-    }
-
-    if (isLocked) {
-      return redirectTo('/ban', request)
-    }
-
-    return redirectTo(`/profile/${userResponse.data.username}`, request)
-  }
+  const isLocked = userResponse.data?.islocked
 
   if (nextUrl.startsWith('/auth')) {
     if (isLocked) return redirectTo('/ban', request)
     return redirectTo('/', request)
+  }
+
+  if (nextUrl === '/profile') {
+    if (!userResponse.ok) return redirectTo('/', request)
+    if (isLocked) return redirectTo('/ban', request)
+    return redirectTo(`/profile/${userResponse.data.username}`, request)
   }
 
   if (nextUrl.startsWith('/ban')) {

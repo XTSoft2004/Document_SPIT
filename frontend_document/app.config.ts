@@ -14,7 +14,7 @@ const isBrowser = typeof window !== 'undefined'
 
 const globalConfig: IGlobalConfig = {
   baseUrl: process.env.NEXT_PUBLIC_INTERNAL_API_URL ?? 'http://backend:5000',
-  version: process.env.NEXT_PUBLIC_VERSION ?? '1.0.2',
+  version: process.env.NEXT_PUBLIC_VERSION ?? '1.0.3',
 }
 
 export default globalConfig
