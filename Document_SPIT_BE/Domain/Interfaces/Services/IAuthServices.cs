@@ -21,5 +21,16 @@ namespace Domain.Interfaces.Services
         /// </summary>
         /// <returns></returns>
         Task<HttpResponse> LogoutUser();
+        /// <summary>
+        /// Tạo tài khoản người dùng
+        /// </summary>
+        /// <param name="registerRequest"></param>
+        /// <returns></returns>
+        Task<HttpResponse> RegisterAsync(RegisterRequest registerRequest);
+        /// <summary>
+        /// Refresh token người dùng
+        /// </summary>
+        /// <returns></returns>
+        Task<HttpResponse> RefreshTokenAccount();
     }
 }

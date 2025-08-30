@@ -36,13 +36,16 @@ namespace Domain.Services
         }
         public TokenResponse GenerateToken(UserResponse user, string deviceId)
         {
-            return new TokenResponse()
+            var token = new TokenResponse()
             {
                 AccessToken = GenerateTokenUser(user, deviceId),
-                ExpiresAt = DateTime.Now.AddDays(Convert.ToInt32(_config["JwtSettings:ExpireToken"])),
+                ExpiresAt = DateTime.Now.AddMinutes(Convert.ToInt32(_config["JwtSettings:ExpireToken"])),
+                //ExpiresAt = DateTime.Now.AddSeconds(30),
                 RefreshToken = GenerateRefreshToken(user, deviceId),
                 RefreshExpiresAt = DateTime.Now.AddDays(Convert.ToInt32(_config["JwtSettings:ExpireRefreshToken"]))
-            };
+                //RefreshExpiresAt = DateTime.Now.AddMinutes(1)
+            }; ;
+            return token;
         }
         public string GenerateTokenUser(UserResponse user, string deviceId)
         {
@@ -50,7 +53,9 @@ namespace Domain.Services
             var claims = new[]
             {
                 new Claim("userName", user.Username),
-                new Claim("userId", user.UserId.ToString()),
+                new Claim("userId", user.Id.ToString()),
+                new Claim(ClaimTypes.Role, user.RoleName),
+                //new Claim("fullName", user.Fullname),
                 new Claim("deviceId", deviceId ?? string.Empty),
             };
 
@@ -60,6 +65,7 @@ namespace Domain.Services
                 Audience = _config["JwtSettings:Audience"],
                 Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.Now.AddDays(Convert.ToInt32(_config["JwtSettings:ExpireToken"])),
+                //Expires = DateTime.Now.AddSeconds(30),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
             };
 
@@ -75,7 +81,8 @@ namespace Domain.Services
             var claims = new[]
             {
                 new Claim("userName", user.Username),
-                new Claim("userId", user.UserId.ToString()),
+                new Claim("userId", user.Id.ToString()),
+                new Claim(ClaimTypes.Role, user.RoleName),
                 new Claim("deviceId", deviceId ?? string.Empty),
             };
 
@@ -85,6 +92,7 @@ namespace Domain.Services
                 Audience = _config["JwtSettings:Audience"],
                 Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.Now.AddDays(Convert.ToInt32(_config["JwtSettings:ExpireRefreshToken"])),
+                //Expires = DateTime.Now.AddMinutes(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
             };
 
@@ -109,6 +117,7 @@ namespace Domain.Services
             var claims = jwtToken.Claims;
             var IdValue = claims.FirstOrDefault(c => c.Type == "userId")?.Value;
             var username = claims.FirstOrDefault(c => c.Type == "userName")?.Value;
+            var role = claims.FirstOrDefault(c => c.Type == "role")?.Value;
             var deviceId = claims.FirstOrDefault(c => c.Type == "deviceId")?.Value;
             var expiryDateUnix = claims.FirstOrDefault(c => c.Type == "exp")?.Value;
             var expiryDate = expiryDateUnix != null
@@ -119,11 +128,19 @@ namespace Domain.Services
 
             return new UserTokenResponse()
             {
-                UserId = !string.IsNullOrEmpty(IdValue) ? long.Parse(IdValue) : -100,
+                Id = !string.IsNullOrEmpty(IdValue) ? long.Parse(IdValue) : -100,
                 Username = username,
                 ExpiryDate = expiryDate,
                 DeviceId = deviceId,
+                RoleName = role
             };
+        }
+        public string GetTokenFromHeader()
+        {
+            var authHeader = _HttpContextHelper!.GetHeader("Authorization");
+            if (string.IsNullOrEmpty(authHeader))
+                return string.Empty;
+            return authHeader.Replace("Bearer", "").Trim();
         }
         public UserTokenResponse? GetTokenBrowser()
         {
@@ -151,7 +168,7 @@ namespace Domain.Services
         }
         public async Task<HttpResponse> UpdateRefreshToken(TokenRequest info)
         {
-            var user = _user.Find(f => f.UserId == info.UserId);
+            var user = _user.Find(f => f.Id == info.UserId);
             if(user == null)
                 return HttpResponse.Error("Người dùng không tồn tại.", System.Net.HttpStatusCode.NotFound);
 
@@ -169,7 +186,7 @@ namespace Domain.Services
             {
                 _token.Insert(new TokenUser()
                 {
-                    UserId = user.UserId,
+                    UserId = user.Id,
                     User = user,
                     Token = info.Token,
                     ExpiryDate = info.ExpiryDate,

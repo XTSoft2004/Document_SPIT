@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: ./Document_SPIT_BE
+      target: dev
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./Document_SPIT_BE:/src
+    environment:
+      - DOTNET_ENVIRONMENT=Development
+      - DOTNET_USE_POLLING_FILE_WATCHER=true
+    working_dir: /src
+    restart: always
+    stdin_open: true
+    tty: true
+
+  frontend:
+    build:
+      context: ./frontend_document
+      target: dev
+    ports:
+      - "1111:1111"
+    environment:
+      - NODE_ENV=development
+      - WATCHPACK_POLLING=true
+    volumes:
+      - ./frontend_document:/app
+      - /app/node_modules  # Cái này đúng, để tránh ghi đè bởi host
+    restart: always
+    stdin_open: true
+    tty: true

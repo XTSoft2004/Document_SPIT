@@ -1,5 +1,6 @@
 ﻿using Domain.Common.Http;
 using Domain.Model.Request.User;
+using Domain.Model.Response.User;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,10 +12,81 @@ namespace Domain.Interfaces.Services
     public interface IUserServices
     {
         /// <summary>
-        /// Thêm và cập nhật người dùng
+        /// Set quyền cho người dùng
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        Task<HttpResponse> SetRole(string username, string roleName);
+        /// <summary>
+        /// Lấy thông của người dùng hiện tại
+        /// </summary>
+        /// <returns></returns>
+        Task<HttpResponse> GetMe();
+        /// <summary>
+        /// Lấy lịch sử hoạt động người dùng theo ID
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        Task<HttpResponse> GetHistory(long? userId);
+        /// <summary>
+        /// Lấy danh sách người dùng với phân trang và tìm kiếm
+        /// </summary>
+        /// <param name="search"></param>
+        /// <param name="pageNumber"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="totalRecords"></param>
+        /// <returns></returns>
+        List<UserResponse>? GetUser(string search, int pageNumber, int pageSize, out int totalRecords);
+        /// <summary>
+        /// Cập nhật thông tin người dùng
         /// </summary>
         /// <param name="userRequest"></param>
         /// <returns></returns>
-        Task<HttpResponse> AddUpdateUser(UserRequest userRequest);
+        Task<HttpResponse> UpdateAsync(long idUser, UserRequest userRequest);
+        /// <summary>
+        /// Khoá tài khoản người dùng theo ID
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        Task<HttpResponse> BanAccount(long userId);
+        /// <summary>
+        /// Tạo mới người dùng
+        /// </summary>
+        /// <param name="userRequest"></param>
+        /// <returns></returns>
+        Task<HttpResponse> CreateAsync(UserCreateRequest userRequest);
+        /// <summary>
+        /// Lấy thông tin người dùng từ token trong Header Authorization
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        Task<HttpResponse> GetProfileToken();
+        /// Lấy danh sách sao của người dùng
+        /// </summary>
+        /// <returns></returns>
+        Task<HttpResponse> getStars();
+        /// <summary>
+        /// Thay đổi trạng thái sao của tài liệu theo ID
+        /// </summary>
+        /// <param name="documentId"></param>
+        /// <returns></returns>
+        Task<HttpResponse> ChangeStatusStar(long documentId);
+        /// <summary>
+        /// Lấy danh sách tài liệu đã tải lên gần đây của người dùng
+        /// </summary>
+        /// <returns></returns>
+        Task<HttpResponse> GetRecentUpload();
+        /// <summary>
+        /// Lấy thông tin người dùng theo tên đăng nhập
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns></returns>
+        Task<HttpResponse> GetProfileUser(string username);
+        /// <summary>
+        /// Tải lên ảnh đại diện cho người dùng
+        /// </summary>
+        /// <param name="uploadAvatarRequest"></param>
+        /// <returns></returns>
+        Task<HttpResponse> UploadAvatar(UploadAvatarRequest uploadAvatarRequest);
     }
 }

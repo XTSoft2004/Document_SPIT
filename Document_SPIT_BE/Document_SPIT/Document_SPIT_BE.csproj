@@ -19,4 +19,10 @@
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="HelperHttpClient">
+      <HintPath>..\DLL_Extension\HelperHttpClient.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

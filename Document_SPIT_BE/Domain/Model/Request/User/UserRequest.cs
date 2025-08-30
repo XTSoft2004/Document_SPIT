@@ -8,9 +8,7 @@ namespace Domain.Model.Request.User
 {
     public class UserRequest
     {
-        public long? UserId { get; set; }
-        public string? Username { get; set; }
-        public string? FullName { get; set; }
-        public bool IsLocked { get; set; } = false;
+        public string? Fullname { get; set; }
+        public string? Password { get; set; }
     }
 }

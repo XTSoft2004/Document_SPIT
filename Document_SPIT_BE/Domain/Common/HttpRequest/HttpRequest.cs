@@ -14,8 +14,16 @@ namespace Domain.Common.HttpRequest
         static HttpRequest()
         {
             _request = new RequestHttpClient();
-            var envPath = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.Parent.FullName, ".env");
-            DotNetEnv.Env.Load(envPath);
+            var manualPath = Environment.GetEnvironmentVariable("DOTNET_ENV_PATH");
+            if (!string.IsNullOrEmpty(manualPath) && File.Exists(manualPath))
+            {
+                DotNetEnv.Env.Load(manualPath);
+            }
+            else
+            {
+                var envPath = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.Parent.FullName, ".env");
+                DotNetEnv.Env.Load(envPath);
+            }
 
             string? keyAPI = Environment.GetEnvironmentVariable("KEY_API");
             _request.SetAuthentication(keyAPI);

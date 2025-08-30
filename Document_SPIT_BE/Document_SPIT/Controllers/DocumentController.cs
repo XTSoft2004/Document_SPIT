@@ -1,0 +1,159 @@
+﻿using Domain.Common.GoogleDriver.Interfaces;
+using Domain.Common.Http;
+using Domain.Interfaces.Services;
+using Domain.Model.Request.Document;
+using Domain.Services;
+using Infrastructure.Migrations;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using static Domain.Common.AppConstants;
+
+namespace Document_SPIT_BE.Controllers
+{
+    [Route("document")]
+    [ApiController]
+    public class DocumentController : Controller
+    {
+        private readonly IDocumentServices? _services;
+        private readonly IGoogleDriverServices? _googleDriverServices;
+        public DocumentController(IDocumentServices? services)
+        {
+            _services = services;
+        }
+
+        //[Authorize(Roles = "Admin")]
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateAsync(DocumentPendingRequest documentPending)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+
+            var response = await _services.CreatePending(documentPending);
+            return response.ToActionResult();
+        }
+        [Authorize(Roles = "Admin")]
+        [HttpPost("review/{IdDocument}")]
+        public async Task<IActionResult> ReviewAsync(long? IdDocument, DocumentReviewRequest documentReview)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+
+            var response = await _services.ReviewAsync(IdDocument, documentReview);
+            return response.ToActionResult();
+        }
+        [HttpGet("thumbnail/{DocumentId}")]
+        public async Task<IActionResult> GetThumbnailBase64(long DocumentId)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+            var thumbnailBase64 = await _services.GetThumbnailBase64(DocumentId);
+            if (string.IsNullOrEmpty(thumbnailBase64))
+                return NotFound(new { Message = "Không tồn tại file, vui lòng kiểm tra lại" });
+
+            // Convert base64 string to byte array
+            byte[] imageBytes = Convert.FromBase64String(thumbnailBase64);
+            // Set content type to image/png (or adjust if you know the actual type)
+            return File(imageBytes, "image/png");
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPatch("{IdDocument}")]
+        public async Task<IActionResult> UpdateAsync(long IdDocument, DocumentRequest documentRequest)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+
+            var response = await _services.UpdateAsync(IdDocument, documentRequest);
+            return response.ToActionResult();
+        }
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{IdDocument}")]
+        public async Task<IActionResult> DeleteAsync(long IdDocument)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+
+            var response = await _services.DeleteAsync(IdDocument);
+            return response.ToActionResult();
+        }
+        [HttpGet("download/{idDocument}")]
+        public async Task<IActionResult> DownloadFile(long? idDocument)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+
+            var (data, contentType, fileName) = await _services.DownloadFile(idDocument);
+            if (data == null || contentType == null || fileName == null)
+                return NotFound(new { Message = "Không tồn tại file, vui lòng kiểm tra lại" });
+
+            Response.Headers["Content-Disposition"] = $"attachment; filename=\"{fileName}\"";
+            return new FileContentResult(data, contentType);
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetDocuments(string search = "", int pageNumber = -1, int pageSize = -1, string statusDocument = "")
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+
+            var documents = _services.GetDocuments(search, pageNumber, pageSize, out int totalRecords, statusDocument);
+
+            var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+            return Ok(ResponseArray.ResponseList(documents, totalRecords, totalPages, pageNumber, pageSize));
+        }
+        [HttpGet("preview/{IdDocument}")]
+        public async Task<IActionResult> GetPreviewByDocumetId(long IdDocument)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+            var result = await _services.GetPreviewByDocumetId(IdDocument);
+            if (result == null)
+                return NotFound(new { Message = "Không tồn tại file, vui lòng kiểm tra lại" });
+
+            var (data, contentType, fileName) = result.Value;
+
+            //Response.Headers["Content-Disposition"] = $"inline; filename=\"{fileName}\"";
+            //return new FileContentResult(data, contentType);
+            var stream = new MemoryStream(data);
+            Response.Headers["Content-Disposition"] = $"inline; filename=\"{fileName}\"";
+            return new FileStreamResult(stream, contentType);
+        }
+        [HttpGet("{documentId}")]
+        public async Task<IActionResult> GetLinkViewId(long documentId)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+            var document = await _services.GetLinkView(documentId);
+            return document.ToActionResult();
+        }
+        [HttpGet("view/{code}")]
+        public async Task<IActionResult> ViewDocumentByCode(string code)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+            var result = await _services.ViewOnce(code);
+            if (result == null)
+                return NotFound(new { Message = "Không tồn tại file, vui lòng kiểm tra lại" });
+
+            var (data, contentType, fileName) = result.Value;
+
+            Response.Headers["Content-Disposition"] = $"inline; filename=\"{fileName}\"";
+            return new FileContentResult(data, contentType);
+        }
+        [HttpGet("recent/{number}")]
+        public async Task<IActionResult> GetRecentDocuments(int number)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+            var response = await _services.GetRecentDocuments(number);
+            return response.ToActionResult();
+        }
+        [HttpGet("user/{username}")]
+        public async Task<IActionResult> GetDocumentMe(string username)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(DefaultString.INVALID_MODEL);
+            var response = await _services.GetDocumentMe(username);
+            return response.ToActionResult();
+        }
+    }
+}

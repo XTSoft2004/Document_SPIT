@@ -15,20 +15,26 @@ namespace Domain.Entities
     {
         [Required, StringLength(250)]
         public string? Name { get; set; }
-        public long? TotalDownloads { get; set; } = 0;
-        public long? TotalViews { get; set; } = 0;
-        public string? PathFile { get; set; }
-        public bool? IsPrivate { get; set; }
-        public StatusDocument_Enum StatusDocument { get; set; } 
-
-        public ICollection<DocumentCategory>? DocumentCategories { get; set; }
-
-        public long? idTypeDocument { get; set; }
-        [ForeignKey(nameof(idTypeDocument))]
-        public virtual DocumentType? Type_Document { get; set; }
+        public string Md5Checksum { get; set; } = string.Empty;
+        public string? FileId { get; set; }
+        public string? FileName { get; set; }
+        public string? FolderId { get; set; }
+        public StatusDocument_Enum? StatusDocument { get; set; }
+        public bool? IsPrivate { get; set; } = false; // Mặc định là công khai
 
         public long? UserId { get; set; }
         [ForeignKey(nameof(UserId))]
         public virtual User? User { get; set; }
+
+        public long? CourseId { get; set; }
+        [ForeignKey(nameof(CourseId))]
+        public virtual Course? Course { get; set; }
+
+        // Thông tin về cảm xúc của người dùng về tài liệu
+        public long? DetaiDocumentId { get; set; }
+        [ForeignKey(nameof(DetaiDocumentId))]
+        public virtual DetailDocument? DetaiDocument { get; set; }
+        public ICollection<Report>? Reports { get; set; }
+        public ICollection<DocumentCategory>? DocumentCategories { get; set; }
     }
 }

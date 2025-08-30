@@ -8,8 +8,12 @@ namespace Domain.Model.Response.User
 {
     public class UserResponse
     {
-        public long? UserId { get; set; }
+        public long? Id { get; set; }
         public string? Username { get; set; }
-        public string? FullName { get; set; }
+        public string? Fullname { get; set; }
+        public bool IsLocked { get; set; }
+
+        public string? RoleName { get; set; }
+        public string? AvatarUrl { get; set; }
     }
 }

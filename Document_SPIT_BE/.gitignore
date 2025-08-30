@@ -33,10 +33,10 @@ logs/
 *.ldf
 
 # Deployment
-publish/
+publish/    
 wwwroot/
 
 # Docker
 docker-compose.override.yml
 
-.env
+.env    

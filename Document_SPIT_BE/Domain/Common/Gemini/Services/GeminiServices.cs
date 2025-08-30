@@ -1,0 +1,94 @@
+﻿using Domain.Base.Services;
+using Domain.Common.Gemini.Interfaces;
+using Domain.Common.Gemini.Models;
+using HelperHttpClient;
+using Microsoft.VisualBasic;
+using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Domain.Common.Gemini.Services
+{
+    public class GeminiServices : BaseService, IGeminiServices
+    {
+        private readonly RequestHttpClient _request;
+
+        public GeminiServices()
+        {
+            _request = new RequestHttpClient();
+            var manualPath = Environment.GetEnvironmentVariable("DOTNET_ENV_PATH");
+            if (!string.IsNullOrEmpty(manualPath) && File.Exists(manualPath))
+            {
+                DotNetEnv.Env.Load(manualPath);
+            }
+            else
+            {
+                var envPath = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.Parent.FullName, ".env");
+                DotNetEnv.Env.Load(envPath);
+            }
+        }
+
+        public async Task<bool> GeminiCheck(UploadFileGeminiCheckRequest uploadFile)
+        {
+            var requestBody = new
+            {
+                contents = new[]
+                {
+                   new
+                   {
+                       parts = new object[]
+                       {
+                            new { text = "Hãy phân tích file/ảnh sau đây và xác định liệu nó có chứa nội dung độc hại hoặc không lành mạnh không (ví dụ: web giả mạo, bạo lực, khiêu dâm, cờ bạc, tài liệu lừa đảo, hoặc không phù hợp với mục đích học tập). Hãy tập trung kiểm tra:\r\n\r\nTên miền nếu có chứa link (ví dụ: trang web có phải là trang đáng tin cậy không?)\r\n\r\nNội dung văn bản (có chứa thông tin sai lệch, quảng cáo lừa đảo hay nội dung kích động không?)\r\n\r\nHình ảnh nếu có (có mang tính phản cảm, khiêu dâm, bạo lực hay mang nội dung dụ dỗ không?)\r\n\r\nChỉ trả lời: “Có” hoặc “Không”. Không cần giải thích thêm." },
+                            new
+                            {
+                                inlineData = new
+                                {
+                                    mimeType = uploadFile.mineType,
+                                    data = uploadFile.base64File
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+
+            string API_KEY_GEMINI = Environment.GetEnvironmentVariable("API_KEY_GEMINI");
+            string url = $"https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key={API_KEY_GEMINI}";
+            var response = await _request.PostAsync(url, requestBody); 
+            Console.WriteLine("=== GeminiCheck: Đã gửi yêu cầu kiểm tra file/ảnh ===");
+            Console.WriteLine("Url: " + url);
+            // Replace line 64 with the following to output the request body as JSON
+            Console.WriteLine("Nội dung yêu cầu: " + Newtonsoft.Json.JsonConvert.SerializeObject(requestBody, Newtonsoft.Json.Formatting.Indented));
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonResponse = JObject.Parse(_request.Content);
+                Console.WriteLine("=== GeminiCheck: Nhận phản hồi thành công ===");
+                Console.WriteLine("Phản hồi JSON: " + jsonResponse.ToString());
+                string? result = jsonResponse["candidates"]?[0]?["content"]?["parts"]?[0]?["text"]?.ToString();
+                string icon = "";
+                if (!String.IsNullOrEmpty(result) && result.ToLower().Contains("có"))
+                {
+                    icon = "❌"; // icon cho nội dung độc hại
+                    Console.WriteLine($"{icon} GeminiCheck: Phát hiện nội dung độc hại hoặc không lành mạnh.");
+                    Console.WriteLine("Kết quả kiểm tra: " + result);
+                    return true;
+                }
+                else
+                {
+                    icon = "✅"; // icon cho nội dung an toàn
+                    Console.WriteLine($"{icon} GeminiCheck: Không phát hiện nội dung độc hại hoặc không lành mạnh.");
+                    Console.WriteLine("Kết quả kiểm tra: " + result);
+                    return false;
+                }
+            }
+            Console.WriteLine("=== GeminiCheck: Không thể kiểm tra file độc hại, vui lòng kiểm tra lại !!! ===");
+            if (!string.IsNullOrEmpty(_request.Content))
+                Console.WriteLine("Phản hồi lỗi: " + _request.Content);
+            return true;
+        }
+    }
+}
