@@ -17,7 +17,7 @@
 
 <p align="center">
     <a href="https://document.spit-husc.io.vn" target="_blank">
-        <img src="frontend_document/public/thumbnail.png" alt="Document SPIT" width="640" />
+        <img src="frontend_document/public/demo.gif" alt="Document SPIT" width="640" />
     </a>
 </p>
 
@@ -51,3 +51,210 @@ Document SPIT centralizes academic and organizational documents with secure acce
 ### Quick Links
 
 - Website: [https://document.spit-husc.io.vn](https://document.spit-husc.io.vn)
+
+## ⚙️ Installation
+
+Option A — Docker (recommended for development)
+
+```powershell
+# at repository root
+docker compose up -d --build
+
+# stop
+# docker compose down
+```
+
+- Backend: http://localhost:5000
+- Frontend: http://localhost:1111
+
+Required config changes when using Docker
+
+- Frontend: set `NEXT_PUBLIC_INTERNAL_API_URL=http://backend:5000` (Docker service name)
+- If your DB is on the host machine: set `DB_SERVER=host.docker.internal` in BE `.env` (Windows/macOS). On Linux, use the host IP.
+- If your DB runs in another container/network: set `DB_SERVER=<db-service-name>` and ensure they share a Docker network.
+
+Option B — Run Frontend and Backend separately
+
+Backend (.NET 8)
+
+```powershell
+# in Document_SPIT_BE/Document_SPIT
+dotnet restore
+$env:ASPNETCORE_URLS = "http://0.0.0.0:5000"; dotnet run
+# http://localhost:5000 (Swagger in Development)
+```
+
+Frontend (Next.js 14)
+
+```powershell
+# in frontend_document
+npm install
+$env:NEXT_PUBLIC_INTERNAL_API_URL = "http://localhost:5000"; npm run dev
+# http://localhost:1111
+```
+
+Required config changes when running separately
+
+- Frontend: set `NEXT_PUBLIC_INTERNAL_API_URL=http://localhost:5000`
+- Backend: set `DB_SERVER=localhost` (or your SQL host) in `.env` and configure `appsettings.json` accordingly
+
+## 🛠️ Configuration
+
+Frontend — `frontend_document/.env.local`
+
+Use this file to configure how the frontend talks to the backend and external services.
+
+```bash
+# ========== Frontend .env.local ==========
+# Google Drive folder IDs (optional, only if using Drive listing/preview)
+NEXT_PUBLIC_FOLDER_ID_HOME=             # Main drive folder ID for home listing
+NEXT_PUBLIC_FOLDER_ID_PENDING=          # Pending/unverified folder ID
+
+# Next.js port exposed by the app (for internal links/UI display)
+NEXT_PUBLIC_API_PORT=1111
+
+# Base URL that server actions/middleware call
+# - Local (no Docker): http://localhost:5000
+# - Docker Compose:    http://backend:5000
+NEXT_PUBLIC_INTERNAL_API_URL=http://localhost:5000
+# NEXT_PUBLIC_INTERNAL_API_URL=http://backend:5000
+
+# Public-facing URLs (used in links/sharing)
+NEXT_PUBLIC_WEB_URL=http://localhost:1111
+NEXT_PUBLIC_API_WAN=                   # Public API base URL if different from INTERNAL_API_URL
+
+# Optional UI version label
+NEXT_PUBLIC_VERSION=1.0.3
+```
+
+Notes
+
+- In Docker, prefer `NEXT_PUBLIC_INTERNAL_API_URL=http://backend:5000`.
+- For local development without Docker, use `http://localhost:5000`.
+
+Backend — `.env` (environment overrides for development/containers)
+
+Create `Document_SPIT_BE/.env` to inject environment variables.
+
+```bash
+# ========== Backend .env ==========
+# Upstream API this service may call (optional)
+API_SERVER=
+KEY_API=
+
+# Database configuration (required unless you set ConnectionStrings__DefaultConnection)
+DB_SERVER=localhost            # Or host.docker.internal when running in Docker (Windows/macOS)
+DB_DATABASE=SPIT_Documents
+DB_USER=sa
+DB_PASSWORD=Strong!Pass123
+
+# Document storage folders (Google Drive folder IDs or filesystem paths)
+FOLDER_RECYCLE=
+FOLDER_PENDING=
+FOLDER_DOCUMENT=
+FOLDER_AVATAR=
+
+# Gemini API (optional)
+API_KEY_GEMINI=
+
+# Telegram notifications (optional)
+BOT_TOKEN=
+CHAT_ID=-1001234567890
+MESSAGE_THREAD_ID=               # Topic/thread ID inside the chat (optional)
+
+# ASP.NET environment & URLs
+DOTNET_ENVIRONMENT=Development
+ASPNETCORE_URLS=http://0.0.0.0:5000
+
+# You can override appsettings.json directly via env keys, e.g.:
+# ConnectionStrings__DefaultConnection=Server=...;Database=...;User ID=...;Password=...
+# JwtSettings__Secret= replace-with-64+char-secret
+```
+
+Backend — `Document_SPIT_BE/Document_SPIT/appsettings.json` (template)
+
+Environment variables will override these values in production/containers. Example template:
+
+```jsonc
+{
+  "ConnectionStrings": {
+    // Full SQL Server connection string; can be overridden by env var:
+    // ConnectionStrings__DefaultConnection
+    "DefaultConnection": "Server=localhost;Initial Catalog=SPIT_Documents;User ID=sa;Password=Strong!Pass123;TrustServerCertificate=True;MultipleActiveResultSets=True"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "JwtSettings": {
+    // Use a strong secret in production; consider storing via env:
+    // JwtSettings__Secret, JwtSettings__Issuer, JwtSettings__Audience
+    "Secret": "replace-with-strong-secret",
+    "Issuer": "example.com",
+    "Audience": "example.com",
+    "ExpireToken": 60, // minutes
+    "ExpireRefreshToken": 4320 // minutes (e.g., 3 days)
+  },
+  "GoogleInfo": {
+    // Needed if using Google Drive integration; can be set via env:
+    // GoogleInfo__client_id, GoogleInfo__client_secret, GoogleInfo__refresh_token
+    "client_id": "",
+    "client_secret": "",
+    "refresh_token": ""
+  },
+  "AllowedHosts": "*",
+  "Kestrel": {
+    "Endpoints": {
+      "Http": {
+        // Keep 0.0.0.0 to listen inside containers
+        "Url": "http://0.0.0.0:5000"
+      }
+    }
+  }
+}
+```
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions from the community.
+
+1. Fork this repository to your GitHub account
+2. Create a feature branch:
+   ```bash
+   git checkout -b feature/your-feature
+   ```
+3. Commit your changes:
+   ```bash
+   git commit -m "feat: add your feature"
+   ```
+4. Push the branch:
+   ```bash
+   git push origin feature/your-feature
+   ```
+5. Open a Pull Request with a clear description
+
+## 👨‍💻 Development Team
+
+| Name                 | Role                          |
+| -------------------- | ----------------------------- |
+| **Trần Xuân Trường** | Full-stack Developer, Content |
+| **Trương Đình Phúc** | Frontend Developer, Content   |
+
+## 🧾 License
+
+This project is released under the [MIT License](LICENSE).
+
+## 📬 Contact
+
+- 💻 **Facebook**: [Trần Xuân Trường](https://www.facebook.com/xuantruong.war.clone.code)
+- ✉️ **Email**: tranxuantruong420@gmail.com
+- 💻 **Facebook**: [Đình Phúc](https://www.facebook.com/kichirou244)
+- ✉️ **Email**: mrphuc244@gmail.com
+
+---
+
+> 🧠 _"Copyright © 2024, Trần Xuân Trường, Trương Đình Phúc"_ — SPIT Team 💙
