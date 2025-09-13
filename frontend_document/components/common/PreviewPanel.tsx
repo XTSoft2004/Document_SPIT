@@ -81,7 +81,7 @@ const PreviewPanel = ({
     }
 
     const isImage = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'].includes(selectedItem.typeFile?.toLowerCase());
-
+    
     return (
         <div className={`w-full h-[100%] animate-in fade-in slide-in-from-right-3 duration-300 ${className}`}>
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 h-full flex flex-col overflow-hidden transform transition-all duration-200 hover:shadow-2xl">

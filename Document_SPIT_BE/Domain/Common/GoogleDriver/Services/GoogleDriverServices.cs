@@ -100,6 +100,16 @@ namespace Domain.Common.GoogleDriver.Services
             if (typeFile == "docx" || typeFile == "doc")
                 mimeType = "application/vnd.google-apps.document";
 
+            if (typeFile == "pptx" || typeFile == "ppt")
+            {
+                mimeType = "application/vnd.google-apps.presentation";
+            }
+
+            if (typeFile == "xlsx" || typeFile == "xls")
+            {
+                mimeType = "application/vnd.google-apps.spreadsheet";
+            }    
+
             string metadataJson = $@"{{
                 ""name"": ""{uploadFileRequest.FileName}"",
                 ""parents"": [""{uploadFileRequest.FolderId}""],

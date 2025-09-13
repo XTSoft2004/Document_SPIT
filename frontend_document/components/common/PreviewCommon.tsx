@@ -45,7 +45,7 @@ export default function PreviewFile({
   const setTranslate = externalSetTranslate || setInternalTranslate
 
   const isImage = /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(fileName)
-  const isPDF = /\.(pdf)$/i.test(fileName)
+  const isPDF = /\.(pptx|pdf|docx)$/i.test(fileName)
 
   const handleZoomIn = React.useCallback(
     () => setScale((s) => Math.min(s + 0.2, 5)),
