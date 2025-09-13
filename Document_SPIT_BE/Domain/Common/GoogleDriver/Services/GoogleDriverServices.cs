@@ -476,7 +476,11 @@ namespace Domain.Common.GoogleDriver.Services
         {
             await GetAccessToken();
             var allItems = ReloadTreeDrive.listFileDrive;
-            return await BuildDriveTree(allItems, rootFolderId);
+
+            List<TreeDocumentResponse> roots = await BuildDriveTree(allItems, rootFolderId);
+            var rootNode = roots.FirstOrDefault(r => r.FolderId == rootFolderId);
+
+            return rootNode?.Children ?? new List<TreeDocumentResponse>();
         }
     }
 }

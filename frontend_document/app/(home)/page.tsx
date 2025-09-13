@@ -1,8 +1,4 @@
 'use client'
-import Image from 'next/image'
-import DocumentPage from './document/[[...slug]]/page'
-import Header from "@/layout/Header";
-import Footer from "@/layout/Footer";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getRecentDocuments } from "@/actions/document.actions";
