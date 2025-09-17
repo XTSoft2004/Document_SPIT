@@ -14,11 +14,10 @@ namespace Domain.Common.Gemini.Services
 {
     public class GeminiServices : BaseService, IGeminiServices
     {
-        private readonly RequestHttpClient _request;
+        private readonly RequestHttpClient _request = new RequestHttpClient();
 
         public GeminiServices()
-        {
-            _request = new RequestHttpClient();
+        {    
             var manualPath = Environment.GetEnvironmentVariable("DOTNET_ENV_PATH");
             if (!string.IsNullOrEmpty(manualPath) && File.Exists(manualPath))
             {
