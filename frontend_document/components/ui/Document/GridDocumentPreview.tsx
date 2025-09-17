@@ -57,7 +57,7 @@ export default function GridDocumentPreview({
     return null
   }
 
-  const handleItemClick = (item: IDriveItem) => {
+  const handleFolderClick = (item: IDriveItem) => {
     onFolderClick?.()
     const foundPath = findPathRecursive(data, item.folderId)
     const path = foundPath
@@ -74,6 +74,16 @@ export default function GridDocumentPreview({
     } else {
       router.push(path)
     }
+  }
+
+  const handleFileClick = (item: IDriveItem) => {
+    const foundPath = findPathRecursive(data, item.folderId)
+    const path = foundPath
+      ? `/document/${foundPath.slice(0, foundPath.length - 1).join('/')}`
+      : `/document/${url}/${convertSlug(item.name)}`
+
+    if (path === pathname) onPreviewFile?.(item)
+    else router.push(path)
   }
 
   if (loading) {
@@ -104,7 +114,7 @@ export default function GridDocumentPreview({
               <FolderCard
                 key={item.folderId}
                 item={item}
-                handleItemClick={handleItemClick}
+                handleItemClick={handleFolderClick}
               />
             ))}
           </div>
@@ -120,7 +130,7 @@ export default function GridDocumentPreview({
               <FileCard
                 key={item.folderId}
                 item={item}
-                onPreviewFile={onPreviewFile}
+                handleFileClick={handleFileClick}
               />
             ))}
           </div>

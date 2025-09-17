@@ -9,10 +9,10 @@ import Image from 'next/image'
 
 interface FileCardProps {
   item: IDriveItem
-  onPreviewFile?: (file: IDriveItem) => void
+  handleFileClick?: (file: IDriveItem) => void
 }
 
-export const FileCard: React.FC<FileCardProps> = ({ item, onPreviewFile }) => {
+export const FileCard: React.FC<FileCardProps> = ({ item, handleFileClick }) => {
   const [loading, setLoading] = useState(true)
 
   return (
@@ -29,7 +29,7 @@ export const FileCard: React.FC<FileCardProps> = ({ item, onPreviewFile }) => {
           overflow: 'hidden',
         },
       }}
-      onClick={() => onPreviewFile?.(item)}
+      onClick={() => handleFileClick?.(item)}
     >
       <div
         className={`w-full flex items-center justify-center relative mb-2 ${

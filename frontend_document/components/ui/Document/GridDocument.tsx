@@ -47,6 +47,7 @@ export default function GridDocument({
   const [mode, setMode] = useState<'list' | 'preview'>('list')
   const [starDocument, setStarDocument] = useState<number[]>([])
   const [isLogin, setIsLogin] = useState(false)
+  const [isSearch, setIsSearch] = useState(false)
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -150,12 +151,22 @@ export default function GridDocument({
     [router],
   )
 
+  const handleDocumentSelect = useCallback((documentId: number) => {
+    const folder = allItems.find((item) => item.documentId === documentId)
+    console.log(folder)
+  }, [])
+
   const displayContent = useMemo(() => {
     if (mobileSearchResults !== undefined && mobileSearchResults !== null) {
       return mobileSearchResults
     }
     return filtered ?? content
   }, [mobileSearchResults, filtered, content])
+
+  useEffect(() => {
+    if (filtered && filtered.length > 0) setIsSearch(true)
+    else setIsSearch(false)
+  }, [filtered])
 
   return (
     <div className="flex h-full min-h-0 relative">
@@ -254,6 +265,7 @@ export default function GridDocument({
               isLogin={isLogin}
               starDocument={starDocument}
               onStarredUpdate={setStarDocument}
+              isSearch={isSearch}
             />
           ) : (
             <GridDocumentPreview

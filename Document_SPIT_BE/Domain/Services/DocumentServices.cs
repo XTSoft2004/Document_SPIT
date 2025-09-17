@@ -570,6 +570,7 @@ namespace Domain.Services
             var documents = _document!.All()
                 .Include(d => d.User)
                 .Include(d => d.DetaiDocument)
+                .Include(d => d.Course)
                 .Where(d => d.IsPrivate == false && d.StatusDocument == StatusDocument_Enum.Approved)
                 .OrderByDescending(d => d.ModifiedDate)
                 .Take(number)
@@ -579,6 +580,8 @@ namespace Domain.Services
             {
                 Id = s.Id,
                 Name = s.Name,
+                CourseName = s.Course.Name,
+                FolderId = s.FolderId,
                 FileId = s.FileId,
                 FileName = s.FileName,
                 Fullname = s.User != null ? s.User.Fullname : string.Empty,
