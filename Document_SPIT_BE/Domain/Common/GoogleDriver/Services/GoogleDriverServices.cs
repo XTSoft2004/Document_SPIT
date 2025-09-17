@@ -93,6 +93,7 @@ namespace Domain.Common.GoogleDriver.Services
         }
         public async Task<UploadFileResponse> UploadFile(UploadFileBase64Request uploadFileRequest)
         {
+            Console.WriteLine($"🚀 Starting upload for file: {uploadFileRequest.FileName} to folder: {uploadFileRequest.FolderId}");
             string accessToken = await GetAccessToken();
             string mimeType = AppDictionary.GetMimeTypeDriver(uploadFileRequest.FileName);
 
@@ -109,6 +110,8 @@ namespace Domain.Common.GoogleDriver.Services
             {
                 mimeType = "application/vnd.google-apps.spreadsheet";
             }    
+
+            Console.WriteLine($"🔄 Determined mimeType: {mimeType}");
 
             string metadataJson = $@"{{
                 ""name"": ""{uploadFileRequest.FileName}"",
@@ -131,6 +134,7 @@ namespace Domain.Common.GoogleDriver.Services
             fileContent.Headers.ContentType = new MediaTypeHeaderValue(mimeType);
             multipartContent.Add(fileContent);
 
+            Console.WriteLine("📤 Sending request to Google Drive API...");
             var response = await client.PostAsync(
                 "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
                 multipartContent
@@ -396,6 +400,7 @@ namespace Domain.Common.GoogleDriver.Services
                            Index = x.index
                        })
                        .ToList();
+
 
                     for (int i = itemIndexExists.Count - 1; i >= 0; i--)
                     {

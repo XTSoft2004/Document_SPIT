@@ -116,8 +116,8 @@ builder.Services.AddScoped<IGeminiServices, GeminiServices>();
 builder.Services.AddScoped<IGeminiServices, GeminiServices>();
 builder.Services.AddScoped(typeof(IRepositoryBase<>), typeof(RepositoryBase<>));
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddHostedService<CheckOneTimeToken>();
-builder.Services.AddHostedService<ReloadTreeDrive>();
+//builder.Services.AddHostedService<CheckOneTimeToken>();
+//builder.Services.AddHostedService<ReloadTreeDrive>();
 
 var app = builder.Build();
 
