@@ -56,6 +56,7 @@ namespace Domain.Common.BackgroudServices
             {
                 using var scope = _scopeFactory.CreateScope();
                 var _document = scope.ServiceProvider.GetRequiredService<IRepositoryBase<Document>>();
+                var _course = scope.ServiceProvider.GetRequiredService<IRepositoryBase<Course>>();
                 var _detailDocument = scope.ServiceProvider.GetRequiredService<IRepositoryBase<DetailDocument>>();
                 scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
                 string? nextPageToken = null;
@@ -117,6 +118,13 @@ namespace Domain.Common.BackgroudServices
                                     item.TotalViews = detailDocument.TotalView;
                                     item.TotalDownloads = detailDocument.TotalDownload;
                                 }
+
+                                if (item.MimeType != "application/vnd.google-apps.folder")
+                                {   
+                                    var course = _course.Find(c => c.Id == document.CourseId);
+                                    if (course != null)
+                                        item.CourseCode = course.Code;
+                                }     
                             }
                         }
                         files.AddRange(items);

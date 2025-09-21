@@ -34,13 +34,15 @@ namespace Domain.Common.GoogleDriver.Services
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IRepositoryBase<Document>? _document;
         private readonly IRepositoryBase<DetailDocument>? _detailDocument;
-        public GoogleDriverSevices(IConfiguration configuration, IHttpClientFactory httpClientFactory, IRepositoryBase<DetailDocument>? detailDocument, IRepositoryBase<Document>? document)
+        private readonly IRepositoryBase<Course>? _course;
+        public GoogleDriverSevices(IConfiguration configuration, IHttpClientFactory httpClientFactory, IRepositoryBase<DetailDocument>? detailDocument, IRepositoryBase<Document>? document, IRepositoryBase<Course>? course)
         {
             _request = new RequestHttpClient();
             _config = configuration;
             _httpClientFactory = httpClientFactory;
             _detailDocument = detailDocument;
             _document = document;
+            _course = course;
         }
         //public async Task<string> UploadImage(UploadFileRequest uploadFileRequest)
         //{
@@ -447,6 +449,7 @@ namespace Domain.Common.GoogleDriver.Services
                     IsFolder = item.MimeType == "application/vnd.google-apps.folder",
                     TotalDownloads = item.TotalDownloads,
                     TotalViews = item.TotalViews,
+                    CourseCode = item.CourseCode,
                     Children = new List<TreeDocumentResponse>()
                 };
             }

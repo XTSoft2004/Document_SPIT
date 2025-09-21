@@ -14,6 +14,7 @@ namespace Domain.Common.GoogleDriver.Model.Response
         public long? TotalViews { get; set; } = 0;
         public string? FolderId { get; set; }
         public bool? IsFolder { get; set; }
+        public string? CourseCode { get; set; }
         public List<TreeDocumentResponse> Children { get; set; } = new();
     }
 }

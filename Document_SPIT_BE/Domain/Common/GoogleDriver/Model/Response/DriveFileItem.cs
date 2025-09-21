@@ -14,6 +14,7 @@ namespace Domain.Common.GoogleDriver.Model.Response
         public long? TotalViews { get; set; } = 0;
         public string Name { get; set; } = string.Empty;
         public string MimeType { get; set; } = string.Empty;
+        public string CourseCode { get; set; } = string.Empty;
         public List<string>? Parents { get; set; }
     }
 }
