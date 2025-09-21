@@ -45,7 +45,7 @@ export default function PreviewFile({
   const setTranslate = externalSetTranslate || setInternalTranslate
 
   const isImage = /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(fileName)
-  const isPDF = /\.(pptx|pdf|docx)$/i.test(fileName)
+  const isPDF = /\.(pptx|ppt|pdf|docx|doc|xlsx|xls)$/i.test(fileName)
 
   const handleZoomIn = React.useCallback(
     () => setScale((s) => Math.min(s + 0.2, 5)),
@@ -328,9 +328,8 @@ export default function PreviewFile({
               sizes="100vw"
               className="transition-all duration-200 w-auto h-auto object-contain"
               style={{
-                transform: `scale(${scale}) translate(${
-                  translate.x / scale
-                }px, ${translate.y / scale}px)`,
+                transform: `scale(${scale}) translate(${translate.x / scale
+                  }px, ${translate.y / scale}px)`,
                 transition: isPanning
                   ? 'none'
                   : 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
