@@ -14,11 +14,10 @@ namespace Domain.Common.Gemini.Services
 {
     public class GeminiServices : BaseService, IGeminiServices
     {
-        private readonly RequestHttpClient _request;
+        private readonly RequestHttpClient _request = new RequestHttpClient();
 
         public GeminiServices()
-        {
-            _request = new RequestHttpClient();
+        {    
             var manualPath = Environment.GetEnvironmentVariable("DOTNET_ENV_PATH");
             if (!string.IsNullOrEmpty(manualPath) && File.Exists(manualPath))
             {
@@ -33,6 +32,7 @@ namespace Domain.Common.Gemini.Services
 
         public async Task<bool> GeminiCheck(UploadFileGeminiCheckRequest uploadFile)
         {
+            Console.WriteLine($"Đang kiểm tra file tài liệu {uploadFile.base64File}!!!");
             var requestBody = new
             {
                 contents = new[]
