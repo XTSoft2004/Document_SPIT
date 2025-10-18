@@ -6,7 +6,7 @@ import NavigationLink from '@/components/ui/Navigation/NavigationLink'
 import { IUserResponse } from '@/types/user'
 import { getMe } from '@/actions/user.action'
 import { logoutAccount } from '@/actions/auth.actions'
-import React, { useEffect } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import MenuProfile from '@/components/ui/Menu/MenuProfile'
 import NotificationService from '@/components/ui/Notification/NotificationService'
 
@@ -30,7 +30,7 @@ const Header = () => {
       setUser(userData.data)
       if (userData.status === 200) {
         setIsLogin(true)
-        return;
+        return
       }
       if (userData.status == 401 && islogin) {
         // alert('Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại')
@@ -115,7 +115,11 @@ const Header = () => {
                   <Avatar
                     size={36}
                     src={user?.avatarUrl || undefined}
-                    icon={!user?.avatarUrl ? <span>{getAvatar(user?.fullname || '')}</span> : undefined}
+                    icon={
+                      !user?.avatarUrl ? (
+                        <span>{getAvatar(user?.fullname || '')}</span>
+                      ) : undefined
+                    }
                     className="border-2 border-gray-200"
                   />
                 </button>

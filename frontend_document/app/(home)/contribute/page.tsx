@@ -1,6 +1,4 @@
 'use client'
-import Footer from "@/layout/Footer";
-import Header from "@/layout/Header";
 import ContributeForm from "@/components/ui/Contribute/ContributeForm";
 import RecentContributions from "@/components/ui/Contribute/RecentContributions";
 import ContributeFAQ from "@/components/ui/Contribute/ContributeFAQ";

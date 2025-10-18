@@ -10,7 +10,9 @@ namespace Domain.Model.Response.Document
     {
         public long? Id { get; set; }
         public string? Name { get; set; }
+        public string? CourseName { get; set; }
         public string? FileName { get; set; }
+        public string? FolderId { get; set; }
         public string? FileId { get; set; }
         public string? Fullname { get; set; }
         public long? TotalDownloads { get; set; } = 0;

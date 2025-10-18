@@ -147,7 +147,7 @@ const Menu = ({ allItems, onMobileSearch }: MenuProps) => {
                 transition={{ duration: 0.3, delay: 0.3 }}
               >
                 <NavigationLink
-                  href="/document/tai-lieu"
+                  href="/document"
                   className={`tab-link ${activeTab === 'document' ? 'active' : ''
                     }`}
                 >

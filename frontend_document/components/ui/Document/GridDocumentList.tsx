@@ -9,6 +9,7 @@ import HeartButton from './HeartButton'
 import globalConfig from '@/app.config'
 import getFileIcon from '@/components/common/IconFile'
 import NotificationService from '../Notification/NotificationService'
+import { isSea } from 'node:sea'
 
 interface GridDocumentListProps {
   data: IDriveResponse[]
@@ -20,6 +21,7 @@ interface GridDocumentListProps {
   isLogin?: boolean
   starDocument?: number[]
   onStarredUpdate?: (starDocument: number[]) => void
+  isSearch?: boolean
 }
 
 export default function GridDocumentList({
@@ -32,6 +34,7 @@ export default function GridDocumentList({
   isLogin = false,
   starDocument = [],
   onStarredUpdate,
+  isSearch = false,
 }: GridDocumentListProps) {
   const router = useRouter()
   const pathname = usePathname()
@@ -92,8 +95,25 @@ export default function GridDocumentList({
         router.push(path)
       }
     } else {
-      onPreviewFile?.(item)
+      const foundPath = findPathRecursive(data, item.folderId);
+      const path = foundPath
+        ? `/document/${foundPath.slice(0, foundPath.length - 1).join('/')}`
+        : `/document/${url}/${convertSlug(item.name)}`;
+
+      if (path === pathname)
+        onPreviewFile?.(item);
+      else
+        router.push(path);
     }
+  }
+
+  const getPath = (item: IDriveItem) => {
+    const foundPath = findPathRecursive(data, item.folderId)
+    const path = foundPath
+        ? `/document/${foundPath.slice(0, foundPath.length - 1).join('/')}`
+        : `/document/${url}/${convertSlug(item.name)}`;
+
+    return path;
   }
 
   return (
@@ -112,6 +132,9 @@ export default function GridDocumentList({
               <div className="font-semibold text-base truncate group-hover:text-blue-700">
                 {item.name}
               </div>
+              {isSearch && (
+                <p className="text-xs text-gray-400 italic truncate">{getPath(item)}</p>
+              )}
             </div>
             {!item.isFolder && (
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">

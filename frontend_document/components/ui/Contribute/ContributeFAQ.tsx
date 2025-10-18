@@ -26,7 +26,7 @@ const FAQ_DATA = [
     {
         id: 5,
         question: 'Kích thước tối đa của tệp là bao nhiêu?',
-        answer: 'Kích thước tối đa cho mỗi tệp là 5MB. Đối với các slide bài giảng hoặc tài liệu lớn, hãy nén file hoặc chia nhỏ thành nhiều phần để tải lên thuận tiện.'
+        answer: `Kích thước tối đa cho mỗi tệp là ${process.env.NEXT_PUBLIC_LIMIT_SIZE}MB. Đối với các slide bài giảng hoặc tài liệu lớn, hãy nén file hoặc chia nhỏ thành nhiều phần để tải lên thuận tiện.`
     },
     {
         id: 6,
@@ -140,7 +140,7 @@ export default function ContributeFAQ() {
                 </div>
             </div>
 
-            <style jsx>{`
+            <style>{`
                 @keyframes fadeIn {
                     from {
                         opacity: 0;

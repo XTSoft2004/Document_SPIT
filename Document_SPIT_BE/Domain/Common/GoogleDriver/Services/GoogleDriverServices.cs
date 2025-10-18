@@ -34,13 +34,15 @@ namespace Domain.Common.GoogleDriver.Services
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IRepositoryBase<Document>? _document;
         private readonly IRepositoryBase<DetailDocument>? _detailDocument;
-        public GoogleDriverSevices(IConfiguration configuration, IHttpClientFactory httpClientFactory, IRepositoryBase<DetailDocument>? detailDocument, IRepositoryBase<Document>? document)
+        private readonly IRepositoryBase<Course>? _course;
+        public GoogleDriverSevices(IConfiguration configuration, IHttpClientFactory httpClientFactory, IRepositoryBase<DetailDocument>? detailDocument, IRepositoryBase<Document>? document, IRepositoryBase<Course>? course)
         {
             _request = new RequestHttpClient();
             _config = configuration;
             _httpClientFactory = httpClientFactory;
             _detailDocument = detailDocument;
             _document = document;
+            _course = course;
         }
         //public async Task<string> UploadImage(UploadFileRequest uploadFileRequest)
         //{
@@ -93,12 +95,25 @@ namespace Domain.Common.GoogleDriver.Services
         }
         public async Task<UploadFileResponse> UploadFile(UploadFileBase64Request uploadFileRequest)
         {
+            Console.WriteLine($"🚀 Starting upload for file: {uploadFileRequest.FileName} to folder: {uploadFileRequest.FolderId}");
             string accessToken = await GetAccessToken();
             string mimeType = AppDictionary.GetMimeTypeDriver(uploadFileRequest.FileName);
 
             var typeFile = uploadFileRequest.FileName.Split('.')[uploadFileRequest.FileName.Split('.').Length - 1];
             if (typeFile == "docx" || typeFile == "doc")
                 mimeType = "application/vnd.google-apps.document";
+
+            if (typeFile == "pptx" || typeFile == "ppt")
+            {
+                mimeType = "application/vnd.google-apps.presentation";
+            }
+
+            if (typeFile == "xlsx" || typeFile == "xls")
+            {
+                mimeType = "application/vnd.google-apps.spreadsheet";
+            }    
+
+            Console.WriteLine($"🔄 Determined mimeType: {mimeType}");
 
             string metadataJson = $@"{{
                 ""name"": ""{uploadFileRequest.FileName}"",
@@ -121,6 +136,7 @@ namespace Domain.Common.GoogleDriver.Services
             fileContent.Headers.ContentType = new MediaTypeHeaderValue(mimeType);
             multipartContent.Add(fileContent);
 
+            Console.WriteLine("📤 Sending request to Google Drive API...");
             var response = await client.PostAsync(
                 "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
                 multipartContent
@@ -387,6 +403,7 @@ namespace Domain.Common.GoogleDriver.Services
                        })
                        .ToList();
 
+
                     for (int i = itemIndexExists.Count - 1; i >= 0; i--)
                     {
                         var match = itemIndexExists[i];
@@ -437,6 +454,7 @@ namespace Domain.Common.GoogleDriver.Services
                     IsFolder = item.MimeType == "application/vnd.google-apps.folder",
                     TotalDownloads = item.TotalDownloads,
                     TotalViews = item.TotalViews,
+                    CourseCode = item.CourseCode,
                     Children = new List<TreeDocumentResponse>()
                 };
             }
@@ -476,7 +494,11 @@ namespace Domain.Common.GoogleDriver.Services
         {
             await GetAccessToken();
             var allItems = ReloadTreeDrive.listFileDrive;
-            return await BuildDriveTree(allItems, rootFolderId);
+
+            List<TreeDocumentResponse> roots = await BuildDriveTree(allItems, rootFolderId);
+            var rootNode = roots.FirstOrDefault(r => r.FolderId == rootFolderId);
+
+            return rootNode?.Children ?? new List<TreeDocumentResponse>();
         }
     }
 }

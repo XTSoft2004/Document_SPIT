@@ -1,67 +1,30 @@
-version: "3.9"
-
 services:
-  #   backend:
-  #     build:
-  #       context: ./Document_SPIT_BE
-  #       target: final
-  #     ports:
-  #       - "5000:5000"
-  #     networks:
-  #       - internal
-  #     environment:
-  #       - NODE_ENV=production
-  #       - DOTNET_ENV_PATH=/app/.env
-  #     working_dir: /app
-  #     restart: always
-
-  #   frontend:
-  #     build:
-  #       context: ./frontend_document
-  #       target: runner
-  #     ports:
-  #       - "1111:1111"
-  #     networks:
-  #       - internal
-  #     environment:
-  #       - NODE_ENV=production
-  #     restart: always
-
   backend:
     build:
       context: ./Document_SPIT_BE
-      target: dev
+      target: final
     ports:
       - "5000:5000"
-    volumes:
-      - ./Document_SPIT_BE:/src
     environment:
-      - DOTNET_ENVIRONMENT=Development
-      - DOTNET_USE_POLLING_FILE_WATCHER=true
-    working_dir: /src
+      - NODE_ENV=production
+      - DOTNET_ENV_PATH=/app/.env
+    working_dir: /app
     restart: always
-    stdin_open: true
-    tty: true
     networks:
       - internal
 
   frontend:
     build:
       context: ./frontend_document
-      target: dev
+      target: runner
     ports:
       - "1111:1111"
     environment:
-      - NODE_ENV=development
-      - WATCHPACK_POLLING=true
-    volumes:
-      - ./frontend_document:/app
-      - /app/node_modules
+      - NODE_ENV=production
     restart: always
-    stdin_open: true
-    tty: true
     networks:
       - internal  
+
 networks:
   internal:
     driver: bridge

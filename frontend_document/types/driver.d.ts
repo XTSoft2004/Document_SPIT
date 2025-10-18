@@ -36,6 +36,7 @@ export interface IDriveResponse {
   totalViews: number
   folderId: string
   isFolder: boolean
+  courseCode: string
   children: IDriveResponse[]
 }
 export interface IDriveItem {

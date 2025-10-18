@@ -52,6 +52,8 @@ export interface IDocumentPendingRequest {
 export interface IDocumentRecentResponse {
   id: number
   name: string
+  courseName: string
+  folderId: string
   fileId: string
   fileName: string
   fullname: string
