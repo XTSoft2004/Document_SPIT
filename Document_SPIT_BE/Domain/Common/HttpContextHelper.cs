@@ -14,6 +14,15 @@ namespace Domain.Common
         }
 
         /// <summary>
+        /// Lấy User ID từ JWT claims (static method)
+        /// </summary>
+        public static string GetUserId(HttpContext httpContext)
+        {
+            var userIdClaim = httpContext?.User?.Claims?.FirstOrDefault(c => c.Type == "userId");
+            return userIdClaim?.Value ?? string.Empty;
+        }
+
+        /// <summary>
         /// Lấy địa chỉ IP của client
         /// </summary>
         public string GetClientIp()

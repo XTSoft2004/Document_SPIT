@@ -5,8 +5,11 @@ using Domain.Common.Gemini.Services;
 using Domain.Common.GoogleDriver.Interfaces;
 using Domain.Common.GoogleDriver.Services;
 using Domain.Common.Http;
+using Domain.Common.SignalR;
+using Domain.Interfaces.Mcp;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
+using Domain.Services.Mcp;
 using Infrastructure.ContextDB.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -111,10 +114,46 @@ builder.Services.AddControllers(); // Thêm Controller
 
 builder.Services.AddEndpointsApiExplorer();
 
+// Cấu hình SignalR cho MCP progress streaming
+builder.Services.AddSignalR();
+
+// Cấu hình CORS cho SignalR
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", builder =>
+    {
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+    
+    options.AddPolicy("SignalRPolicy", builder =>
+    {
+        builder.WithOrigins(
+                "http://localhost:1111",
+                "http://localhost:3000",
+                "http://localhost:3001", 
+                "https://localhost:1111",
+                "https://localhost:3000",
+                "https://localhost:3001"
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials(); // SignalR cần credentials
+    });
+});
+
 builder.Services.AddScoped<IGoogleDriverServices, GoogleDriverSevices>();
 builder.Services.AddScoped<IGeminiServices, GeminiServices>();
 builder.Services.AddScoped<IGeminiServices, GeminiServices>();
 builder.Services.AddScoped(typeof(IRepositoryBase<>), typeof(RepositoryBase<>));
+
+// Đăng ký MCP services
+builder.Services.AddScoped<IMcpToolService, McpToolService>();
+builder.Services.AddScoped<IMcpProgressService, McpProgressService>();
+builder.Services.AddSingleton<IMcpSessionService, McpSessionService>();
+builder.Services.AddScoped<McpPipelineService>();
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHostedService<CheckOneTimeToken>();
 builder.Services.AddHostedService<ReloadTreeDrive>();
@@ -184,9 +223,15 @@ app.Use(async (context, next) =>
 
 app.UseHttpsRedirection();
 
+// Sử dụng CORS
+app.UseCors("SignalRPolicy");
+
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Map SignalR Hub
+app.MapHub<McpProgressHub>("/hubs/mcp-progress");
 
 app.MapControllers();
 
