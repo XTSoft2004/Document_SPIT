@@ -204,7 +204,29 @@ export function ChatBox() {
                     }`}
                   >
                     <p className="text-sm whitespace-pre-wrap break-words">
-                      {message.content}
+                      {message.content
+                        .split(/(\[.*?\]\(.*?\))/)
+                        .map((part, index) => {
+                          const linkMatch = part.match(/\[(.*?)\]\((.*?)\)/)
+                          if (linkMatch) {
+                            return (
+                              <a
+                                key={index}
+                                href={linkMatch[2]}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={`underline hover:opacity-80 ${
+                                  message.role === 'user'
+                                    ? 'text-white'
+                                    : 'text-blue-600'
+                                }`}
+                              >
+                                {linkMatch[1]}
+                              </a>
+                            )
+                          }
+                          return <span key={index}>{part}</span>
+                        })}
                     </p>
                     <p
                       className={`text-xs mt-1 ${

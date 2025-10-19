@@ -10,15 +10,11 @@ using System.Threading.Tasks;
 
 namespace Domain.Services.Mcp
 {
-    /// <summary>
-    /// Service xử lý MCP tools cho search document
-    /// </summary>
     public class McpToolService : IMcpToolService
     {
         private readonly IDocumentServices _documentServices;
         private readonly IMcpProgressService _progressService;
 
-        // Các từ khóa để nhận diện search document query
         private readonly List<string> _searchKeywords = new List<string>
         {
             "tìm", "tìm kiếm", "search", "tài liệu", "document", "docs",
@@ -33,10 +29,6 @@ namespace Domain.Services.Mcp
             _documentServices = documentServices;
             _progressService = progressService;
         }
-
-        /// <summary>
-        /// Kiểm tra xem query có phải là search document không
-        /// </summary>
         public bool IsSearchDocumentQuery(string query)
         {
             if (string.IsNullOrWhiteSpace(query))
@@ -47,10 +39,6 @@ namespace Domain.Services.Mcp
             // Kiểm tra xem có chứa các từ khóa không
             return _searchKeywords.Any(keyword => queryLower.Contains(keyword.ToLower()));
         }
-
-        /// <summary>
-        /// Thực thi MCP tool dựa trên request
-        /// </summary>
         public async Task<McpToolResponse> ExecuteToolAsync(McpToolRequest request)
         {
             try
@@ -84,9 +72,6 @@ namespace Domain.Services.Mcp
             }
         }
 
-        /// <summary>
-        /// Tìm kiếm tài liệu với progress reporting
-        /// </summary>
         public async Task<McpToolResponse> SearchDocumentsAsync(SearchDocumentRequest request)
         {
             var sessionId = request.SessionId ?? _progressService.GenerateSessionId();

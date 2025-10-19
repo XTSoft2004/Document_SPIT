@@ -1,4 +1,6 @@
+using Domain.Common.BackgroudServices;
 using Domain.Common.Gemini.Interfaces;
+using Domain.Common.GoogleDriver.Model.Response;
 using Domain.Interfaces.Mcp;
 using Domain.Interfaces.Services;
 using Domain.Model.Mcp;
@@ -15,9 +17,6 @@ using System.Threading.Tasks;
 
 namespace Domain.Services.Mcp
 {
-    /// <summary>
-    /// Service xử lý pipeline MCP: analyze_intent -> search_documents -> generate_response
-    /// </summary>
     public class McpPipelineService
     {
         private readonly IMcpToolService _mcpToolService;
@@ -39,7 +38,6 @@ namespace Domain.Services.Mcp
             _documentServices = documentServices;
             _httpClient = new RequestHttpClient();
             
-            // Load environment variables
             var manualPath = Environment.GetEnvironmentVariable("DOTNET_ENV_PATH");
             if (!string.IsNullOrEmpty(manualPath) && File.Exists(manualPath))
             {
@@ -58,18 +56,12 @@ namespace Domain.Services.Mcp
                     }
                 }
             }
-
-            // Initialize Pinecone client
             var pineconeApiKey = Environment.GetEnvironmentVariable("PINECONE_API_KEY");
             if (!string.IsNullOrEmpty(pineconeApiKey))
             {
                 _pineconeClient = new PineconeClient(pineconeApiKey);
             }
         }
-
-        /// <summary>
-        /// Xử lý query theo pipeline
-        /// </summary>
         public async Task<McpQueryResponse> ProcessQueryAsync(McpQueryRequest request, string userId)
         {
             try
@@ -185,9 +177,6 @@ namespace Domain.Services.Mcp
             }
         }
 
-        /// <summary>
-        /// Phân tích intent bằng Gemini AI
-        /// </summary>
         private async Task<(string Intent, bool IsDocumentSearch)> AnalyzeIntentAsync(string query)
         {
             try
@@ -249,7 +238,6 @@ Chỉ trả lời JSON, không giải thích thêm."
 
                     if (!string.IsNullOrEmpty(resultText))
                     {
-                        // Parse JSON response
                         var cleanJson = resultText.Trim().Replace("```json", "").Replace("```", "").Trim();
                         var intentData = JObject.Parse(cleanJson);
 
@@ -260,23 +248,17 @@ Chỉ trả lời JSON, không giải thích thêm."
                     }
                 }
 
-                // Fallback: sử dụng keyword matching đơn giản
                 return (_mcpToolService.IsSearchDocumentQuery(query) 
                     ? ("Tìm kiếm tài liệu", true) 
                     : ("Hỏi đáp chung", false));
             }
             catch
             {
-                // Fallback
                 return (_mcpToolService.IsSearchDocumentQuery(query) 
                     ? ("Tìm kiếm tài liệu", true) 
                     : ("Hỏi đáp chung", false));
             }
         }
-
-        /// <summary>
-        /// Tìm kiếm tài liệu sử dụng Pinecone vector database
-        /// </summary>
         private async Task<List<DocumentSearchResult>> SearchDocumentsAsync(string query)
         {
             try
@@ -297,7 +279,6 @@ Chỉ trả lời JSON, không giải thích thêm."
                 // Step 2: Query Pinecone sử dụng SDK
                 var index = _pineconeClient.Index("spit-document");
                 
-                // Tạo query request với cú pháp đúng của Pinecone SDK
                 var queryRequest = new QueryRequest
                 {
                     Vector = embedding.Select(d => (float)d).ToArray(),
@@ -313,34 +294,44 @@ Chỉ trả lời JSON, không giải thích thêm."
 
                     foreach (var match in queryResponse.Matches)
                     {
-                        // Parse metadata
                         long documentId = 0;
-                        string title = string.Empty;
-                        string description = string.Empty;
+                        string courseName = string.Empty;
+                        string documentName = string.Empty;
+                        string folderId = string.Empty;
 
                         if (match.Metadata != null)
                         {
                             if (match.Metadata.TryGetValue("documentId", out var docIdValue))
                             {
-                                documentId = Convert.ToInt64(docIdValue);
+                                var docIdString = docIdValue?.ToString() ?? "0";
+                                if (long.TryParse(docIdString, out var parsedId))
+                                {
+                                    documentId = parsedId;
+                                }
                             }
 
-                            if (match.Metadata.TryGetValue("courseName", out var titleValue))
+                            if (match.Metadata.TryGetValue("courseName", out var courseValue))
                             {
-                                title = titleValue?.ToString() ?? string.Empty;
+                                courseName = courseValue?.ToString() ?? string.Empty;
                             }
 
-                            if (match.Metadata.TryGetValue("documentName", out var descValue))
+                            if (match.Metadata.TryGetValue("documentName", out var documentNameValue))
                             {
-                                description = descValue?.ToString() ?? string.Empty;
+                                documentName = documentNameValue?.ToString() ?? string.Empty;
+                            }
+
+                            if (match.Metadata.TryGetValue("folderId", out var folderIdValue))
+                            {
+                                folderId = folderIdValue?.ToString()?.Trim('"', '\\') ?? string.Empty;
                             }
                         }
 
                         results.Add(new DocumentSearchResult
                         {
                             DocumentId = documentId,
-                            Title = title,
-                            Description = description,
+                            CourseName = courseName,
+                            DocumentName = documentName,
+                            FolderId = folderId,
                             RelevanceScore = match.Score ?? 0.0
                         });
                     }
@@ -355,10 +346,6 @@ Chỉ trả lời JSON, không giải thích thêm."
                 return new List<DocumentSearchResult>();
             }
         }
-
-        /// <summary>
-        /// Tạo embedding vector từ text bằng Gemini
-        /// </summary>
         private async Task<double[]> GenerateEmbeddingAsync(string text)
         {
             try
@@ -383,7 +370,6 @@ Chỉ trả lời JSON, không giải thích thêm."
 
                 string url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key={apiKey}";
 
-                // Add retry logic with exponential backoff for rate limiting
                 int maxRetries = 3;
                 int retryDelayMs = 1000;
 
@@ -403,7 +389,6 @@ Chỉ trả lời JSON, không giải thích thêm."
                     }
                     else if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
                     {
-                        // Rate limit hit, wait and retry
                         if (attempt < maxRetries - 1)
                         {
                             await Task.Delay(retryDelayMs * (int)Math.Pow(2, attempt));
@@ -412,7 +397,6 @@ Chỉ trả lời JSON, không giải thích thêm."
                     }
                     else
                     {
-                        // Other error, break immediately
                         break;
                     }
                 }
@@ -425,30 +409,105 @@ Chỉ trả lời JSON, không giải thích thêm."
             }
         }
 
-        /// <summary>
-        /// Generate response bằng Gemini AI
-        /// </summary>
-        private async Task<string> GenerateResponseAsync(string query, string intent, List<DocumentSearchResult>? documents)
+        private string GetFolderPath(string folderId, List<DriveFileItem> listFileDrive)
         {
-            try
+            if (string.IsNullOrEmpty(folderId) || listFileDrive == null || !listFileDrive.Any())
             {
-                var documentsInfo = "";
-                if (documents != null && documents.Any())
+                return string.Empty;
+            }
+
+            var pathParts = new List<string>();
+            var currentFolderId = folderId;
+
+            while (!string.IsNullOrEmpty(currentFolderId))
+            {
+                var currentFolder = listFileDrive.FirstOrDefault(f => f.Id == currentFolderId);
+
+                if (currentFolder == null)
                 {
-                    documentsInfo = "\n\nTài liệu tìm được:\n" + string.Join("\n", 
-                        documents.Select((d, i) => $"{i + 1}. {d.Title} (ID: {d.DocumentId})"));
+                    break;
                 }
 
-                var requestBody = new
+                pathParts.Insert(0, currentFolder.Name);
+
+                // Get parent folder ID
+                if (currentFolder.Parents != null && currentFolder.Parents.Any())
                 {
-                    contents = new[]
+                    currentFolderId = currentFolder.Parents.First();
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            if (pathParts.Count > 2)
+            {
+                var slugPath = string.Join("/", pathParts.Skip(2).Select(ConvertToSlug));
+                return $"https://document.spit-husc.io.vn/document/{slugPath}";
+            }
+
+            return string.Empty;
+        }
+
+        private string ConvertToSlug(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                return string.Empty;
+            }
+
+            return text
+                .ToLowerInvariant()
+                .Normalize(System.Text.NormalizationForm.FormD)
+                .Where(c => char.GetUnicodeCategory(c) != System.Globalization.UnicodeCategory.NonSpacingMark)
+                .Aggregate(new System.Text.StringBuilder(), (sb, c) => sb.Append(c))
+                .ToString()
+                .Replace("đ", "d")
+                .Replace("Đ", "d")
+                .Replace(" ", "-")
+                .Replace(".", "-")
+                .Trim('-')
+                .Replace("--", "-")
+                .Replace("--", "-");
+
+            return string.Empty;
+        }
+
+private async Task<string> GenerateResponseAsync(string query, string intent, List<DocumentSearchResult>? documents)
+{
+    try
+    {
+        List<DriveFileItem> listFileDrive = ReloadTreeDrive.listFileDrive;
+        var documentsInfo = "";
+        
+        if (documents != null && documents.Any())
+        {
+            var documentLinks = documents
+                .Select((d, i) =>
+                {
+                    var path = GetFolderPath(d.FolderId ?? string.Empty, listFileDrive);
+                    if (!string.IsNullOrEmpty(path))
+                    {
+                        return $"{i + 1}. [{d.DocumentName}]({path}) - {d.CourseName}";
+                    }
+                    return $"{i + 1}. {d.DocumentName} - {d.CourseName}";
+                })
+                .ToList();
+            
+            documentsInfo = "\n\nTài liệu tìm được:\n" + string.Join("\n", documentLinks);
+        }
+
+        var requestBody = new
+        {
+            contents = new[]
+            {
+                new
+                {
+                    parts = new[]
                     {
                         new
                         {
-                            parts = new[]
-                            {
-                                new
-                                {
 text = $@"Hãy trả lời câu hỏi sau một cách tự nhiên, thân thiện và hữu ích:
 
 Câu hỏi: ""{query}""
@@ -459,65 +518,63 @@ Intent đã phân tích: {intent}
 Yêu cầu:
 - Trả lời bằng tiếng Việt
 - Ngắn gọn, súc tích (2-3 câu)
-- Nếu có tài liệu, hãy liệt kê danh sách các tài liệu tìm được với định dạng:
-  * Tên tài liệu
-  Sau đó giới thiệu ngắn gọn về kết quả tìm kiếm
+- Nếu có tài liệu, hãy liệt kê danh sách các tài liệu tìm được CHÍNH XÁC theo định dạng đã cho (giữ nguyên format Markdown link)
+- Không thay đổi hay thêm bất kỳ ký tự nào vào các link
+- Sau danh sách, giới thiệu ngắn gọn về kết quả tìm kiếm
 - Nếu không có tài liệu hoặc không tìm thấy, hãy gợi ý người dùng cách tìm kiếm tốt hơn
 
 Chỉ trả lời nội dung, không thêm phần giải thích hay format đặc biệt."
-                                }
-                            }
                         }
                     }
-                };
-
-                string? apiKey = Environment.GetEnvironmentVariable("API_KEY_GEMINI");
-                if (string.IsNullOrEmpty(apiKey))
-                {
-                    if (documents != null && documents.Any())
-                    {
-                        return $"Tôi đã tìm thấy {documents.Count} tài liệu liên quan đến \"{query}\". Bạn có thể xem danh sách bên dưới.";
-                    }
-                    else
-                    {
-                        return $"Xin lỗi, tôi không tìm thấy tài liệu nào liên quan đến \"{query}\". Hãy thử sử dụng từ khóa khác hoặc mô tả rõ hơn.";
-                    }
-                }
-
-                string url = $"https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key={apiKey}";
-                
-                var response = await _httpClient.PostAsync(url, requestBody);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    var jsonResponse = JObject.Parse(_httpClient.Content);
-                    var resultText = jsonResponse["candidates"]?[0]?["content"]?["parts"]?[0]?["text"]?.ToString();
-
-                    if (!string.IsNullOrEmpty(resultText))
-                    {
-                        return resultText.Trim();
-                    }
-                }
-
-                // Fallback response
-                if (documents != null && documents.Any())
-                {
-                    return $"Tôi đã tìm thấy {documents.Count} tài liệu liên quan đến \"{query}\". Bạn có thể xem danh sách bên dưới.";
-                }
-                else
-                {
-                    return $"Xin lỗi, tôi không tìm thấy tài liệu nào liên quan đến \"{query}\". Hãy thử sử dụng từ khóa khác hoặc mô tả rõ hơn.";
                 }
             }
-            catch
+        };
+
+        string? apiKey = Environment.GetEnvironmentVariable("API_KEY_GEMINI");
+        if (string.IsNullOrEmpty(apiKey))
+        {
+            if (documents != null && documents.Any())
             {
-                // Fallback response
-                if (documents != null && documents.Any())
-                {
-                    return $"Đã tìm thấy {documents.Count} tài liệu.";
-                }
-                return "Đã xảy ra lỗi khi tạo câu trả lời. Vui lòng thử lại.";
+                return $"Tôi đã tìm thấy {documents.Count} tài liệu liên quan đến \"{query}\":\n\n{documentsInfo}";
+            }
+            else
+            {
+                return $"Xin lỗi, tôi không tìm thấy tài liệu nào liên quan đến \"{query}\". Hãy thử sử dụng từ khóa khác hoặc mô tả rõ hơn.";
             }
         }
+
+        string url = $"https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key={apiKey}";
+        
+        var response = await _httpClient.PostAsync(url, requestBody);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var jsonResponse = JObject.Parse(_httpClient.Content);
+            var resultText = jsonResponse["candidates"]?[0]?["content"]?["parts"]?[0]?["text"]?.ToString();
+
+            if (!string.IsNullOrEmpty(resultText))
+            {
+                return resultText.Trim();
+            }
+        }
+        
+        if (documents != null && documents.Any())
+        {
+            return $"Tôi đã tìm thấy {documents.Count} tài liệu liên quan đến \"{query}\":\n\n{documentsInfo}";
+        }
+        else
+        {
+            return $"Xin lỗi, tôi không tìm thấy tài liệu nào liên quan đến \"{query}\". Hãy thử sử dụng từ khóa khác hoặc mô tả rõ hơn.";
+        }
+    }
+    catch
+    {
+        if (documents != null && documents.Any())
+        {
+            return $"Đã tìm thấy {documents.Count} tài liệu.";
+        }
+        return "Đã xảy ra lỗi khi tạo câu trả lời. Vui lòng thử lại.";
+    }
+}
     }
 }

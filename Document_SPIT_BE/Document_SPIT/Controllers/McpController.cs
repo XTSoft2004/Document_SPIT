@@ -10,9 +10,6 @@ using System.Threading.Tasks;
 
 namespace Document_SPIT.Controllers
 {
-    /// <summary>
-    /// Controller xử lý MCP requests với session-based flow dựa trên deviceId
-    /// </summary>
     [ApiController]
     [Route("mcp")]
     public class McpController : ControllerBase
@@ -34,9 +31,6 @@ namespace Document_SPIT.Controllers
             _pipelineService = pipelineService;
         }
 
-        /// <summary>
-        /// Tạo hoặc lấy MCP session dựa trên deviceId
-        /// </summary>
         [HttpPost("session/create")]
         public async Task<IActionResult> CreateSession([FromBody] CreateSessionRequest request)
         {
@@ -65,9 +59,6 @@ namespace Document_SPIT.Controllers
             }
         }
 
-        /// <summary>
-        /// Đóng MCP session
-        /// </summary>
         [HttpPost("session/close")]
         public async Task<IActionResult> CloseSession([FromBody] CloseSessionRequest request)
         {
@@ -102,9 +93,6 @@ namespace Document_SPIT.Controllers
             }
         }
 
-        /// <summary>
-        /// Xử lý query MCP với pipeline flow: analyze_intent -> search_documents -> generate_response
-        /// </summary>
         [HttpPost("chat")]
         public async Task<IActionResult> Chat([FromBody] McpQueryRequest request)
         {
@@ -125,18 +113,16 @@ namespace Document_SPIT.Controllers
                     return BadRequest(new { message = "Query không được để trống" });
                 }
 
-                // Validate session với deviceId
                 var isValid = await _sessionService.ValidateSessionAsync(request.SessionId, request.DeviceId);
                 if (!isValid)
                 {
                     return BadRequest(new { message = "Invalid session or deviceId mismatch" });
                 }
 
-                // Lấy userId nếu có (từ token), nếu không thì dùng deviceId
                 var userId = HttpContextHelper.GetUserId(HttpContext);
                 if (string.IsNullOrEmpty(userId))
                 {
-                    userId = request.DeviceId; // Dùng deviceId làm userId cho anonymous users
+                    userId = request.DeviceId; 
                 }
 
                 var response = await _pipelineService.ProcessQueryAsync(request, userId);

@@ -131,11 +131,7 @@ builder.Services.AddCors(options =>
     {
         builder.WithOrigins(
                 "http://localhost:1111",
-                "http://localhost:3000",
-                "http://localhost:3001", 
-                "https://localhost:1111",
-                "https://localhost:3000",
-                "https://localhost:3001"
+                "https://localhost:1111"
             )
             .AllowAnyHeader()
             .AllowAnyMethod()
@@ -148,7 +144,6 @@ builder.Services.AddScoped<IGeminiServices, GeminiServices>();
 builder.Services.AddScoped<IGeminiServices, GeminiServices>();
 builder.Services.AddScoped(typeof(IRepositoryBase<>), typeof(RepositoryBase<>));
 
-// Đăng ký MCP services
 builder.Services.AddScoped<IMcpToolService, McpToolService>();
 builder.Services.AddScoped<IMcpProgressService, McpProgressService>();
 builder.Services.AddSingleton<IMcpSessionService, McpSessionService>();

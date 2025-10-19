@@ -6,9 +6,6 @@ using System.Threading.Tasks;
 
 namespace Domain.Services.Mcp
 {
-    /// <summary>
-    /// Service quản lý MCP sessions dựa trên deviceId
-    /// </summary>
     public class McpSessionService : IMcpSessionService
     {
         private readonly ConcurrentDictionary<string, McpSession> _sessions = new();
@@ -17,12 +14,10 @@ namespace Domain.Services.Mcp
 
         public Task<string> CreateOrGetSessionAsync(string deviceId)
         {
-            // Kiểm tra xem deviceId đã có session hay chưa
             if (_deviceToSession.TryGetValue(deviceId, out var existingSessionId))
             {
                 if (_sessions.TryGetValue(existingSessionId, out var existingSession))
                 {
-                    // Kiểm tra session còn hợp lệ không
                     if (DateTime.UtcNow - existingSession.LastAccessedAt <= _sessionTimeout)
                     {
                         existingSession.LastAccessedAt = DateTime.UtcNow;
@@ -30,14 +25,12 @@ namespace Domain.Services.Mcp
                     }
                     else
                     {
-                        // Session hết hạn, xóa đi
                         _sessions.TryRemove(existingSessionId, out _);
                         _deviceToSession.TryRemove(deviceId, out _);
                     }
                 }
             }
 
-            // Tạo session mới
             var sessionId = Guid.NewGuid().ToString();
             var session = new McpSession
             {
@@ -59,11 +52,9 @@ namespace Domain.Services.Mcp
             if (!_sessions.TryGetValue(sessionId, out var session))
                 return Task.FromResult(false);
 
-            // Kiểm tra deviceId có khớp không
             if (session.DeviceId != deviceId)
                 return Task.FromResult(false);
 
-            // Kiểm tra timeout
             if (DateTime.UtcNow - session.LastAccessedAt > _sessionTimeout)
             {
                 _sessions.TryRemove(sessionId, out _);
@@ -108,7 +99,6 @@ namespace Domain.Services.Mcp
         {
             if (_deviceToSession.TryGetValue(deviceId, out var sessionId))
             {
-                // Kiểm tra session còn tồn tại và hợp lệ không
                 if (_sessions.TryGetValue(sessionId, out var session))
                 {
                     if (DateTime.UtcNow - session.LastAccessedAt <= _sessionTimeout)
