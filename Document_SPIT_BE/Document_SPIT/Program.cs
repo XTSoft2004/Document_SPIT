@@ -5,8 +5,10 @@ using Domain.Common.Gemini.Services;
 using Domain.Common.GoogleDriver.Interfaces;
 using Domain.Common.GoogleDriver.Services;
 using Domain.Common.Http;
+using Domain.Interfaces.Mcp;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
+using Domain.Services.Mcp;
 using Infrastructure.ContextDB.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -111,10 +113,42 @@ builder.Services.AddControllers(); // Thêm Controller
 
 builder.Services.AddEndpointsApiExplorer();
 
+// Cấu hình CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", builder =>
+    {
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+    
+    options.AddPolicy("SignalRPolicy", builder =>
+    {
+        builder.WithOrigins(
+                "http://localhost:1111",
+                "https://localhost:1111",
+                "http://localhost:3000",
+                "https://localhost:3000",
+                "http://localhost:5000",
+                "https://localhost:5000",
+                "https://document.spit-husc.io.vn"
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
+
 builder.Services.AddScoped<IGoogleDriverServices, GoogleDriverSevices>();
 builder.Services.AddScoped<IGeminiServices, GeminiServices>();
 builder.Services.AddScoped<IGeminiServices, GeminiServices>();
 builder.Services.AddScoped(typeof(IRepositoryBase<>), typeof(RepositoryBase<>));
+
+builder.Services.AddScoped<IMcpToolService, McpToolService>();
+builder.Services.AddSingleton<IMcpSessionService, McpSessionService>();
+builder.Services.AddScoped<McpPipelineService>();
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHostedService<CheckOneTimeToken>();
 builder.Services.AddHostedService<ReloadTreeDrive>();
@@ -185,9 +219,18 @@ app.Use(async (context, next) =>
 app.UseHttpsRedirection();
 
 app.UseRouting();
+
+// Sử dụng CORS
+app.UseCors("SignalRPolicy");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();
+// Map endpoints
+app.UseEndpoints(endpoints =>
+{
+    // Map Controllers
+    endpoints.MapControllers();
+});
 
 app.Run();

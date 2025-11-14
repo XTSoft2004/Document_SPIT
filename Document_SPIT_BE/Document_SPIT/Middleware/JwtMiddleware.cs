@@ -54,6 +54,7 @@ namespace Server_Manager.Middleware
                 "/statistical/parameter-document",
                 "/user/profile/",
                 "/server",
+                "/mcp"
             };
 
             var specialRoutes = new[]

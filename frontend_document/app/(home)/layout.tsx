@@ -5,8 +5,9 @@ import AppInitializer from '@/components/ui/Loading/AppInitializer'
 import PageTransitionLoader from '@/components/ui/Loading/PageTransitionLoader'
 import Header from '@/layout/Header'
 import Footer from '@/layout/Footer'
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { AuthProvider } from '@/context/AuthContext'
+import { ChatBox } from '@/components/common/ChatBox'
 
 export const metadata: Metadata = {
   title: 'Trang chủ - SPIT Document',
@@ -17,11 +18,12 @@ export const metadata: Metadata = {
     'tài liệu CNTT HUSC',
     'chia sẻ kiến thức',
     'học tập trực tuyến',
-    'cộng đồng sinh viên CNTT'
+    'cộng đồng sinh viên CNTT',
   ],
   openGraph: {
     title: 'Trang chủ - SPIT Document',
-    description: 'Khám phá hàng ngàn tài liệu học tập chất lượng cao từ sinh viên Khoa CNTT HUSC',
+    description:
+      'Khám phá hàng ngàn tài liệu học tập chất lượng cao từ sinh viên Khoa CNTT HUSC',
     type: 'website',
     url: 'https://document.spit-husc.io.vn/',
   },
@@ -35,7 +37,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  // Không sử dụng useEffect trong layout, nên loại bỏ logic isMobile
   return (
     <html lang="en">
       <body>
@@ -54,6 +55,8 @@ export default function RootLayout({
                 {children}
                 <Footer />
               </div>
+
+              {/* <ChatBox /> */}
             </AuthProvider>
           </AppInitializer>
         </AntdRegistry>
