@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { MessageCircle, X, Send, Loader2 } from 'lucide-react'
 import { useMcpSession } from '@/hooks/useMcpSession'
 import NotificationService from '@/components/ui/Notification/NotificationService'
+import { useRouter } from 'next/navigation'
 
 interface Message {
   id: string
@@ -26,6 +27,7 @@ export function ChatBox() {
   const [input, setInput] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const router = useRouter()
 
   const {
     sessionId,
@@ -33,7 +35,7 @@ export function ChatBox() {
     isLoading: isSessionLoading,
     error: sessionError,
     isInitialized,
-    progress,
+    initializeSession,
     sendQuery,
     closeSession,
   } = useMcpSession()
@@ -49,10 +51,16 @@ export function ChatBox() {
   }, [messages])
 
   useEffect(() => {
-    if (isOpen && inputRef.current) {
-      inputRef.current.focus()
+    if (isOpen) {
+      if (!isInitialized && !isSessionLoading) {
+        console.log('🚀 Initializing MCP session...')
+        initializeSession()
+      }
+      if (inputRef.current) {
+        inputRef.current.focus()
+      }
     }
-  }, [isOpen])
+  }, [isOpen, isInitialized, isSessionLoading, initializeSession])
 
   useEffect(() => {
     if (sessionError) {
@@ -210,19 +218,19 @@ export function ChatBox() {
                           const linkMatch = part.match(/\[(.*?)\]\((.*?)\)/)
                           if (linkMatch) {
                             return (
-                              <a
+                              <span
                                 key={index}
-                                href={linkMatch[2]}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={`underline hover:opacity-80 ${
+                                className={`underline cursor-pointer hover:opacity-80 ${
                                   message.role === 'user'
                                     ? 'text-white'
                                     : 'text-blue-600'
                                 }`}
+                                onClick={() => {
+                                  router.push(linkMatch[2])
+                                }}
                               >
                                 {linkMatch[1]}
-                              </a>
+                              </span>
                             )
                           }
                           return <span key={index}>{part}</span>
@@ -247,26 +255,19 @@ export function ChatBox() {
               {/* Loading indicator */}
               {isSending && (
                 <motion.div
+                  key="loading-indicator"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
                   className="flex justify-start"
                 >
                   <div className="bg-white rounded-2xl px-4 py-3 shadow-sm max-w-[80%]">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
-                      <span className="text-sm text-gray-600">
-                        {progress?.message || 'Đang suy nghĩ...'}
-                      </span>
-                    </div>
-                    {/* Progress bar */}
-                    {progress && (
-                      <div className="w-full bg-gray-200 rounded-full h-1.5">
-                        <div
-                          className="bg-gradient-to-r from-blue-500 to-purple-600 h-1.5 rounded-full transition-all duration-300"
-                          style={{ width: `${progress.progress}%` }}
-                        />
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin text-blue-500 flex-shrink-0" />
+                      <div className="text-sm font-medium text-gray-800">
+                        🤖 Đang xử lý...
                       </div>
-                    )}
+                    </div>
                   </div>
                 </motion.div>
               )}

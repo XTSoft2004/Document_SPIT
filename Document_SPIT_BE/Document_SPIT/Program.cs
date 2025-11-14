@@ -5,7 +5,6 @@ using Domain.Common.Gemini.Services;
 using Domain.Common.GoogleDriver.Interfaces;
 using Domain.Common.GoogleDriver.Services;
 using Domain.Common.Http;
-using Domain.Common.SignalR;
 using Domain.Interfaces.Mcp;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
@@ -114,10 +113,7 @@ builder.Services.AddControllers(); // Thêm Controller
 
 builder.Services.AddEndpointsApiExplorer();
 
-// Cấu hình SignalR cho MCP progress streaming
-builder.Services.AddSignalR();
-
-// Cấu hình CORS cho SignalR
+// Cấu hình CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", builder =>
@@ -131,11 +127,16 @@ builder.Services.AddCors(options =>
     {
         builder.WithOrigins(
                 "http://localhost:1111",
-                "https://localhost:1111"
+                "https://localhost:1111",
+                "http://localhost:3000",
+                "https://localhost:3000",
+                "http://localhost:5000",
+                "https://localhost:5000",
+                "https://document.spit-husc.io.vn"
             )
             .AllowAnyHeader()
             .AllowAnyMethod()
-            .AllowCredentials(); // SignalR cần credentials
+            .AllowCredentials();
     });
 });
 
@@ -145,7 +146,6 @@ builder.Services.AddScoped<IGeminiServices, GeminiServices>();
 builder.Services.AddScoped(typeof(IRepositoryBase<>), typeof(RepositoryBase<>));
 
 builder.Services.AddScoped<IMcpToolService, McpToolService>();
-builder.Services.AddScoped<IMcpProgressService, McpProgressService>();
 builder.Services.AddSingleton<IMcpSessionService, McpSessionService>();
 builder.Services.AddScoped<McpPipelineService>();
 
@@ -218,16 +218,19 @@ app.Use(async (context, next) =>
 
 app.UseHttpsRedirection();
 
+app.UseRouting();
+
 // Sử dụng CORS
 app.UseCors("SignalRPolicy");
 
-app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Map SignalR Hub
-app.MapHub<McpProgressHub>("/hubs/mcp-progress");
-
-app.MapControllers();
+// Map endpoints
+app.UseEndpoints(endpoints =>
+{
+    // Map Controllers
+    endpoints.MapControllers();
+});
 
 app.Run();

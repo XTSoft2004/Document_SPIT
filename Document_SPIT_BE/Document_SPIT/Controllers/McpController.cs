@@ -1,6 +1,5 @@
 using Domain.Common;
 using Domain.Interfaces.Mcp;
-using Domain.Model.Mcp;
 using Domain.Model.Request.Mcp;
 using Domain.Services.Mcp;
 using Microsoft.AspNetCore.Authorization;
@@ -14,19 +13,13 @@ namespace Document_SPIT.Controllers
     [Route("mcp")]
     public class McpController : ControllerBase
     {
-        private readonly IMcpToolService _mcpToolService;
-        private readonly IMcpProgressService _progressService;
         private readonly IMcpSessionService _sessionService;
         private readonly McpPipelineService _pipelineService;
 
         public McpController(
-            IMcpToolService mcpToolService,
-            IMcpProgressService progressService,
             IMcpSessionService sessionService,
             McpPipelineService pipelineService)
         {
-            _mcpToolService = mcpToolService;
-            _progressService = progressService;
             _sessionService = sessionService;
             _pipelineService = pipelineService;
         }

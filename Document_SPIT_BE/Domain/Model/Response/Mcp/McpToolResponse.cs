@@ -14,15 +14,4 @@ namespace Domain.Model.Mcp
         public Dictionary<string, object>? Metadata { get; set; }
         public string? SessionId { get; set; }
     }
-
-    public class McpProgressUpdate
-    {
-        public string SessionId { get; set; }
-
-        public string Step { get; set; }
-        public string Message { get; set; }
-        public int Progress { get; set; }
-        public DateTime Timestamp { get; set; } = DateTime.Now;
-        public object? Data { get; set; }
-    }
 }

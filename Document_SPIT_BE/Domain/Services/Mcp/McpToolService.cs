@@ -13,7 +13,6 @@ namespace Domain.Services.Mcp
     public class McpToolService : IMcpToolService
     {
         private readonly IDocumentServices _documentServices;
-        private readonly IMcpProgressService _progressService;
 
         private readonly List<string> _searchKeywords = new List<string>
         {
@@ -23,11 +22,9 @@ namespace Domain.Services.Mcp
         };
 
         public McpToolService(
-            IDocumentServices documentServices,
-            IMcpProgressService progressService)
+            IDocumentServices documentServices)
         {
             _documentServices = documentServices;
-            _progressService = progressService;
         }
         public bool IsSearchDocumentQuery(string query)
         {
@@ -74,21 +71,10 @@ namespace Domain.Services.Mcp
 
         public async Task<McpToolResponse> SearchDocumentsAsync(SearchDocumentRequest request)
         {
-            var sessionId = request.SessionId ?? _progressService.GenerateSessionId();
+            var sessionId = request.SessionId ?? Guid.NewGuid().ToString("N");
             
             try
             {
-                // Bước 1: Validating
-                await _progressService.SendProgressAsync(new McpProgressUpdate
-                {
-                    SessionId = sessionId,
-                    Step = "validating",
-                    Message = "Đang kiểm tra query tìm kiếm...",
-                    Progress = 10
-                });
-
-                await Task.Delay(300); // Simulate processing
-
                 // Kiểm tra query
                 if (string.IsNullOrWhiteSpace(request.Query))
                 {
@@ -101,28 +87,9 @@ namespace Domain.Services.Mcp
                     };
                 }
 
-                // Bước 2: Analyzing
-                await _progressService.SendProgressAsync(new McpProgressUpdate
-                {
-                    SessionId = sessionId,
-                    Step = "analyzing",
-                    Message = "Đang phân tích yêu cầu tìm kiếm...",
-                    Progress = 30
-                });
-
-                await Task.Delay(300);
-
                 // Kiểm tra xem có phải search document không
                 if (!IsSearchDocumentQuery(request.Query))
                 {
-                    await _progressService.SendProgressAsync(new McpProgressUpdate
-                    {
-                        SessionId = sessionId,
-                        Step = "completed",
-                        Message = "Query không phải là yêu cầu tìm kiếm tài liệu",
-                        Progress = 100
-                    });
-
                     return new McpToolResponse
                     {
                         ToolName = "search_document",
@@ -136,17 +103,6 @@ namespace Domain.Services.Mcp
                     };
                 }
 
-                // Bước 3: Searching
-                await _progressService.SendProgressAsync(new McpProgressUpdate
-                {
-                    SessionId = sessionId,
-                    Step = "searching",
-                    Message = "Đang tìm kiếm trong cơ sở dữ liệu...",
-                    Progress = 50
-                });
-
-                await Task.Delay(500);
-
                 // Tìm kiếm trong database
                 int totalRecords;
                 var documents = _documentServices.GetDocuments(
@@ -156,39 +112,6 @@ namespace Domain.Services.Mcp
                     totalRecords: out totalRecords,
                     statusDocument: request.StatusDocument ?? string.Empty
                 );
-
-                // Bước 4: Processing results
-                await _progressService.SendProgressAsync(new McpProgressUpdate
-                {
-                    SessionId = sessionId,
-                    Step = "processing",
-                    Message = $"Đã tìm thấy {totalRecords} tài liệu, đang xử lý kết quả...",
-                    Progress = 80,
-                    Data = new { totalRecords }
-                });
-
-                await Task.Delay(300);
-
-                // Bước 5: Responding
-                await _progressService.SendProgressAsync(new McpProgressUpdate
-                {
-                    SessionId = sessionId,
-                    Step = "responding",
-                    Message = "Đang chuẩn bị phản hồi...",
-                    Progress = 90
-                });
-
-                await Task.Delay(200);
-
-                // Hoàn thành
-                await _progressService.SendProgressAsync(new McpProgressUpdate
-                {
-                    SessionId = sessionId,
-                    Step = "completed",
-                    Message = $"Hoàn tất! Tìm thấy {totalRecords} tài liệu.",
-                    Progress = 100,
-                    Data = new { totalRecords, resultCount = documents.Count }
-                });
 
                 return new McpToolResponse
                 {
@@ -216,15 +139,6 @@ namespace Domain.Services.Mcp
             }
             catch (Exception ex)
             {
-                // Gửi error progress
-                await _progressService.SendProgressAsync(new McpProgressUpdate
-                {
-                    SessionId = sessionId,
-                    Step = "error",
-                    Message = $"Lỗi: {ex.Message}",
-                    Progress = 0
-                });
-
                 return new McpToolResponse
                 {
                     ToolName = "search_document",

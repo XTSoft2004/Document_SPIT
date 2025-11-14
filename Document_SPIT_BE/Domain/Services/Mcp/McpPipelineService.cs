@@ -21,7 +21,6 @@ namespace Domain.Services.Mcp
     {
         private readonly IMcpToolService _mcpToolService;
         private readonly IMcpSessionService _sessionService;
-        private readonly IMcpProgressService _progressService;
         private readonly IDocumentServices _documentServices;
         private readonly RequestHttpClient _httpClient;
         private readonly PineconeClient? _pineconeClient;
@@ -29,12 +28,10 @@ namespace Domain.Services.Mcp
         public McpPipelineService(
             IMcpToolService mcpToolService,
             IMcpSessionService sessionService,
-            IMcpProgressService progressService,
             IDocumentServices documentServices)
         {
             _mcpToolService = mcpToolService;
             _sessionService = sessionService;
-            _progressService = progressService;
             _documentServices = documentServices;
             _httpClient = new RequestHttpClient();
             
@@ -66,15 +63,7 @@ namespace Domain.Services.Mcp
         {
             try
             {
-                // Step 1: Validate session
-                await _progressService.SendProgressAsync(new McpProgressUpdate
-                {
-                    SessionId = request.SessionId,
-                    Step = "validating",
-                    Message = "Đang xác thực session...",
-                    Progress = 5
-                });
-
+                // Validate session
                 var isValidSession = await _sessionService.ValidateSessionAsync(request.SessionId, userId);
                 if (!isValidSession)
                 {
@@ -86,67 +75,26 @@ namespace Domain.Services.Mcp
                     };
                 }
 
-                // Step 2: Analyze intent
-                await _progressService.SendProgressAsync(new McpProgressUpdate
-                {
-                    SessionId = request.SessionId,
-                    Step = "analyzing",
-                    Message = "Đang phân tích ý định của câu hỏi...",
-                    Progress = 20
-                });
-
+                // Analyze intent
                 var intent = await AnalyzeIntentAsync(request.Query);
 
-                // Step 3: Search documents if needed
+                // Search documents if needed
                 List<DocumentSearchResult>? documents = null;
                 if (intent.IsDocumentSearch)
                 {
-                    await _progressService.SendProgressAsync(new McpProgressUpdate
-                    {
-                        SessionId = request.SessionId,
-                        Step = "searching",
-                        Message = "Đang tìm kiếm tài liệu...",
-                        Progress = 40
-                    });
-
                     documents = await SearchDocumentsAsync(request.Query);
-
-                    await _progressService.SendProgressAsync(new McpProgressUpdate
-                    {
-                        SessionId = request.SessionId,
-                        Step = "processing",
-                        Message = $"Đã tìm thấy {documents?.Count ?? 0} tài liệu",
-                        Progress = 60
-                    });
                 }
 
-                // Step 4: Generate response
-                await _progressService.SendProgressAsync(new McpProgressUpdate
-                {
-                    SessionId = request.SessionId,
-                    Step = "generating",
-                    Message = "Đang tạo câu trả lời...",
-                    Progress = 80
-                });
-
+                // Generate response
                 var response = await GenerateResponseAsync(request.Query, intent.Intent, documents);
 
-                // Step 5: Update session context
+                // Update session context
                 await _sessionService.UpdateSessionContextAsync(request.SessionId, new
                 {
                     query = request.Query,
                     intent = intent.Intent,
                     timestamp = DateTime.UtcNow,
                     documentsFound = documents?.Count ?? 0
-                });
-
-                // Step 6: Complete
-                await _progressService.SendProgressAsync(new McpProgressUpdate
-                {
-                    SessionId = request.SessionId,
-                    Step = "completed",
-                    Message = "Hoàn tất!",
-                    Progress = 100
                 });
 
                 return new McpQueryResponse
@@ -160,14 +108,6 @@ namespace Domain.Services.Mcp
             }
             catch (Exception ex)
             {
-                await _progressService.SendProgressAsync(new McpProgressUpdate
-                {
-                    SessionId = request.SessionId,
-                    Step = "error",
-                    Message = $"Lỗi: {ex.Message}",
-                    Progress = 0
-                });
-
                 return new McpQueryResponse
                 {
                     SessionId = request.SessionId,

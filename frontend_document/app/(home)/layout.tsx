@@ -56,7 +56,7 @@ export default function RootLayout({
                 <Footer />
               </div>
 
-              <ChatBox />
+              {/* <ChatBox /> */}
             </AuthProvider>
           </AppInitializer>
         </AntdRegistry>
