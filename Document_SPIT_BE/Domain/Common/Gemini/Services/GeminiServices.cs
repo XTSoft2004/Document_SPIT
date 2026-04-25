@@ -1,4 +1,4 @@
-﻿using Domain.Base.Services;
+using Domain.Base.Services;
 using Domain.Common.Gemini.Interfaces;
 using Domain.Common.Gemini.Models;
 using HelperHttpClient;
@@ -18,16 +18,6 @@ namespace Domain.Common.Gemini.Services
 
         public GeminiServices()
         {    
-            var manualPath = Environment.GetEnvironmentVariable("DOTNET_ENV_PATH");
-            if (!string.IsNullOrEmpty(manualPath) && File.Exists(manualPath))
-            {
-                DotNetEnv.Env.Load(manualPath);
-            }
-            else
-            {
-                var envPath = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.Parent.FullName, ".env");
-                DotNetEnv.Env.Load(envPath);
-            }
         }
 
         public async Task<bool> GeminiCheck(UploadFileGeminiCheckRequest uploadFile)

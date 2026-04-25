@@ -1,4 +1,4 @@
-﻿using Domain.Base.Services;
+using Domain.Base.Services;
 using Domain.Common;
 using Domain.Common.GoogleDriver.Interfaces;
 using Domain.Common.GoogleDriver.Model.Request;
@@ -48,16 +48,6 @@ namespace Domain.Services
             _startDocument = startDocument;
             _document = document;
             _googleDriverServices = googleDriverServices;
-            var manualPath = Environment.GetEnvironmentVariable("DOTNET_ENV_PATH");
-            if (!string.IsNullOrEmpty(manualPath) && File.Exists(manualPath))
-            {
-                DotNetEnv.Env.Load(manualPath);
-            }
-            else
-            {
-                var envPath = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.Parent.FullName, ".env");
-                DotNetEnv.Env.Load(envPath);
-            }
         }
         public async Task<HttpResponse> UpdateAsync(long idUser, UserRequest userRequest)
         {

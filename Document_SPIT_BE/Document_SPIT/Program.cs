@@ -19,6 +19,9 @@ using System.Security.Claims;
 using System.Text;
 using WebApp.Configures.DIConfig;
 
+// Load file .env (chỉ dùng cho local development)
+DotNetEnv.Env.Load();
+
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
     Args = args,

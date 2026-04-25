@@ -35,24 +35,6 @@ namespace Domain.Services.Mcp
             _documentServices = documentServices;
             _httpClient = new RequestHttpClient();
             
-            var manualPath = Environment.GetEnvironmentVariable("DOTNET_ENV_PATH");
-            if (!string.IsNullOrEmpty(manualPath) && File.Exists(manualPath))
-            {
-                DotNetEnv.Env.Load(manualPath);
-            }
-            else
-            {
-                var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-                var parentDir = Directory.GetParent(baseDirectory);
-                if (parentDir?.Parent?.Parent?.Parent?.Parent != null)
-                {
-                    var envPath = Path.Combine(parentDir.Parent.Parent.Parent.Parent.FullName, ".env");
-                    if (File.Exists(envPath))
-                    {
-                        DotNetEnv.Env.Load(envPath);
-                    }
-                }
-            }
             var pineconeApiKey = Environment.GetEnvironmentVariable("PINECONE_API_KEY");
             if (!string.IsNullOrEmpty(pineconeApiKey))
             {
