@@ -1,9 +1,8 @@
 # --- Base image for runtime ---
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
-EXPOSE 5000
-EXPOSE 5001
-ENV ASPNETCORE_URLS=http://+:5000
+EXPOSE 10000
+ENV ASPNETCORE_URLS=http://+:10000
 
 # --- Build image ---
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
@@ -64,8 +63,8 @@ COPY entrypoint.sh ./entrypoint.sh
 # Fix line endings and permissions
 RUN dos2unix entrypoint.sh && chmod +x entrypoint.sh
 
-ENV DOTNET_ENVIRONMENT=Development
-ENV ASPNETCORE_ENVIRONMENT=Development
+ENV DOTNET_ENVIRONMENT=Production
+ENV ASPNETCORE_ENVIRONMENT=Production
 
 # The entrypoint script will generate appsettings.json and start the app
 ENTRYPOINT ["./entrypoint.sh"]

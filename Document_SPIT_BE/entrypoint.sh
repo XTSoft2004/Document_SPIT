@@ -38,7 +38,7 @@ cat <<EOF > appsettings.json
   "Kestrel": {
     "Endpoints": {
       "Http": {
-        "Url": "http://0.0.0.0:5000"
+        "Url": "http://0.0.0.0:${PORT:-10000}"
       }
     }
   }
