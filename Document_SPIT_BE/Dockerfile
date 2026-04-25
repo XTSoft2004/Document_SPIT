@@ -50,15 +50,21 @@ CMD ["dotnet", "watch", "--project", "Document_SPIT/Document_SPIT_BE.csproj", "r
 FROM base AS final
 WORKDIR /app
 
+# Install tools for environment handling
+RUN apt-get update && apt-get install -y dos2unix && rm -rf /var/lib/apt/lists/*
+
 # Copy publish output
 COPY --from=publish /app/publish .
 
-# Copy optional appsettings if needed
-COPY Document_SPIT/appsettings.json ./appsettings.json
+# Copy environment files and entrypoint script
+# Use .env* to match .env, .env.production, etc., if they exist
+COPY .env* ./
+COPY entrypoint.sh ./entrypoint.sh
 
-# Copy .env into container
-COPY .env .env
+# Fix line endings and permissions
+RUN dos2unix entrypoint.sh && chmod +x entrypoint.sh
 
 ENV DOTNET_ENVIRONMENT=Production
 
-ENTRYPOINT ["dotnet", "Document_SPIT_BE.dll"]
+# The entrypoint script will generate appsettings.json and start the app
+ENTRYPOINT ["./entrypoint.sh"]
