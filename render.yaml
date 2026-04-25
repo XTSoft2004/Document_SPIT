@@ -1,7 +1,7 @@
 services:
   # Backend Service
   - type: web
-    name: document-spit-be
+    name: document-spit-api
     runtime: docker
     rootDir: Document_SPIT_BE
     dockerContext: .
@@ -26,13 +26,13 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: JWT_ISSUER
-        value: https://document-spit-be.onrender.com
+        value: https://document-spit-api.onrender.com
       - key: JWT_AUDIENCE
         value: https://document-spit.onrender.com
 
   # Frontend Service
   - type: web
-    name: document-spit-fe
+    name: document-spit
     runtime: docker
     rootDir: frontend_document
     dockerContext: .
@@ -42,7 +42,7 @@ services:
       - key: PORT
         value: 10000
       - key: NEXT_PUBLIC_API_URL
-        value: https://document-spit-be.onrender.com
+        value: https://document-spit-api.onrender.com
       - key: NEXT_PUBLIC_WEB_URL
         value: https://document-spit.onrender.com
       - key: NEXT_PUBLIC_LIMIT_SIZE
