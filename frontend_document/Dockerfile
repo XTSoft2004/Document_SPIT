@@ -16,6 +16,26 @@ COPY . .
 RUN npm run build
 
 
+# --- Stage 3: Dev mode ---
+FROM node:20 AS dev
+
+WORKDIR /app
+
+ENV NODE_ENV=development
+ENV PORT=1111
+
+# Copy package files & install
+COPY package.json package-lock.json* ./
+RUN npm install
+
+# Copy full code
+COPY . .
+
+EXPOSE 1111
+
+CMD ["npm", "run", "dev"]
+
+
 # --- Stage 2: Production runner ---
 FROM node:20-alpine AS runner
 
@@ -37,23 +57,3 @@ COPY --from=builder /app/next.config.mjs ./next.config.mjs
 EXPOSE 10000
 
 CMD ["npm", "start", "--", "-p", "10000"]
-
-
-# --- Stage 3: Dev mode ---
-FROM node:20 AS dev
-
-WORKDIR /app
-
-ENV NODE_ENV=development
-ENV PORT=1111
-
-# Copy package files & install
-COPY package.json package-lock.json* ./
-RUN npm install
-
-# Copy full code
-COPY . .
-
-EXPOSE 1111
-
-CMD ["npm", "run", "dev"]
