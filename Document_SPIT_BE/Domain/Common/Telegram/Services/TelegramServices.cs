@@ -1,4 +1,4 @@
-﻿using Domain.Base.Services;
+using Domain.Base.Services;
 using Domain.Common.Telegram.Interfaces;
 using HelperHttpClient;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -15,16 +15,6 @@ namespace Domain.Common.Telegram.Services
     {
         public TelegramServices() 
         {
-            var manualPath = Environment.GetEnvironmentVariable("DOTNET_ENV_PATH");
-            if (!string.IsNullOrEmpty(manualPath) && File.Exists(manualPath))
-            {
-                DotNetEnv.Env.Load(manualPath);
-            }
-            else
-            {
-                var envPath = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.Parent.FullName, ".env");
-                DotNetEnv.Env.Load(envPath);
-            }
         }
         public async Task<bool> SendMessage(string message, string Message_Thread_ID)
         {
