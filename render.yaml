@@ -14,7 +14,8 @@ services:
         value: Production
       - key: ALLOWED_ORIGINS
         value: https://document-spit.onrender.com
-      # Các biến sau cần cấu hình tay trên Dashboard Render hoặc file .env
+      
+      # Database Configuration
       - key: DB_SERVER
         sync: false
       - key: DB_DATABASE
@@ -23,12 +24,48 @@ services:
         sync: false
       - key: DB_PASSWORD
         sync: false
+
+      # JWT Configuration
       - key: JWT_SECRET
-        generateValue: true
+        sync: false
       - key: JWT_ISSUER
         value: https://document-spit-api.onrender.com
       - key: JWT_AUDIENCE
         value: https://document-spit.onrender.com
+
+      # Google Drive API Configuration
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REFRESH_TOKEN
+        sync: false
+
+      # Google Drive Folder IDs
+      - key: FOLDER_RECYCLE
+        sync: false
+      - key: FOLDER_PENDING
+        sync: false
+      - key: FOLDER_DOCUMENT
+        sync: false
+      - key: FOLDER_AVATAR
+        sync: false
+
+      # AI & Integration
+      - key: API_KEY_GEMINI
+        sync: false
+      - key: BOT_TOKEN
+        sync: false
+      - key: CHAT_ID
+        sync: false
+      - key: MESSAGE_THREAD_ID
+        value: "2"
+      
+      # Other
+      - key: KEY_API
+        value: Document_SPIT_19082023
+      - key: API_SERVER
+        value: document-spit-api.onrender.com
 
   # Frontend Service
   - type: web
@@ -49,3 +86,9 @@ services:
         value: "50"
       - key: NEXT_PUBLIC_MAX_SIZE_FILE
         value: "100"
+      - key: NEXT_PUBLIC_VERSION
+        value: "1.0.5"
+      - key: NEXT_PUBLIC_FOLDER_ID_PENDING
+        sync: false
+      - key: NEXT_PUBLIC_FOLDER_ID_HOME
+        sync: false
