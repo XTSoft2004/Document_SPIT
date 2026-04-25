@@ -126,12 +126,12 @@ builder.Services.AddCors(options =>
                .AllowAnyHeader();
     });
     
-    options.AddPolicy("SignalRPolicy", builder =>
+    options.AddPolicy("SignalRPolicy", policyBuilder =>
     {
-        var allowedOrigins = configuration["ALLOWED_ORIGINS"]?.Split(',', StringSplitOptions.RemoveEmptyEntries) 
+        var allowedOrigins = builder.Configuration["ALLOWED_ORIGINS"]?.Split(',', StringSplitOptions.RemoveEmptyEntries) 
                              ?? new[] { "http://localhost:1111", "http://localhost:3000", "https://document.spit-husc.io.vn" };
         
-        builder.WithOrigins(allowedOrigins)
+        policyBuilder.WithOrigins(allowedOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
