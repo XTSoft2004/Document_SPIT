@@ -1,4 +1,4 @@
-﻿using Domain.Common.BackgroudServices;
+using Domain.Common.BackgroudServices;
 using Domain.Common.ExceptionLogger.Interfaces;
 using Domain.Common.Gemini.Interfaces;
 using Domain.Common.Gemini.Services;
@@ -156,11 +156,13 @@ builder.Services.AddHostedService<ReloadTreeDrive>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// Bật Swagger ở mọi môi trường để tiện kiểm tra trên Render
+app.UseSwagger();
+app.UseSwaggerUI(options =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+    options.RoutePrefix = string.Empty; // Swagger sẽ là trang chủ
+});
 app.UseStaticFiles();
 var httpContextAccessor = app.Services.GetRequiredService<IHttpContextAccessor>();
 HttpAppContext.Configure(httpContextAccessor);
