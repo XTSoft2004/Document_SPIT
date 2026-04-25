@@ -3,15 +3,12 @@
 # 1. Load environment variables from .env file if it exists
 if [ -f .env ]; then
     echo "Loading environment variables from .env..."
-    # Export all variables from .env, handling potential spaces and quotes
     set -a
     source .env
     set +a
 fi
 
 # 2. Generate appsettings.json dynamically
-# Values are taken directly from the environment (Render Env Vars or .env file)
-# If a variable is missing, it will result in an empty string in the JSON
 echo "Generating appsettings.json from environment..."
 cat <<EOF > appsettings.json
 {
@@ -28,8 +25,9 @@ cat <<EOF > appsettings.json
     "Secret": "${JWT_SECRET}",
     "Issuer": "${JWT_ISSUER}",
     "Audience": "${JWT_AUDIENCE}",
-    "ExpireToken": 3,
-    "ExpireRefreshToken": 7
+    "ExpireMinutes": ${JWT_EXPIRE_MINUTES:-60},
+    "ExpireToken": ${JWT_EXPIRE_TOKEN:-3},
+    "ExpireRefreshToken": ${JWT_EXPIRE_REFRESH_TOKEN:-7}
   },
   "GoogleInfo": {
     "client_id": "${GOOGLE_CLIENT_ID}",
@@ -47,7 +45,7 @@ cat <<EOF > appsettings.json
 }
 EOF
 
-echo "appsettings.json has been generated."
+echo "appsettings.json generated successfully."
 
 # 3. Start the application
 echo "Starting Document_SPIT_BE..."

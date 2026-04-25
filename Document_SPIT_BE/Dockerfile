@@ -64,7 +64,8 @@ COPY entrypoint.sh ./entrypoint.sh
 # Fix line endings and permissions
 RUN dos2unix entrypoint.sh && chmod +x entrypoint.sh
 
-ENV DOTNET_ENVIRONMENT=Production
+ENV DOTNET_ENVIRONMENT=Development
+ENV ASPNETCORE_ENVIRONMENT=Development
 
 # The entrypoint script will generate appsettings.json and start the app
 ENTRYPOINT ["./entrypoint.sh"]
