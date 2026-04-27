@@ -55,9 +55,7 @@ RUN apt-get update && apt-get install -y dos2unix && rm -rf /var/lib/apt/lists/*
 # Copy publish output
 COPY --from=publish /app/publish .
 
-# Copy environment files and entrypoint script
-# Use .env* to match .env, .env.production, etc., if they exist
-COPY .env* ./
+# Copy entrypoint script
 COPY entrypoint.sh ./entrypoint.sh
 
 # Fix line endings and permissions
