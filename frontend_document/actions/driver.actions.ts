@@ -30,7 +30,13 @@ export const getInfoGoogleDriver = async () => {
     },
   })
 
-  const data = await response.json()
+  let data;
+  try {
+    data = await response.json();
+  } catch (error) {
+    console.error('Error parsing JSON in getInfoGoogleDriver:', error);
+    data = {};
+  }
 
   return {
     ok: response.ok,
@@ -59,7 +65,13 @@ export const loadFolder = async (
     },
   )
 
-  const data = await response.json()
+  let data;
+  try {
+    data = await response.json();
+  } catch (error) {
+    console.error('Error parsing JSON in loadFolder:', error);
+    data = [];
+  }
   //   revalidateTag('driver.folder')
 
   const res = (data as ILoadFolder[]).sort((a, b) => {
@@ -88,7 +100,13 @@ export const createFolder = async (name: string, parentId: string) => {
     },
   )
 
-  const data = await response.json()
+  let data;
+  try {
+    data = await response.json();
+  } catch (error) {
+    console.error('Error parsing JSON in createFolder:', error);
+    data = {};
+  }
 
   revalidateTag('driver.folder')
 
@@ -115,7 +133,13 @@ export const getTree = async () => {
     },
   )
 
-  const data = await response.json()
+  let data;
+  try {
+    data = await response.json();
+  } catch (error) {
+    console.error('Error parsing JSON in getTree:', error);
+    data = [];
+  }
 
   return {
     ok: response.ok,

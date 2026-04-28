@@ -64,12 +64,13 @@ export const metadata: Metadata = {
     icons: {
         icon: "/favicon.ico",
     },
+};
+
+export const viewport = {
     themeColor: "#ffffff",
-    viewport: {
-        width: "device-width",
-        initialScale: 1,
-        maximumScale: 1,
-    },
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
 };
 
 // Component nhỏ để dùng hook Analytics trong client moved to components/analytics/AnalyticsTracker

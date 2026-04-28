@@ -32,7 +32,13 @@ export const createDocument = async (
     body: JSON.stringify(formData),
   })
 
-  const data = await response.json()
+  let data;
+  try {
+    data = await response.json();
+  } catch (error) {
+    console.error('Error parsing JSON in createDocument:', error);
+    data = {};
+  }
   revalidateTag('document.index')
   revalidateTag('driver.tree')
 
@@ -58,7 +64,13 @@ export const reviewDocument = async (
       body: JSON.stringify(formData),
     },
   )
-  const data = await response.json()
+  let data;
+  try {
+    data = await response.json();
+  } catch (error) {
+    console.error('Error parsing JSON in reviewDocument:', error);
+    data = {};
+  }
   revalidateTag('document.index')
 
   return {
@@ -84,7 +96,13 @@ export const updateDocument = async (
     },
   )
 
-  const data = await response.json()
+  let data;
+  try {
+    data = await response.json();
+  } catch (error) {
+    console.error('Error parsing JSON in updateDocument:', error);
+    data = {};
+  }
 
   revalidateTag('document.index')
   revalidateTag('driver.tree')
@@ -106,7 +124,13 @@ export const deleteDocument = async (id: string): Promise<IBaseResponse> => {
     body: JSON.stringify({ id }),
   })
 
-  const data = await response.json()
+  let data;
+  try {
+    data = await response.json();
+  } catch (error) {
+    console.error('Error parsing JSON in deleteDocument:', error);
+    data = {};
+  }
 
   revalidateTag('document.index')
   revalidateTag('document.show')
@@ -141,7 +165,13 @@ export const getDocuments = async (
     },
   )
 
-  const data = await response.json()
+  let data;
+  try {
+    data = await response.json();
+  } catch (error) {
+    console.error('Error parsing JSON in getDocuments:', error);
+    data = { data: [] };
+  }
 
   return {
     ok: response.ok,
@@ -167,7 +197,13 @@ export const getCodeView = async (documentId: number) => {
     },
   )
 
-  const data = await response.json()
+  let data;
+  try {
+    data = await response.json();
+  } catch (error) {
+    console.error('Error parsing JSON in getCodeView:', error);
+    data = {};
+  }
   return {
     ok: response.ok,
     status: response.status,
@@ -192,7 +228,13 @@ export const getRecentDocuments = async (number: number) => {
     },
   )
 
-  const data = await response.json()
+  let data;
+  try {
+    data = await response.json();
+  } catch (error) {
+    console.error('Error parsing JSON in getRecentDocuments:', error);
+    data = { data: [] };
+  }
 
   return {
     ok: response.ok,
@@ -215,7 +257,13 @@ export const getCodeDocument = async (documentId: number) => {
     },
   )
 
-  const data = await response.json()
+  let data;
+  try {
+    data = await response.json();
+  } catch (error) {
+    console.error('Error parsing JSON in getCodeDocument:', error);
+    data = {};
+  }
   revalidateTag('document.index')
 
   return {
@@ -239,7 +287,13 @@ export const getDocumentUser = async (username: string) => {
     },
   )
 
-  const data = await response.json()
+  let data;
+  try {
+    data = await response.json();
+  } catch (error) {
+    console.error('Error parsing JSON in getDocumentUser:', error);
+    data = { data: [] };
+  }
 
   return {
     ok: response.ok,
