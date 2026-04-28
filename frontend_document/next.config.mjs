@@ -4,7 +4,7 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    domains: ['localhost', 'drive.google.com', 'document.spit-husc.io.vn', 'xtcoder2004.io.vn', 'xtcoder2004.io.vn:1122', 'backend', 'backend:5000', '192.168.1.20'],
+    domains: ['localhost', 'drive.google.com', 'document.spit-husc.io.vn', 'xtcoder2004.io.vn', 'xtcoder2004.io.vn:1122', 'backend', 'backend:5000', '192.168.1.20', 'spitdocument-backend.up.railway.app'],
     remotePatterns: [
       {
         protocol: 'https',

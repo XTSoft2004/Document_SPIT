@@ -18,12 +18,12 @@ Write-Host "=== Đăng nhập vào Docker Hub ===" -ForegroundColor Cyan
 docker login
 
 Write-Host "=== Đang build Backend Image: $BackendImage ===" -ForegroundColor Cyan
-Push-Location "c:\Users\XuanTruong_PC\Documents\Document_SPIT\Document_SPIT_BE"
+Push-Location "D:\Learn_HUSC\Ca_Nhan\Document_SPIT\Document_SPIT_BE"
 docker build -t $BackendImage -f Dockerfile .
 Pop-Location
 
 Write-Host "=== Đang build Frontend Image: $FrontendImage ===" -ForegroundColor Cyan
-Push-Location "c:\Users\XuanTruong_PC\Documents\Document_SPIT\frontend_document"
+Push-Location "D:\Learn_HUSC\Ca_Nhan\Document_SPIT\frontend_document"
 docker build -t $FrontendImage -f Dockerfile .
 Pop-Location
 

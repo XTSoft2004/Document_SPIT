@@ -18,7 +18,8 @@ cat <<EOF > appsettings.json
   "Logging": {
     "LogLevel": {
       "Default": "Information",
-      "Microsoft.AspNetCore": "Warning"
+      "Microsoft.AspNetCore": "Warning",
+      "Microsoft.EntityFrameworkCore.Database.Command": "Warning"
     }
   },
   "JwtSettings": {
