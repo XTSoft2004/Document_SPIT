@@ -129,7 +129,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("SignalRPolicy", policyBuilder =>
     {
         var allowedOrigins = builder.Configuration["ALLOWED_ORIGINS"]?.Split(',', StringSplitOptions.RemoveEmptyEntries) 
-                             ?? new[] { "http://localhost:1111", "http://localhost:3000", "https://document.spit-husc.io.vn" };
+                             ?? new[] { "http://localhost:1111", "http://localhost:3000", "https://document.spit-husc.io.vn", "https://spitdocument-frontend.up.railway.app" };
         
         policyBuilder.WithOrigins(allowedOrigins)
             .AllowAnyHeader()
